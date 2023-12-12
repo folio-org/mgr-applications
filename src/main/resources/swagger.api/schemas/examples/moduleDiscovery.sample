@@ -1,0 +1,6 @@
+{
+  "id": "mod-sample-1.3.7",
+  "name": "mod-sample",
+  "version": "1.3.7",
+  "location": "http://mod-sample:8080"
+}

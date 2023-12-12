@@ -1,0 +1,205 @@
+{
+    "discovery": {
+        "moduleId": "mod-notify-2.10.0",
+        "applicationId": "application-0.0.1",
+        "location": "http://mod-notify:8081",
+        "interfaces": [
+            {
+                "id": "notify",
+                "version": "2.2",
+                "endpoints": [
+                    {
+                        "methods": [
+                            "GET"
+                        ],
+                        "pathPattern": "/notify"
+                    },
+                    {
+                        "methods": [
+                            "POST"
+                        ],
+                        "pathPattern": "/notify"
+                    },
+                    {
+                        "methods": [
+                            "POST"
+                        ],
+                        "pathPattern": "/notify/_username/{uid}"
+                    },
+                    {
+                        "methods": [
+                            "GET"
+                        ],
+                        "pathPattern": "/notify/{id}"
+                    },
+                    {
+                        "methods": [
+                            "PUT"
+                        ],
+                        "pathPattern": "/notify/{id}"
+                    },
+                    {
+                        "methods": [
+                            "DELETE"
+                        ],
+                        "pathPattern": "/notify/{id}"
+                    },
+                    {
+                        "methods": [
+                            "GET"
+                        ],
+                        "pathPattern": "/notify/user/_self"
+                    },
+                    {
+                        "methods": [
+                            "DELETE"
+                        ],
+                        "pathPattern": "/notify/user/_self"
+                    }
+                ]
+            },
+            {
+                "id": "patron-notice",
+                "version": "1.1",
+                "endpoints": [
+                    {
+                        "methods": [
+                            "POST"
+                        ],
+                        "pathPattern": "/patron-notice"
+                    }
+                ]
+            },
+            {
+                "id": "_jsonSchemas",
+                "version": "1.0",
+                "interfaceType": "multiple",
+                "endpoints": [
+                    {
+                        "methods": [
+                            "GET"
+                        ],
+                        "pathPattern": "/_/jsonSchemas"
+                    }
+                ]
+            },
+            {
+                "id": "_ramls",
+                "version": "1.0",
+                "interfaceType": "multiple",
+                "endpoints": [
+                    {
+                        "methods": [
+                            "GET"
+                        ],
+                        "pathPattern": "/_/ramls"
+                    }
+                ]
+            },
+            {
+                "id": "_tenant",
+                "version": "2.0",
+                "interfaceType": "system",
+                "endpoints": [
+                    {
+                        "methods": [
+                            "POST"
+                        ],
+                        "pathPattern": "/_/tenant"
+                    },
+                    {
+                        "methods": [
+                            "GET",
+                            "DELETE"
+                        ],
+                        "pathPattern": "/_/tenant/{id}"
+                    }
+                ]
+            }
+        ]
+    },
+    "requiredDiscoveries": [
+        {
+            "moduleId": "mod-event-config-2.2.0",
+            "applicationId": "application-two-1.1.1",
+            "location": "http://mod-event-config:8081",
+            "interfaces": [
+                {
+                    "id": "mod-event",
+                    "version": "1.0",
+                    "endpoints": [
+                        {
+                            "methods": [
+                                "GET"
+                            ],
+                            "pathPattern": "/eventConfig/{id}"
+                        },
+                        {
+                            "methods": [
+                                "GET"
+                            ],
+                            "pathPattern": "/eventConfig"
+                        },
+                        {
+                            "methods": [
+                                "POST"
+                            ],
+                            "pathPattern": "/eventConfig"
+                        },
+                        {
+                            "methods": [
+                                "PUT"
+                            ],
+                            "pathPattern": "/eventConfig/{id}"
+                        },
+                        {
+                            "methods": [
+                                "DELETE"
+                            ],
+                            "pathPattern": "/eventConfig/{id}"
+                        }
+                    ]
+                },
+                {
+                    "id": "_tenant",
+                    "version": "2.0",
+                    "interfaceType": "system",
+                    "endpoints": [
+                        {
+                            "methods": [
+                                "POST"
+                            ],
+                            "pathPattern": "/_/tenant"
+                        },
+                        {
+                            "methods": [
+                                "GET",
+                                "DELETE"
+                            ],
+                            "pathPattern": "/_/tenant/{id}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "moduleId": "mod-sender-1.7.0",
+            "applicationId": "application-0.0.1",
+            "location": "http://mod-sender:8081",
+            "interfaces": [
+                {
+                    "id": "message-delivery",
+                    "version": "1.0",
+                    "endpoints": [
+                        {
+                            "methods": [
+                                "POST"
+                            ],
+                            "pathPattern": "/message-delivery"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

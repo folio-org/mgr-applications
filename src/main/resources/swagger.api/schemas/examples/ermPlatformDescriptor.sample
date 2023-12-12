@@ -1,0 +1,19 @@
+{
+  "$schema": "../platformDescriptor.json",
+  "id": "18ee519f-3fc1-4c24-8b93-d502dae9e8c5",
+  "name": "erm-platform",
+  "version": "1.1.0",
+  "type": "extended",
+  "description": "LSP platform",
+  "basePlatform": {
+    "name": "base-platform",
+    "version": "1.1.0"
+  },
+  "applications": [
+    {
+      "name": "erm",
+      "version": "14.2.6",
+      "type": "functional"
+    }
+  ]
+}

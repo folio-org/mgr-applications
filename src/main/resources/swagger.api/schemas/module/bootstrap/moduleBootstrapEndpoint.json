@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "An endpoint that an interface can provide",
+  "type": "object",
+  "properties": {
+    "methods": {
+      "description": "List of methods GET, POST,.. * (for all)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pathPattern": {
+      "description": "Path pattern match. * matches any path. {x} matches one or more characters but not slash",
+      "type": "string"
+    },
+    "path": {
+      "description": "Path prefix match",
+      "type": "string"
+    },
+    "permissionsRequired": {
+      "description": "Required permissions",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Application Descriptor Schema",
+  "description": "Application Descriptor for Application Manager Installer",
+  "type": "object",
+  "x-implements": [ "org.folio.am.domain.model.Artifact" ],
+  "allOf": [
+    {
+      "$ref": "common/artifact.json"
+    }
+  ],
+  "properties": {
+    "description" : {
+      "description": "A description of application manager",
+      "type": "string"
+    },
+    "metadata" : {
+      "$ref" : "common/metadata.json",
+      "readonly" : true
+    },
+    "modules" : {
+      "description": "List of modules which are grouped by the application",
+      "type": "array",
+      "id": "module",
+      "items": {
+        "$ref": "module/module.json"
+      }
+    },
+    "uiModules": {
+      "description": "List of ui-modules which are grouped by the application",
+      "type": "array",
+      "id": "uiModule",
+      "items": {
+        "$ref": "module/module.json"
+      }
+    },
+    "moduleDescriptors" : {
+      "description": "List of module descriptors which are grouped by the application",
+      "type": "array",
+      "id": "moduleDescriptor",
+      "items": {
+        "$ref": "module/descriptor/moduleDescriptor.json"
+      }
+    },
+    "uiModuleDescriptors" : {
+      "description": "List of ui module descriptors which are grouped by the application",
+      "type": "array",
+      "id": "uiModuleDescriptor",
+      "items": {
+        "$ref": "module/descriptor/moduleDescriptor.json"
+      }
+    },
+    "platform"  : {
+      "description": "information about version of a platform",
+      "type": "string"
+    },
+    "dependencies" : {
+      "description": "List of dependencies to other applications",
+      "type": "array",
+      "id": "dependency",
+      "items": {
+        "$ref": "dependency.json"
+      }
+    },
+    "deployment": {
+      "$ref": "applicationDeployment.json"
+    }
+  },
+  "additionalProperties": false
+}

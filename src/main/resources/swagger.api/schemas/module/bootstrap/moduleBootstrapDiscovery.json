@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "A Module bootstrap discovery information",
+  "type": "object",
+  "properties": {
+    "moduleId": {
+      "description": "Module ID",
+      "type": "string"
+    },
+    "applicationId": {
+      "description": "Application ID",
+      "type": "string"
+    },
+    "location": {
+      "description": "Module location",
+      "type": "string"
+    },
+    "interfaces": {
+      "description": "Provided interfaces",
+      "type": "array",
+      "items": {
+        "$ref": "moduleBootstrapInterface.json"
+      }
+    }
+  },
+  "required": [
+    "moduleId",
+    "applicationId"
+  ]
+}

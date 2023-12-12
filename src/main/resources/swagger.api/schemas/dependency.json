@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Dependency",
+  "x-class-extra-annotation": "@com.fasterxml.jackson.annotation.JsonIgnoreProperties({\"id\"})",
+  "properties": {
+    "name": {
+      "description": "Artifact name",
+      "type": "string"
+    },
+    "version": {
+      "description": "The concrete version of an artifact (semantic version) or the version range",
+      "type": "string",
+      "x-extra-annotation": "@org.folio.am.domain.validation.constraints.SemVersionOrRange"
+    }
+  },
+  "additionalProperties": false,
+  "required": [ "name", "version" ]
+}

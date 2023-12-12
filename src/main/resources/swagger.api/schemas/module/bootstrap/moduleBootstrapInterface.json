@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "An interface that a module can provide",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Interface ID",
+      "type": "string"
+    },
+    "version": {
+      "description": "Interface version in major.minor format",
+      "type": "string"
+    },
+    "interfaceType": {
+      "description": "Interface type",
+      "type": "string"
+    },
+    "endpoints": {
+      "description": "Endpoint entries for this interface",
+      "type": "array",
+      "items": {
+        "$ref": "moduleBootstrapEndpoint.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "version",
+    "endpoints"
+  ]
+}

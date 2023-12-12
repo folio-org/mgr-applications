@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Application Artifact Schema",
+  "description": "Artifact Descriptor for Application Manager Installer",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "A Name-Version id for identifying this artifact",
+      "type": "string"
+    },
+    "name": {
+      "description": "Artifact name",
+      "type": "string"
+    },
+    "version": {
+      "description": "The version of an artifact (semantic version approach)",
+      "$ref": "version.json"
+    }
+  },
+  "additionalProperties": false,
+  "required": [ "name", "version" ]
+}

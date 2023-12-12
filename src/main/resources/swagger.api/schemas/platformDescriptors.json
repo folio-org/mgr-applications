@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Collection of platform descriptors",
+  "properties": {
+    "platformDescriptors": {
+      "description": "List of platform descriptors",
+      "type": "array",
+      "items": {
+        "$ref": "platformDescriptors.json"
+      }
+    },
+    "totalRecords": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "platformDescriptors",
+    "totalRecords"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Collection of application descriptors",
+  "properties": {
+    "applicationDescriptors": {
+      "description": "List of application descriptors",
+      "type": "array",
+      "id": "applicationDescriptor",
+      "items": {
+        "$ref": "applicationDescriptor.json"
+      }
+    },
+    "totalRecords": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "applicationDescriptors",
+    "totalRecords"
+  ]
+}

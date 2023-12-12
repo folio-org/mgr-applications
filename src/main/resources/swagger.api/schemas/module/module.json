@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Module",
+  "x-implements": [ "org.folio.am.domain.model.Artifact" ],
+  "allOf": [
+    {
+      "$ref": "../common/artifact.json"
+    }
+  ],
+  "properties": {
+    "url": {
+      "description": "URL to the artifact",
+      "type": "string"
+    }
+  }
+}

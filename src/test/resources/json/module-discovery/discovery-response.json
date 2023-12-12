@@ -1,0 +1,6 @@
+{
+  "location": "http://test-module-foo:8080",
+  "id": "test-module-disc-foo-1.0.0",
+  "name": "test-module-disc-foo",
+  "version": "1.0.0"
+}

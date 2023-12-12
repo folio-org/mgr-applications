@@ -1,0 +1,69 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="create-application-module-table" author="dmtkachenko">
+        <createTable tableName="application_module">
+            <column name="application_id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="pk_application_module"/>
+            </column>
+            <column name="module_id" type="VARCHAR(255)">
+                <constraints primaryKey="true" primaryKeyName="pk_application_module"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-fk-app-module-application-id" author="dmtkachenko">
+        <addForeignKeyConstraint
+                baseColumnNames="application_id"
+                baseTableName="application_module"
+                constraintName="fk_app_module_application"
+                deferrable="false"
+                initiallyDeferred="false"
+                onDelete="CASCADE"
+                onUpdate="RESTRICT"
+                referencedColumnNames="id"
+                referencedTableName="application"/>
+    </changeSet>
+
+    <changeSet id="create-fk-app-module-module-id" author="dmtkachenko">
+        <addForeignKeyConstraint
+                baseColumnNames="module_id"
+                baseTableName="application_module"
+                constraintName="fk_app_module_module"
+                deferrable="false"
+                initiallyDeferred="false"
+                onDelete="CASCADE"
+                onUpdate="RESTRICT"
+                referencedColumnNames="id"
+                referencedTableName="module"/>
+    </changeSet>
+
+    <changeSet id="populate-application-module-table" author="dmtkachenko">
+        <sql>
+            INSERT INTO application_module (application_id, module_id)
+                SELECT application_id, id
+                  FROM module;
+        </sql>
+    </changeSet>
+
+    <changeSet id="drop-module-bootstrap-view" author="dmtkachenko">
+        <dropView viewName="module_bootstrap"/>
+    </changeSet>
+
+    <changeSet id="drop-module-appid-column" author="dmtkachenko">
+        <dropColumn tableName="module" columnName="application_id"/>
+    </changeSet>
+
+    <changeSet id="create-unq-module-name-version" author="dmtkachenko">
+        <addUniqueConstraint
+            columnNames="name, version"
+            tableName="module"
+            constraintName="unq_module_name_version"
+            deferrable="false"
+            initiallyDeferred="false"/>
+    </changeSet>
+
+</databaseChangeLog>

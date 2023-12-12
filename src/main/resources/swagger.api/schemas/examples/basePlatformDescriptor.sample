@@ -1,0 +1,45 @@
+{
+  "$schema": "../platformDescriptor.json",
+  "id": "7a5a48b1-359a-4ec9-b980-7533b38be518",
+  "name": "base-platform",
+  "version": "1.1.0",
+  "type": "base",
+  "description": "Base platform",
+  "applications": [
+    {
+      "name": "postgres",
+      "version": "12.11.0",
+      "type": "system"
+    },
+    {
+      "name": "keycloak",
+      "version": "19.0.0",
+      "type": "system"
+    },
+    {
+      "name": "kafka",
+      "version": "3.2.0",
+      "type": "system"
+    },
+    {
+      "name": "kong",
+      "version": "2.4.2",
+      "type": "system"
+    },
+    {
+      "name": "application-manager",
+      "version": "1.0.0",
+      "type": "system"
+    },
+    {
+      "name": "users",
+      "version": "16.2.0",
+      "type": "functional"
+    },
+    {
+      "name": "tags",
+      "version": "7.2.5",
+      "type": "functional"
+    }
+  ]
+}

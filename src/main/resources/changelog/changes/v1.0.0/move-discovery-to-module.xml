@@ -1,0 +1,36 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="add-module-discovery-column" author="dmtkachenko">
+        <addColumn tableName="module">
+            <column name="discovery_url" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="populate-module-discovery-column" author="dmtkachenko">
+        <sql>
+            UPDATE module m
+            SET discovery_url = (
+                    SELECT md.url
+                      FROM module_discovery md
+                      WHERE m.id = md.id
+                );
+        </sql>
+    </changeSet>
+
+    <changeSet id="drop-module-discovery-table" author="dmtkachenko">
+        <dropTable tableName="module_discovery" cascadeConstraints="true" />
+    </changeSet>
+
+    <changeSet id="update-module-bootstrap-view" author="dmtkachenko">
+        <createView viewName="module_bootstrap" replaceIfExists="true">
+            SELECT m.*, am.application_id
+              FROM module m
+              INNER JOIN application_module am ON m.id = am.module_id
+        </createView>
+    </changeSet>
+
+</databaseChangeLog>

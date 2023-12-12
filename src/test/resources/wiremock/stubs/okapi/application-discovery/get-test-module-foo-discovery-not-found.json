@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/_/discovery/modules/test-module-foo-1.0.0/test-module-foo-1.0.0",
+    "headers": {
+      "X-Okapi-Token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "text/plain",
+      "Location": "/_/discovery/modules/test-module-foo-1.0.0/test-module-foo-1.0.0"
+    },
+    "body": "test-module-foo-1.0.0/test-module-foo-1.0.0"
+  }
+}

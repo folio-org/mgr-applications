@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/modules/discovery",
+    "headers": {
+      "X-Okapi-Permissions-Required": {
+        "equalTo": "mgr-applications.discoveries.collection.post"
+      },
+      "X-Okapi-Token": {
+        "equalTo": "X-Okapi-Token test value"
+      },
+      "X-Okapi-Tenant": {
+        "equalTo": "supertenant"
+      },
+      "X-Okapi-Url": {
+        "matches": ".*"
+      }
+    }
+  },
+  "response": {
+    "status": 202
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/_/discovery/modules",
+    "headers": {
+      "X-Okapi-Token": { "equalTo": "X-Okapi-Token test value" },
+      "Content-Type": { "equalTo": "application/json" }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "srvcId": "test-module-bar-1.0.0",
+          "instId": "${json-unit.ignore}",
+          "url": "http://test-module-bar:8080"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json",
+      "Location": "/_/discovery/modules/test-module-bar-1.0.0/test-module-bar-1.0.0"
+    },
+    "jsonBody": [
+      {
+        "srvcId": "test-module-bar-1.0.0",
+        "instId": "test-module-bar-1.0.0",
+        "url": "http://test-module-bar:8080"
+      }
+    ]
+  }
+}

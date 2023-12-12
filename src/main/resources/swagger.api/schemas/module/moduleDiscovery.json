@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Module discovery information",
+  "x-implements": [ "org.folio.am.domain.model.Artifact" ],
+  "allOf": [
+    {
+      "$ref": "../common/artifact.json"
+    }
+  ],
+  "properties": {
+    "location": {
+      "description": "A url address of module where its been deployed",
+      "type": "string"
+    }
+  },
+  "required": [
+    "location"
+  ]
+}

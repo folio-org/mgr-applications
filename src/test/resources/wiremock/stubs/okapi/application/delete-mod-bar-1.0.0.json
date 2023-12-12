@@ -1,0 +1,12 @@
+{
+  "request": {
+    "method": "DELETE",
+    "url": "/_/proxy/modules/mod-bar-1.0.0",
+    "headers": {
+      "X-Okapi-Token": { "equalTo": "X-Okapi-Token test value" }
+    }
+  },
+  "response": {
+    "status": 204
+  }
+}

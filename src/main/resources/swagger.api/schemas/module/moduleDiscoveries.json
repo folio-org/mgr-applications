@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Collection of discovery information for modules that comprise an application",
+  "properties": {
+    "discovery": {
+      "description": "Discovery information for the modules that comprise this application",
+      "type": "array",
+      "id": "moduleDiscovery",
+      "items": {
+        "$ref": "moduleDiscovery.json"
+      }
+    },
+    "totalRecords": {
+      "readOnly": true,
+      "description": "The total number of records matching the provided criteria",
+      "type": "integer",
+      "format": "int64"
+    }
+  },
+  "required": [
+    "discovery"
+  ]
+}

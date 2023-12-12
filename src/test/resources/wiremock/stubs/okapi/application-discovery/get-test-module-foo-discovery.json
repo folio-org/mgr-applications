@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/_/discovery/modules/test-module-foo-1.0.0/test-module-foo-1.0.0",
+    "headers": {
+      "X-Okapi-Token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Location": "/_/discovery/modules/test-module-foo-1.0.0/test-module-foo-1.0.0"
+    },
+    "jsonBody": {
+      "srvcId": "test-module-foo-1.0.0",
+      "instId": "test-module-foo-1.0.0",
+      "url": "http://test-module-foo:8080"
+    }
+  }
+}

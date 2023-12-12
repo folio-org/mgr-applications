@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Bootstrap information of the module",
+  "properties": {
+    "module": {
+      "description": "Discovery information of the module",
+      "$ref": "moduleBootstrapDiscovery.json"
+    },
+    "requiredModules": {
+      "description": "Discovery information for the required modules",
+      "type": "array",
+      "items": {
+        "$ref": "moduleBootstrapDiscovery.json"
+      }
+    }
+  },
+  "required": [
+    "module"
+  ]
+}

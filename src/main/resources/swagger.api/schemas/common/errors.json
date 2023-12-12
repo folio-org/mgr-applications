@@ -1,0 +1,19 @@
+{
+  "description": "A set of errors",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "errors": {
+      "id": "errors",
+      "description": "List of errors",
+      "type": "array",
+      "items": {
+        "$ref": "error.json"
+      }
+    },
+    "total_records": {
+      "description": "Total number of errors",
+      "type": "integer"
+    }
+  }
+}

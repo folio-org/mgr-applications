@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Platform Descriptor Schema",
+  "description": "Platform Descriptor for Application Manager Installer",
+  "type": "object",
+  "x-implements": [ "org.folio.am.domain.model.Artifact" ],
+  "allOf": [
+    {
+      "$ref": "common/artifact.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "description": "Application type",
+      "type": "string",
+      "enum": [
+        "system",
+        "functional"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "type"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/_/proxy/import/modules?check=false",
+    "headers": {
+      "X-Okapi-Token": {
+        "equalTo": "X-Okapi-Token test value"
+      },
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": [
+          {
+            "id": "test-module-2.0.0",
+            "name": "test-module2"
+          }
+        ]
+      }
+    ]
+  },
+  "response": {
+    "status": 204
+  }
+}

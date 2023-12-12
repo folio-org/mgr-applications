@@ -1,0 +1,387 @@
+openapi: 3.0.0
+
+info:
+  title: Manager Applications API
+  version: v1
+  description: Manager Applications API
+
+servers:
+  - url: http://localhost:8081
+    description: Locally deployed server
+
+paths:
+  /applications:
+    post:
+      operationId: registerApplication
+      description: Register a new application.
+      parameters:
+        - $ref: '#/components/parameters/x-okapi-token'
+        - $ref: '#/components/parameters/check'
+      tags:
+        - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/applicationDescriptor'
+      responses:
+        '201':
+          description: An application descriptor as response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/applicationDescriptor'
+
+    get:
+      operationId: getApplicationsByQuery
+      description: Retrieve registered application by query.
+      tags:
+        - applications
+      parameters:
+        - $ref: '#/components/parameters/cql-query'
+        - $ref: '#/components/parameters/query-offset'
+        - $ref: '#/components/parameters/query-limit'
+        - $ref: '#/components/parameters/full'
+      responses:
+        '200':
+          description: An application descriptors list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/applicationDescriptors'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
+  /applications/{id}:
+    get:
+      operationId: getApplicationById
+      description: Retrieve registered application by id.
+      tags:
+        - applications
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+        - $ref: '#/components/parameters/full'
+      responses:
+        '200':
+          description: An application descriptor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/applicationDescriptor'
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+    delete:
+      operationId: deregisterApplicationById
+      description: De-register (delete) application by id.
+      tags:
+        - applications
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+        - $ref: '#/components/parameters/x-okapi-token'
+      responses:
+        '204':
+          description: An application descriptor
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
+  /applications/validate:
+    post:
+      operationId: validateApplicationDescriptor
+      description: Validate application descriptor.
+      tags:
+        - applications
+      parameters:
+        - $ref: '#/components/parameters/validation-mode'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/applicationDescriptor'
+      responses:
+        '204':
+          description: No content
+        '400':
+          $ref: '#/components/responses/bad-request'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
+  /applications/{id}/discovery:
+    get:
+      operationId: getDiscovery
+      description: Retrieve module discovery info for application referenced by id.
+      tags:
+        - application-discovery
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+        - $ref: '#/components/parameters/query-offset'
+        - $ref: '#/components/parameters/query-limit'
+      responses:
+        '200':
+          description: An application discovery
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moduleDiscoveries'
+        '400':
+          $ref: '#/components/responses/bad-request'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
+  /modules/{id}:
+    get:
+      operationId: getModuleBootstrap
+      description: Retrieve bootstrap information for module referenced by id
+      tags:
+        - module-bootstrap
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      responses:
+        '200':
+          description: A module bootstrap info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moduleBootstrap'
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
+  /modules/discovery:
+    get:
+      operationId: searchModuleDiscovery
+      description: Retrieving module discovery information by CQL query and pagination parameters.
+      tags:
+        - module-discovery
+      parameters:
+        - $ref: '#/components/parameters/cql-query'
+        - $ref: '#/components/parameters/query-offset'
+        - $ref: '#/components/parameters/query-limit'
+      responses:
+        '200':
+          description: Module discovery search result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moduleDiscoveries'
+        '400':
+          $ref: '#/components/responses/bad-request'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+    post:
+      operationId: createModuleDiscoveries
+      description: Creates module discovery information in a batch
+      tags:
+        - module-discovery
+      parameters:
+        - $ref: '#/components/parameters/x-okapi-token'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/moduleDiscoveries'
+      responses:
+        '201':
+          description: An application discovery as response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moduleDiscoveries'
+        '400':
+          $ref: '#/components/responses/bad-request'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
+  /modules/{id}/discovery:
+    get:
+      operationId: getModuleDiscovery
+      description: Retrieving discovery for the module referenced by id.
+      tags:
+        - module-discovery
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      responses:
+        '200':
+          description: A module discovery info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moduleDiscovery'
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+    post:
+      operationId: createModuleDiscovery
+      description: Creates a discovery for the module referenced by id.
+      tags:
+        - module-discovery
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+        - $ref: '#/components/parameters/x-okapi-token'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/moduleDiscovery'
+      responses:
+        '201':
+          description: A module discovery info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moduleDiscovery'
+        '400':
+          $ref: '#/components/responses/bad-request'
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+    put:
+      operationId: updateModuleDiscovery
+      description: Update discovery for the module referenced by id.
+      tags:
+        - module-discovery
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+        - $ref: '#/components/parameters/x-okapi-token'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/moduleDiscovery'
+      responses:
+        '204':
+          description: No content
+        '400':
+          $ref: '#/components/responses/bad-request'
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+    delete:
+      operationId: deleteModuleDiscovery
+      description: Delete discovery of the module referenced by id.
+      tags:
+        - module-discovery
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+        - $ref: '#/components/parameters/x-okapi-token'
+      responses:
+        '204':
+          description: No content
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
+components:
+  schemas:
+    applicationDescriptor:
+      $ref: schemas/applicationDescriptor.json
+    applicationDescriptors:
+      $ref: schemas/applicationDescriptors.json
+    moduleDiscovery:
+      $ref: schemas/module/moduleDiscovery.json
+    moduleDiscoveries:
+      $ref: schemas/module/moduleDiscoveries.json
+    moduleBootstrap:
+      $ref: schemas/module/bootstrap/moduleBootstrap.json
+    errorResponse:
+      $ref: schemas/common/errors.json
+    deploymentDescriptor:
+      $ref: schemas/deploymentDescriptor.json
+    applicationReferences:
+      $ref: schemas/applicationReferences.json
+    validationMode:
+      $ref: schemas/validationMode.json
+
+  responses:
+    bad-request:
+      description: Error response if request body contains validation error (in json format)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+    entity-not-found:
+      description: Error response if entity is not found by id (in json format)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+    internal-server-error:
+      description: Error response for unhandled or critical server exceptions, e.g. NullPointerException.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+
+  parameters:
+    path-entity-id:
+      in: path
+      required: true
+      name: id
+      description: Entity/document id
+      schema:
+        type: string
+    query-limit:
+      in: query
+      required: false
+      name: limit
+      description: Limit the number of elements returned in the response.
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 500
+        default: 10
+    check:
+      in: query
+      name: check
+      required: false
+      description: |
+        Whether to run default validation of application descriptor or not
+        Default validation mode specified in the application properties
+      schema:
+        type: boolean
+        default: true
+    query-offset:
+      in: query
+      required: false
+      name: offset
+      description: Skip over a number of elements by specifying an offset value for the query.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    cql-query:
+      name: query
+      in: query
+      description: A CQL query string with search conditions.
+      schema:
+        type: string
+    x-okapi-token:
+      name: x-okapi-token
+      in: header
+      required: false
+      description: An OKAPI authentication token
+      schema:
+        type: string
+    full:
+      name: full
+      in: query
+      required: false
+      description: Show full information in the response including ModuleDescriptors
+      schema:
+        type: boolean
+        default: false
+    validation-mode:
+      in: query
+      name: mode
+      required: false
+      description: Validation mode to be applied
+      schema:
+        $ref: '#/components/schemas/validationMode'

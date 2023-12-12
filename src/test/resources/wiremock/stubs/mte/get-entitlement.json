@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/entitlements?query=applicationId%3Dtest-app-1.0.0",
+    "headers": {
+      "X-Okapi-Token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Location": "/entitlements?query=applicationId%3Dtest-app-1.0.0"
+    },
+    "jsonBody": {
+      "totalRecords": 1,
+      "entitlements": [
+        {
+          "applicationId": "test-app-1.0.0",
+          "tenantId": "abcec782-6bb6-48ae-888e-9020bef72485"
+        }
+      ]
+    }
+  }
+}

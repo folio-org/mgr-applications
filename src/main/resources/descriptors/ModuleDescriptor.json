@@ -1,0 +1,299 @@
+{
+  "id": "mgr-applications-1.0.0",
+  "name": "Manager Applications",
+  "provides": [
+    {
+      "id": "applications",
+      "version": "1.0",
+      "handlers": [
+        {
+          "type": "internal",
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/applications",
+          "permissionsRequired": [
+            "mgr-applications.applications.item.post"
+          ]
+        },
+        {
+          "type": "internal",
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/applications",
+          "permissionsRequired": [
+            "mgr-applications.applications.collection.get"
+          ]
+        },
+        {
+          "type": "internal",
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/applications/{id}",
+          "permissionsRequired": [
+            "mgr-applications.applications.item.get"
+          ]
+        },
+        {
+          "type": "internal",
+          "methods": [
+            "DELETE"
+          ],
+          "pathPattern": "/applications/{id}",
+          "permissionsRequired": [
+            "mgr-applications.applications.item.delete"
+          ],
+          "modulePermissions": [
+            "mgr-tenant-entitlements.entitlements.collection.get"
+          ]
+        },
+        {
+          "type": "internal",
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/applications/validate",
+          "permissionsRequired": [
+            "mgr-applications.applications.item.validate"
+          ]
+        },
+        {
+          "type": "internal",
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/applications/validate-dependencies",
+          "permissionsRequired": [
+            "mgr-applications.applications.collection.validate-dependencies"
+          ]
+        }
+
+      ]
+    },
+    {
+      "id": "discoveries",
+      "version": "2.0",
+      "handlers": [
+        {
+          "type": "internal",
+          "methods": [ "GET" ],
+          "pathPattern": "/applications/{id}/discovery",
+          "permissionsRequired": [ "mgr-applications.app-discoveries.collection.get" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "GET" ],
+          "pathPattern": "/modules/discovery",
+          "permissionsRequired": [ "mgr-applications.discoveries.collection.get" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "GET" ],
+          "pathPattern": "/modules/{id}/discovery",
+          "permissionsRequired": [ "mgr-applications.discoveries.item.get" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "POST" ],
+          "pathPattern": "/modules/{id}/discovery",
+          "permissionsRequired": [ "mgr-applications.discoveries.item.post" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "POST" ],
+          "pathPattern": "/modules/discovery",
+          "permissionsRequired": [ "mgr-applications.discoveries.collection.post" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "PUT" ],
+          "pathPattern": "/modules/{id}/discovery",
+          "permissionsRequired": [ "mgr-applications.discoveries.item.put" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "DELETE" ],
+          "pathPattern": "/modules/{id}/discovery",
+          "permissionsRequired": [ "mgr-applications.discoveries.item.delete" ]
+        }
+      ]
+    },
+    {
+      "id": "module-bootstraps",
+      "version": "1.0",
+      "handlers": [
+        {
+          "type": "internal",
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/modules/{id}",
+          "permissionsRequired": [
+            "mgr-applications.module-bootstraps.item.get"
+          ]
+        }
+      ]
+    }
+  ],
+  "requires": [],
+  "permissionSets": [
+    {
+      "description": "Register a new application",
+      "displayName": "Manager Applications - create application",
+      "permissionName": "mgr-applications.applications.item.post",
+      "subPermissions": [
+        "okapi.proxy.modules.post"
+      ]
+    },
+    {
+      "description": "Validate a new application descriptor",
+      "displayName": "Manager Applications - validate application",
+      "permissionName": "mgr-applications.applications.item.validate"
+    },
+    {
+      "description": "Validate dependencies of applications",
+      "displayName": "Manager Applications - validate application dependencies",
+      "permissionName": "mgr-applications.applications.collection.validate-dependencies"
+    },
+    {
+      "description": "De-register (delete) application",
+      "displayName": "Manager Applications - delete application",
+      "permissionName": "mgr-applications.applications.item.delete",
+      "subPermissions": [
+        "okapi.proxy.modules.delete"
+      ]
+    },
+    {
+      "description": "Retrieve registered application",
+      "displayName": "Manager Applications - get application by id",
+      "permissionName": "mgr-applications.applications.item.get"
+    },
+    {
+      "description": "Retrieve registered applications",
+      "displayName": "Manager Applications - get applications",
+      "permissionName": "mgr-applications.applications.collection.get"
+    },
+    {
+      "description": "Register new module discoveries for application",
+      "displayName": "Manager Applications - create discoveries",
+      "permissionName": "mgr-applications.discoveries.collection.post",
+      "subPermissions": [
+        "okapi.discovery.get",
+        "okapi.discovery.delete",
+        "okapi.discovery.post"
+      ]
+    },
+    {
+      "description": "Update module discovery for application",
+      "displayName": "Manager Applications - update discovery",
+      "permissionName": "mgr-applications.discoveries.item.put",
+      "subPermissions": [
+        "okapi.discovery.get",
+        "okapi.discovery.delete",
+        "okapi.discovery.post"
+      ]
+    },
+    {
+      "description": "Update module discoveries for application",
+      "displayName": "Manager Applications - update discoveries",
+      "permissionName": "mgr-applications.discoveries.collection.put",
+      "subPermissions": [
+        "okapi.discovery.get",
+        "okapi.discovery.delete",
+        "okapi.discovery.post"
+      ]
+    },
+    {
+      "description": "De-register (delete) module discovery for application",
+      "displayName": "Manager Applications - delete discovery",
+      "permissionName": "mgr-applications.discoveries.item.delete",
+      "subPermissions": [
+        "okapi.discovery.delete"
+      ]
+    },
+    {
+      "description": "De-register (delete) module discoveries for application",
+      "displayName": "Manager Applications - delete discoveries",
+      "permissionName": "mgr-applications.discoveries.collection.delete",
+      "subPermissions": [
+        "okapi.discovery.delete"
+      ]
+    },
+    {
+      "description": "Get module discovery for module",
+      "displayName": "Manager Applications - get discovery by module id",
+      "permissionName": "mgr-applications.discoveries.item.get"
+    },
+    {
+      "description": "Search module discoveries by CQL query",
+      "displayName": "Manager Applications - search discovery information for modules",
+      "permissionName": "mgr-applications.discoveries.collection.get"
+    },
+    {
+      "description": "Get module discoveries for application",
+      "displayName": "Manager Applications - retrieve discovery information for application",
+      "permissionName": "mgr-applications.app-discoveries.collection.get"
+    },
+    {
+      "description": "Get module bootstrap",
+      "displayName": "Manager Applications - get module bootstrap",
+      "permissionName": "mgr-applications.module-bootstraps.item.get"
+    },
+    {
+      "description": "Manage applications",
+      "displayName": "Manager Applications - Manage applications",
+      "permissionName": "mgr-applications.applications.all",
+      "visible": true,
+      "subPermissions": [
+        "mgr-applications.applications.item.post",
+        "mgr-applications.applications.item.validate",
+        "mgr-applications.applications.collection.validate-dependencies",
+        "mgr-applications.applications.item.get",
+        "mgr-applications.applications.item.delete",
+        "mgr-applications.applications.collection.get"
+      ]
+    },
+    {
+      "description": "Manage module discoveries",
+      "displayName": "Manager Applications - Manage module discoveries",
+      "permissionName": "mgr-applications.discoveries.all",
+      "visible": true,
+      "subPermissions": [
+        "mgr-applications.discoveries.item.get",
+        "mgr-applications.discoveries.item.post",
+        "mgr-applications.discoveries.item.put",
+        "mgr-applications.discoveries.item.delete",
+        "mgr-applications.discoveries.collection.post",
+        "mgr-applications.discoveries.collection.get",
+        "mgr-applications.app-discoveries.collection.get"
+      ]
+    },
+    {
+      "description": "Manager Applications - Permissions with no side effects",
+      "displayName": "Manager Applications - Read only permissions",
+      "permissionName": "mgr-applications.readonly",
+      "visible": true,
+      "subPermissions": [
+        "mgr-applications.applications.item.get",
+        "mgr-applications.applications.collection.get",
+        "mgr-applications.discoveries.item.get",
+        "mgr-applications.discoveries.collection.get",
+        "mgr-applications.app-discoveries.collection.get",
+        "mgr-applications.module-bootstraps.item.get"
+      ]
+    },
+    {
+      "description": "Manager Applications - Anything goes",
+      "displayName": "Manager Applications - All permissions",
+      "permissionName": "mgr-applications.all",
+      "visible": true,
+      "subPermissions": [
+        "mgr-applications.applications.all",
+        "mgr-applications.discoveries.all",
+        "mgr-applications.module-bootstraps.item.get"
+      ]
+    }
+  ]
+}

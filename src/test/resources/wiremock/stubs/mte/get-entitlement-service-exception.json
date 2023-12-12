@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/entitlements?query=applicationId%3Dtest-app-1.0.0",
+    "headers": {
+      "X-Okapi-Token": {
+        "equalTo": "X-Okapi-Token test value"
+      }
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json",
+      "Location": "/entitlements?query=applicationId%3Dtest-app-1.0.0"
+    },
+    "jsonBody": {
+      "errors": [
+        {
+          "message": "mgr-tenant-entitlements is not available",
+          "type": "ServiceException",
+          "code": "service_error",
+          "parameters": [
+            {
+              "key": "cause",
+              "value": "mgr-tenant-entitlements executing GET http://mgr-tenant-entitlements:8081/entitlements?query=applicationId%3Dapplication2-1.3.8"
+            }
+          ]
+        }
+      ],
+      "total_records": 1
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/modules/foo-module-1.0.0"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "foo-module-1.0.0",
+      "name": "foo-module"
+    }
+  }
+}

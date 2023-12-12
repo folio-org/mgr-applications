@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "string",
+  "description": "Error message code",
+  "enum": [
+    "unknown_error",
+    "service_error",
+    "validation_error",
+    "not_found_error",
+    "found_error"
+  ]
+}

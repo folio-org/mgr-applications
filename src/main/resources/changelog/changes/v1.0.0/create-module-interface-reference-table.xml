@@ -1,0 +1,59 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <changeSet id="create-interface-ref-type-enum" author="ooliinyk">
+    <sql>
+      CREATE TYPE interface_ref_type AS ENUM ('PROVIDES', 'REQUIRES', 'OPTIONAL');
+    </sql>
+  </changeSet>
+
+  <changeSet id="create-module_interface_reference-table" author="ooliinyk">
+    <createTable tableName="module_interface_reference">
+      <column name="module_id" type="VARCHAR(255)">
+        <constraints primaryKey="true" primaryKeyName="pk_module_interface_reference"/>
+      </column>
+      <column name="id" type="VARCHAR(255)">
+        <constraints primaryKey="true" primaryKeyName="pk_module_interface_reference"/>
+      </column>
+      <column name="version" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="type" type="interface_ref_type">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="create-fk_module-interface-reference_module-id" author="ooliinyk">
+    <addForeignKeyConstraint
+      baseColumnNames="module_id"
+      baseTableName="module_interface_reference"
+      constraintName="fk_module_interface_reference_module"
+      deferrable="false"
+      initiallyDeferred="false"
+      onDelete="CASCADE"
+      onUpdate="RESTRICT"
+      referencedColumnNames="id"
+      referencedTableName="module"/>
+  </changeSet>
+
+  <changeSet id="create-idx_module_interface_reference_module_id" author="ooliinyk">
+    <createIndex indexName="idx_module_interface_reference_module_id" tableName="module_interface_reference">
+      <column name="module_id"/>
+    </createIndex>
+  </changeSet>
+  <changeSet id="create-idx_module_interface_reference_id" author="ooliinyk">
+    <createIndex indexName="idx_module_interface_reference_id" tableName="module_interface_reference">
+      <column name="id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="create-module_bootstrap-view" author="ooliinyk">
+    <createView viewName="module_bootstrap">
+      SELECT m.*, md.url FROM module m LEFT JOIN module_discovery md on m.id = md.id
+    </createView>
+  </changeSet>
+</databaseChangeLog>

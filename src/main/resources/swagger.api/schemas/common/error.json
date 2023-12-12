@@ -1,0 +1,23 @@
+{
+  "description": "An error",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "Error message text"
+    },
+    "type": {
+      "type": "string",
+      "description": "Error message type"
+    },
+    "code": {
+      "description": "Error message code",
+      "$ref": "errorCode.json"
+    },
+    "parameters": {
+      "description": "Error message parameters",
+      "$ref": "parameters.json"
+    }
+  }
+}

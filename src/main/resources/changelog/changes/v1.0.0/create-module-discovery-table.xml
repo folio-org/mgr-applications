@@ -1,0 +1,39 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <changeSet id="create-module-discovery-table" author="dmtkachenko">
+    <createTable tableName="module_discovery">
+      <column name="id" type="VARCHAR(255)">
+        <constraints nullable="false" primaryKey="true"
+                     primaryKeyName="pk_mod_discovery"/>
+      </column>
+      <column name="name" type="VARCHAR(255)"/>
+      <column name="version" type="VARCHAR(255)"/>
+      <column name="url" type="VARCHAR(255)"/>
+      <column name="application_id" type="VARCHAR(255)"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="create-fk-mod-discovery-application-id" author="dmtkachenko">
+    <addForeignKeyConstraint
+        baseColumnNames="application_id"
+        baseTableName="module_discovery"
+        constraintName="fk_module_disc_application"
+        deferrable="false"
+        initiallyDeferred="false"
+        onDelete="CASCADE"
+        onUpdate="RESTRICT"
+        referencedColumnNames="id"
+        referencedTableName="application"/>
+  </changeSet>
+
+  <changeSet id="create-fk-index-mod-discovery-application-id" author="dmtkachenko">
+    <createIndex indexName="idx_mod_disc_application_id" tableName="module_discovery">
+      <column name="application_id"/>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>

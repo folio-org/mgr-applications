@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/applications/test-disc-app-1.0.0/discovery",
+    "headers": {
+      "X-Okapi-Permissions-Required": {
+        "equalTo": "mgr-applications.discoveries.collection.delete"
+      },
+      "X-Okapi-Token": {
+        "equalTo": "X-Okapi-Token test value"
+      },
+      "X-Okapi-Tenant": {
+        "equalTo": "supertenant"
+      },
+      "X-Okapi-Url": {
+        "matches": ".*"
+      }
+    }
+  },
+  "response": {
+    "status": 202
+  }
+}

@@ -1,0 +1,131 @@
+spring:
+  application:
+    name: mgr-applications
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+      accept-single-value-as-array: true
+  datasource:
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_DATABASE:okapi_modules}
+  liquibase:
+    change-log: classpath:changelog/changelog-master.xml
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:kafka}:${KAFKA_PORT:9092}
+    security:
+      protocol: ${KAFKA_SECURITY_PROTOCOL:PLAINTEXT}
+    ssl:
+      key-store-password: ${KAFKA_SSL_KEYSTORE_PASSWORD:}
+      key-store-location: ${KAFKA_SSL_KEYSTORE_LOCATION:}
+      trust-store-password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD:}
+      trust-store-location: ${KAFKA_SSL_TRUSTSTORE_LOCATION:}
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        retries: 5
+        spring.json.add.type.headers: false
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+
+application:
+  http-client:
+    read-timeout: 30000
+    connection-timeout: 300000
+  far-mode:
+    enabled: ${FAR_MODE:false}
+  security:
+    enabled: ${SECURITY_ENABLED:false}
+  kong:
+    enabled: ${KONG_INTEGRATION_ENABLED:true}
+    url: ${KONG_ADMIN_URL:${kong.url:}}
+  okapi:
+    enabled: ${OKAPI_INTEGRATION_ENABLED:true}
+    url: ${OKAPI_URL:${okapi.url:}}
+    mod-authtoken-url: ${MOD_AUTHTOKEN_URL}
+  environment: ${ENV:folio}
+  kafka:
+    topics:
+      - name: discovery
+        numPartitions: ${KAFKA_DISCOVERY_TOPIC_PARTITIONS:1}
+        replicationFactor: ${KAFKA_DISCOVERY_TOPIC_REPLICATION_FACTOR:}
+  keycloak:
+    enabled: ${KC_INTEGRATION_ENABLED:false}
+    url: ${KC_URL:http://keycloak:8080}
+    admin:
+      client_id: ${KC_ADMIN_CLIENT_ID:folio-backend-admin-client}
+      username: ${KC_ADMIN_USERNAME:}
+      password: ${KC_ADMIN_PASSWORD:}
+      grant_type: ${KC_ADMIN_GRANT_TYPE:client_credentials}
+    import:
+      enabled: ${KC_IMPORT_ENABLED:false}
+    client:
+      client_id: ${KC_CLIENT_ID:mgr-applications}
+  secret-store:
+    type: ${SECRET_STORE_TYPE:}
+    aws-ssm:
+      region: ${SECRET_STORE_AWS_SSM_REGION:}
+      use-iam: ${SECRET_STORE_AWS_SSM_USE_IAM:true}
+      ecs-credentials-endpoint: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_ENDPOINT:}
+      ecs-credentials-path: ${SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_PATH:}
+    vault:
+      token: ${SECRET_STORE_VAULT_TOKEN:}
+      address: ${SECRET_STORE_VAULT_ADDRESS:}
+      enable-ssl: ${SECRET_STORE_VAULT_ENABLE_SSL:false}
+      pem-file-path: ${SECRET_STORE_VAULT_PEM_FILE_PATH:}
+      keystore-password: ${SECRET_STORE_VAULT_KEYSTORE_PASSWORD:}
+      keystore-file-path: ${SECRET_STORE_VAULT_KEYSTORE_FILE_PATH:}
+      truststore-file-path: ${SECRET_STORE_VAULT_TRUSTSTORE_FILE_PATH:}
+  validation:
+    default-mode: ${VALIDATION_MODE:basic}
+
+tenant:
+  entitlement:
+    url: ${TE_URL:${te.url:http://mgr-tenant-entitlements:8081}}
+
+folio:
+  jpa:
+    repository:
+      base-packages: org.folio.am.*
+
+server:
+  port: 8081
+  max-http-request-header-size: ${MAX_HTTP_REQUEST_HEADER_SIZE:200KB}
+  compression:
+    enabled: true
+    mime-types: text/html,text/plain,text/css,application/javascript,application/json
+
+management:
+  endpoints.web:
+    base-path: /admin
+    exposure:
+      include: info,health,liquibase,threaddump,heapdump,httptrace,loggers
+
+feign:
+  client:
+    config:
+      okapi:
+        connectTimeout: 30000
+        readTimeout: 300000
+
+messaging:
+  trx-outbox:
+    enabled: true
+    publishing:
+      task-execution:
+        pool:
+          keep-alive: 600s
+      scheduling:
+        enabled: true

@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Platform Descriptor Schema",
+  "description": "Platform Descriptor for Application Manager Installer",
+  "type": "object",
+  "x-implements": [ "org.folio.am.domain.model.Artifact" ],
+  "allOf": [
+    {
+      "$ref": "common/artifact.json"
+    }
+  ],
+  "properties": {
+    "type": {
+      "description": "Platform type",
+      "type": "string",
+      "enum": [
+        "base",
+        "extended"
+      ]
+    },
+    "description" : {
+      "description": "A description of platform",
+      "type": "string"
+    },
+    "basePlatform" : {
+      "description": "The base platform this platform inherits from",
+      "type": "object",
+      "$ref": "common/artifact.json"
+    },
+    "metadata" : {
+      "$ref" : "common/metadata.json",
+      "readonly" : true
+    },
+    "applications" : {
+      "description": "List of applications grouped by the platform",
+      "type": "array",
+      "items": {
+        "$ref": "platformApplication.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "applications"
+  ]
+}

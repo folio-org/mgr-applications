@@ -1,0 +1,33 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+  <changeSet id="create application table" author="Saurav Pandey">
+      <createTable tableName="application">
+        <column name="id" type="VARCHAR(255)">
+          <constraints nullable="false" primaryKey="true"/>
+        </column>
+        <column name="name" type="VARCHAR(255)"/>
+        <column name="version" type="VARCHAR(255)"/>
+        <column name="application_descriptor" type="jsonb"/>
+      </createTable>
+  </changeSet>
+
+  <changeSet id="create application_descriptor_dependency table" author="Sherzod Nurjonov">
+    <createTable tableName="application_descriptor_dependency">
+      <column name="dependent_application_id" type="VARCHAR(255)"/>
+      <column name="application_id" type="VARCHAR(255)"/>
+    </createTable>
+    <addForeignKeyConstraint
+            baseTableName="application_descriptor_dependency"
+            baseColumnNames="application_id"
+            constraintName="application_descriptor_dependency_application_fk"
+            referencedTableName="application"
+            referencedColumnNames="id"/>
+    <addPrimaryKey
+            tableName="application_descriptor_dependency"
+            columnNames="dependent_application_id,application_id"
+            constraintName="application_descriptor_dependency_pk"/>
+  </changeSet>
+</databaseChangeLog>

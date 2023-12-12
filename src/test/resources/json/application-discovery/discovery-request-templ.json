@@ -1,0 +1,14 @@
+{
+  "discovery": [
+    {
+      "name": "%s",
+      "version": "1.0.0",
+      "location": "%s"
+    },
+    {
+      "name": "%s",
+      "version": "1.0.0",
+      "location": "%s"
+    }
+  ]
+}

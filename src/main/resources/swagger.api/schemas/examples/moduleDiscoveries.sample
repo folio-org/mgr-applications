@@ -1,0 +1,17 @@
+{
+  "moduleDiscoveries": [
+    {
+      "id": "mod-sample-1.3.7",
+      "name": "mod-sample",
+      "version": "1.3.7",
+      "location": "http://mod-sample:8080"
+    },
+    {
+      "id": "mod-test-1.3.7",
+      "name": "mod-test",
+      "version": "1.3.7",
+      "location": "http://mod-test:8080"
+    }
+  ],
+  "totalRecords": 2
+}

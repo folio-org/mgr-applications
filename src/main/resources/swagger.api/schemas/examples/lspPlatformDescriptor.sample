@@ -1,0 +1,34 @@
+{
+  "$schema": "../platformDescriptor.json",
+  "id": "6628487d-23d1-4e98-8203-4e59deb907eb",
+  "name": "lsp-platform",
+  "version": "1.1.0",
+  "type": "extended",
+  "description": "LSP platform",
+  "basePlatform": {
+    "name": "base-platform",
+    "version": "1.1.0"
+  },
+  "applications": [
+    {
+      "name": "circulation",
+      "version": "11.2.5",
+      "type": "functional"
+    },
+    {
+      "name": "acquisitions",
+      "version": "8.2.3",
+      "type": "functional"
+    },
+    {
+      "name": "inventory",
+      "version": "12.9.0",
+      "type": "functional"
+    },
+    {
+      "name": "finance",
+      "version": "5.1.2",
+      "type": "functional"
+    }
+  ]
+}

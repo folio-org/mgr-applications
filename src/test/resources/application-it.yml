@@ -1,0 +1,32 @@
+spring:
+  main:
+    banner-mode: off
+  datasource:
+    username: app_manager_admin
+    password: folio123
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/am_it
+    hikari:
+      maximum-pool-size: 3
+      max-lifetime: 60000
+  jpa:
+    show-sql: true
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+      group-id: testing
+
+application:
+  environment: it
+  security:
+    enabled: false
+  keycloak:
+    enabled: false
+  okapi:
+    enabled: true
+  secret-store:
+    type: EPHEMERAL
+    ephemeral:
+      content:
+        folio_master_mgr-applications: supersecret
+  validation:
+    default-mode: basic
