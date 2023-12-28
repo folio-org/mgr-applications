@@ -37,6 +37,8 @@
     <spring-cloud-bom.version>2022.0.1</spring-cloud-bom.version>
     <cql2pgjson.version>35.0.4</cql2pgjson.version>
     <folio-spring-cql.version>7.0.0</folio-spring-cql.version>
+    <folio-security.version>1.1.0-SNAPSHOT</folio-security.version>
+    <folio-backend-testing.version>1.1.0-SNAPSHOT</folio-backend-testing.version>
     <applications-poc-versions.version>1.0.0-SNAPSHOT</applications-poc-versions.version>
     <folio-java-checkstyle.version>1.0.0-SNAPSHOT</folio-java-checkstyle.version>
     <semver4j.version>5.2.2</semver4j.version>
@@ -200,7 +202,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-security</artifactId>
-      <version>${applications-poc-versions.version}</version>
+      <version>${folio-security.version}</version>
     </dependency>
 
     <dependency>
@@ -259,7 +261,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-backend-testing</artifactId>
-      <version>${applications-poc-versions.version}</version>
+      <version>${folio-backend-testing.version}</version>
       <scope>test</scope>
     </dependency>
 
