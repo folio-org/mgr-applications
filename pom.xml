@@ -51,12 +51,6 @@
     <!-- Plugins versions -->
     <maven-checkstyle.version>10.12.3</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
-    <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
-    <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
-    <maven-failsafe-plugin.version>3.2.3</maven-failsafe-plugin.version>
-    <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
-    <maven-surefire-plugin.version>3.2.3</maven-surefire-plugin.version>
-    <build-helper-maven-plugin.version>3.5.0</build-helper-maven-plugin.version>
     <openapi-generator.version>6.4.0</openapi-generator.version>
 
     <sonar.exclusions>
@@ -465,7 +459,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>${maven-release-plugin.version}</version>
         <configuration>
           <preparationGoals>clean verify</preparationGoals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
