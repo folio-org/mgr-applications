@@ -16,7 +16,7 @@ public class PostgresContainerExtension implements BeforeAllCallback, AfterAllCa
   private static final String DB_PORT_PROPERTY = "DB_PORT";
 
   @SuppressWarnings("resource")
-  private static final PostgreSQLContainer<?> CONTAINER = new PostgreSQLContainer<>("postgres:12.11")
+  private static final PostgreSQLContainer<?> CONTAINER = new PostgreSQLContainer<>("postgres:12-alpine")
     .withDatabaseName("postgres")
     .withEnv("PG_USER", "postgres")
     .withUsername("postgres")
