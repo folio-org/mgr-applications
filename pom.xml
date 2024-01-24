@@ -35,7 +35,7 @@
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
     <spring-cloud-bom.version>2023.0.0</spring-cloud-bom.version>
     <cql2pgjson.version>35.0.4</cql2pgjson.version>
-    <folio-spring-cql.version>7.2.2</folio-spring-cql.version>
+    <folio-spring-cql.version>8.0.0</folio-spring-cql.version>
     <folio-security.version>1.0.0</folio-security.version>
     <folio-backend-testing.version>1.0.0</folio-backend-testing.version>
     <applications-poc-versions.version>1.0.0</applications-poc-versions.version>
