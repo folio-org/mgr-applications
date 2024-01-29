@@ -34,7 +34,7 @@
     <apache-commons-collections4.version>4.4</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
     <spring-cloud-bom.version>2023.0.0</spring-cloud-bom.version>
-    <cql2pgjson.version>35.0.4</cql2pgjson.version>
+    <cql2pgjson.version>35.1.1</cql2pgjson.version>
     <folio-spring-cql.version>8.0.0</folio-spring-cql.version>
     <folio-security.version>1.0.0</folio-security.version>
     <folio-backend-testing.version>1.0.0</folio-backend-testing.version>
