@@ -45,7 +45,7 @@
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
 
     <!-- Test dependencies versions -->
-    <testcontainer.version>1.19.3</testcontainer.version>
+    <testcontainer.version>1.19.4</testcontainer.version>
     <awaitility.version>4.2.0</awaitility.version>
     <instancio.version>4.0.0</instancio.version>
 
