@@ -1,6 +1,7 @@
 package org.folio.am.support.extensions.impl;
 
 import static java.time.Duration.ofSeconds;
+import static org.folio.am.support.extensions.impl.PostgresContainerExtension.POSTGRES_NETWORK_ALIAS;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback {
 
   public static final String KONG_GATEWAY_URL_PROPERTY = "kong.gateway.url";
-  public static final String KONG_DOCKER_IMAGE = "kong:2.8.1-alpine";
+  public static final String KONG_DOCKER_IMAGE = "kong:3.4.1-ubuntu";
   public static final String KONG_URL_PROPERTY = "kong.url";
 
   @SuppressWarnings("resource")
@@ -70,7 +71,8 @@ public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback
     environment.put("KONG_PG_USER", "kong_admin");
     environment.put("KONG_PG_PASSWORD", "kong123");
     environment.put("KONG_PG_PORT", "5432");
-    environment.put("KONG_PG_HOST", PostgresContainerExtension.POSTGRES_NETWORK_ALIAS);
+    environment.put("KONG_PG_HOST", POSTGRES_NETWORK_ALIAS);
+    environment.put("KONG_ROUTER_FLAVOR", "expressions");
 
     return environment;
   }
@@ -86,6 +88,7 @@ public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback
     environment.put("KONG_ADMIN_LISTEN", "0.0.0.0:8001");
     environment.put("KONG_PLUGINS", "bundled");
     environment.put("KONG_LOG_LEVEL", "info");
+    environment.put("KONG_WORKER_STATE_UPDATE_FREQUENCY", "2");
 
     return environment;
   }
