@@ -5,13 +5,16 @@ import static org.folio.am.support.extensions.impl.PostgresContainerExtension.PO
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 
+@Slf4j
 public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback {
 
   public static final String KONG_GATEWAY_URL_PROPERTY = "kong.gateway.url";
@@ -23,6 +26,7 @@ public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback
     .withEnv(kongEnvironment())
     .withNetwork(Network.SHARED)
     .withExposedPorts(8000, 8001)
+    .withLogConsumer(new Slf4jLogConsumer(log))
     .withAccessToHost(true);
 
   @Override
@@ -51,7 +55,7 @@ public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback
     try (var bootstrapMigrations = migrationContainer(command)) {
       bootstrapMigrations.start();
     } catch (Exception e) {
-      throw new RuntimeException("Failed to run kong migrations");
+      throw new RuntimeException("Failed to run kong migrations", e);
     }
   }
 
