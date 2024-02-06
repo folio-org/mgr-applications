@@ -18,7 +18,7 @@ import org.springframework.test.context.TestPropertySource;
   "application.kong.module-self-url=https://test-mgr-applications:443",
   "application.kong.register-module=true"
 })
-public class KongRegistrationIT extends BaseIntegrationTest {
+class KongRegistrationIT extends BaseIntegrationTest {
 
   @Autowired private KongAdminClient kongAdminClient;
 
