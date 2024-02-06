@@ -1,18 +1,21 @@
 package org.folio.am.integration.kong;
 
-import feign.FeignException;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.domain.dto.ModuleDiscovery;
-import org.folio.am.integration.kong.model.KongService;
 import org.folio.am.service.ApplicationDiscoveryListener;
+import org.folio.tools.kong.model.Service;
+import org.folio.tools.kong.service.KongGatewayService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 @Log4j2
+@Component
 @RequiredArgsConstructor
-public class KongGatewayService implements ApplicationDiscoveryListener {
+@ConditionalOnProperty(value = "application.kong.enabled")
+public class KongDiscoveryListener implements ApplicationDiscoveryListener {
 
-  private final KongAdminClient kongAdminClient;
+  private final KongGatewayService kongGatewayService;
 
   /**
    * Creates service into API Gateway.
@@ -45,33 +48,13 @@ public class KongGatewayService implements ApplicationDiscoveryListener {
    */
   @Override
   public void onDiscoveryDelete(String serviceId, String instanceId, String token) {
-    kongAdminClient.deleteService(serviceId);
+    kongGatewayService.deleteService(serviceId);
     log.debug("discovery info removed from Kong");
   }
 
   private void upsertService(ModuleDiscovery moduleDiscovery) {
     var serviceId = moduleDiscovery.getId();
-    var service = new KongService().name(serviceId).url(moduleDiscovery.getLocation());
-
-    try {
-      var kongService = kongAdminClient.getService(serviceId);
-      var kongUrl = getUrl(kongService);
-      if (!Objects.equals(kongUrl, service.getUrl())) {
-        log.debug("Module discovery updated in Kong: {}", serviceId);
-        kongAdminClient.upsertService(serviceId, service);
-      } else {
-        log.debug("Module discovery with id {} not changed in Kong", serviceId);
-      }
-    } catch (FeignException.NotFound e) {
-      kongAdminClient.upsertService(serviceId, service);
-      log.debug("Module discovery created in Kong: {}", serviceId);
-    }
-  }
-
-  private String getUrl(KongService kongService) {
-    if (kongService.getUrl() != null) {
-      return kongService.getUrl();
-    }
-    return String.format("%s://%s:%s", kongService.getProtocol(), kongService.getHost(), kongService.getPort());
+    var service = new Service().name(serviceId).url(moduleDiscovery.getLocation());
+    kongGatewayService.upsertService(service);
   }
 }

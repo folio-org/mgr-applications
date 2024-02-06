@@ -38,11 +38,11 @@ import feign.FeignException.NotFound;
 import java.net.URL;
 import lombok.SneakyThrows;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
-import org.folio.am.integration.kong.KongAdminClient;
-import org.folio.am.integration.kong.model.KongService;
 import org.folio.am.support.base.BaseIntegrationTest;
 import org.folio.common.utils.OkapiHeaders;
 import org.folio.test.types.IntegrationTest;
+import org.folio.tools.kong.client.KongAdminClient;
+import org.folio.tools.kong.model.Service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,9 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
 
   @BeforeAll
   public static void setUp(@Autowired ApplicationContext applicationContext) {
-    assertThat(applicationContext.containsBean("kongAdminClient")).isTrue();
+    assertThat(applicationContext.containsBean("folioKongAdminClient")).isTrue();
+    assertThat(applicationContext.containsBean("folioKongGatewayService")).isTrue();
+    assertThat(applicationContext.containsBean("kongDiscoveryListener")).isTrue();
     assertThat(applicationContext.containsBean("okapiClient")).isFalse();
 
     fakeKafkaConsumer.registerTopic(getEnvTopicName(DISCOVERY_DESTINATION), DiscoveryEvent.class);
@@ -213,8 +215,8 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries.sql")
   void delete_positive() throws Exception {
-    kongAdminClient.upsertService(MODULE_BAR_ID, new KongService().name(MODULE_BAR_ID).url(MODULE_BAR_URL));
-    kongAdminClient.upsertService(MODULE_FOO_ID, new KongService().name(MODULE_FOO_ID).url(MODULE_FOO_URL));
+    kongAdminClient.upsertService(MODULE_BAR_ID, new Service().name(MODULE_BAR_ID).url(MODULE_BAR_URL));
+    kongAdminClient.upsertService(MODULE_FOO_ID, new Service().name(MODULE_FOO_ID).url(MODULE_FOO_URL));
 
     mockMvc.perform(delete("/modules/{id}/discovery", MODULE_FOO_ID)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))

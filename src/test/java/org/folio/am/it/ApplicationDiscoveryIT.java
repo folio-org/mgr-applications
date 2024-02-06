@@ -33,8 +33,6 @@ import feign.FeignException.NotFound;
 import java.net.URL;
 import lombok.SneakyThrows;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
-import org.folio.am.integration.kong.KongAdminClient;
-import org.folio.am.integration.kong.model.KongService;
 import org.folio.am.support.KafkaEventAssertions;
 import org.folio.am.support.TestValues;
 import org.folio.am.support.base.BaseIntegrationTest;
@@ -43,6 +41,8 @@ import org.folio.test.TestUtils;
 import org.folio.test.extensions.EnableOkapiSecurity;
 import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
+import org.folio.tools.kong.client.KongAdminClient;
+import org.folio.tools.kong.model.Service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -198,7 +198,7 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   @Sql(scripts = "classpath:/sql/module-discoveries.sql")
   void update_positive() throws Exception {
     var newModuleDiscoveryUrl = "http://test-module-foo-updated:8080";
-    kongAdminClient.upsertService(MODULE_FOO_ID, new KongService().url(MODULE_FOO_URL));
+    kongAdminClient.upsertService(MODULE_FOO_ID, new Service().url(MODULE_FOO_URL));
 
     var moduleDiscovery = TestValues.moduleFooDiscovery().location(newModuleDiscoveryUrl);
     mockMvc.perform(put("/modules/{id}/discovery", MODULE_FOO_ID)
@@ -282,8 +282,8 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
     "/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json"
   })
   void delete_positive() throws Exception {
-    kongAdminClient.upsertService(MODULE_FOO_ID, new KongService().url(MODULE_FOO_URL));
-    kongAdminClient.upsertService(MODULE_BAR_ID, new KongService().url(MODULE_BAR_URL));
+    kongAdminClient.upsertService(MODULE_FOO_ID, new Service().url(MODULE_FOO_URL));
+    kongAdminClient.upsertService(MODULE_BAR_ID, new Service().url(MODULE_BAR_URL));
 
     mockMvc.perform(delete("/modules/{id}/discovery", MODULE_FOO_ID)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))

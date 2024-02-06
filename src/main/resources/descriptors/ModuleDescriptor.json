@@ -8,68 +8,41 @@
       "handlers": [
         {
           "type": "internal",
-          "methods": [
-            "POST"
-          ],
+          "methods": [ "POST" ],
           "pathPattern": "/applications",
-          "permissionsRequired": [
-            "mgr-applications.applications.item.post"
-          ]
+          "permissionsRequired": [ "mgr-applications.applications.item.post" ]
         },
         {
           "type": "internal",
-          "methods": [
-            "GET"
-          ],
+          "methods": [ "GET" ],
           "pathPattern": "/applications",
-          "permissionsRequired": [
-            "mgr-applications.applications.collection.get"
-          ]
+          "permissionsRequired": [ "mgr-applications.applications.collection.get" ]
         },
         {
           "type": "internal",
-          "methods": [
-            "GET"
-          ],
+          "methods": [ "GET" ],
           "pathPattern": "/applications/{id}",
-          "permissionsRequired": [
-            "mgr-applications.applications.item.get"
-          ]
+          "permissionsRequired": [ "mgr-applications.applications.item.get" ]
         },
         {
           "type": "internal",
-          "methods": [
-            "DELETE"
-          ],
+          "methods": [ "DELETE" ],
           "pathPattern": "/applications/{id}",
-          "permissionsRequired": [
-            "mgr-applications.applications.item.delete"
-          ],
-          "modulePermissions": [
-            "mgr-tenant-entitlements.entitlements.collection.get"
-          ]
+          "permissionsRequired": [ "mgr-applications.applications.item.delete" ],
+          "modulePermissions": [ "mgr-tenant-entitlements.entitlements.collection.get" ]
         },
         {
           "type": "internal",
-          "methods": [
-            "POST"
-          ],
+          "methods": [ "POST" ],
           "pathPattern": "/applications/validate",
-          "permissionsRequired": [
-            "mgr-applications.applications.item.validate"
-          ]
+          "permissionsRequired": [ "mgr-applications.applications.item.validate" ]
         },
         {
           "type": "internal",
-          "methods": [
-            "POST"
-          ],
+          "methods": [ "POST" ],
           "pathPattern": "/applications/validate-dependencies",
-          "permissionsRequired": [
-            "mgr-applications.applications.collection.validate-dependencies"
-          ]
+          "permissionsRequired": [ "mgr-applications.applications.collection.validate-dependencies" ]
         }
-
       ]
     },
     {
@@ -126,13 +99,9 @@
       "handlers": [
         {
           "type": "internal",
-          "methods": [
-            "GET"
-          ],
+          "methods": [ "GET" ],
           "pathPattern": "/modules/{id}",
-          "permissionsRequired": [
-            "mgr-applications.module-bootstraps.item.get"
-          ]
+          "permissionsRequired": [ "mgr-applications.module-bootstraps.item.get" ]
         }
       ]
     }
