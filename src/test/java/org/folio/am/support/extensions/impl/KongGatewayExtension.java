@@ -63,6 +63,7 @@ public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback
     return new GenericContainer<>(KONG_DOCKER_IMAGE)
       .withEnv(kongMigrationEnvironment())
       .withCommand(command)
+      .withLogConsumer(new Slf4jLogConsumer(log))
       .withNetwork(Network.SHARED)
       .withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(ofSeconds(5)));
   }
