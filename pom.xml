@@ -36,7 +36,7 @@
     <spring-cloud-bom.version>2023.0.0</spring-cloud-bom.version>
     <cql2pgjson.version>35.1.1</cql2pgjson.version>
     <folio-spring-cql.version>8.0.0</folio-spring-cql.version>
-    <folio-security.version>1.0.0</folio-security.version>
+    <folio-security.version>1.1.0</folio-security.version>
     <folio-integration-kong.version>1.1.0-SNAPSHOT</folio-integration-kong.version>
     <folio-integration-kafka.version>1.1.0-SNAPSHOT</folio-integration-kafka.version>
     <folio-backend-common.version>1.1.0-SNAPSHOT</folio-backend-common.version>
