@@ -16,7 +16,7 @@ import java.util.Set;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.hibernate.annotations.Type;
 
 @Data

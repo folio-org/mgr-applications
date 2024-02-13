@@ -13,9 +13,9 @@ import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.support.TestValues;
-import org.folio.security.domain.model.descriptor.InterfaceDescriptor;
-import org.folio.security.domain.model.descriptor.InterfaceReference;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.InterfaceDescriptor;
+import org.folio.common.domain.model.InterfaceReference;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ApplicationDescriptorMapperTest {
 
   private final MappingMethods mappingMethods = new MappingMethods();
-  private final ApplicationDescriptorMapper mapper = new ApplicationDescriptorMapperImpl(mappingMethods);
+  private final ApplicationDescriptorMapper mapper =
+    new org.folio.am.mapper.ApplicationDescriptorMapperImpl(mappingMethods);
 
   @Test
   void convert_applicationDescriptor_to_applicationDescriptorEntity_success() {

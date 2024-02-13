@@ -15,9 +15,9 @@ import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
 import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.folio.am.mapper.ModuleBootstrapMapper;
 import org.folio.am.repository.ModuleBootstrapViewRepository;
-import org.folio.security.domain.model.descriptor.InterfaceDescriptor;
-import org.folio.security.domain.model.descriptor.InterfaceReference;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.InterfaceDescriptor;
+import org.folio.common.domain.model.InterfaceReference;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

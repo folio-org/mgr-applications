@@ -4,7 +4,7 @@ import java.util.List;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.model.ValidationContext;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.springframework.core.annotation.Order;
 
 @Order(ValidatorOrder.MODULE_DESCRIPTOR_VALIDATOR)

@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.folio.am.mapper.ModuleBootstrapMapperImpl;
 import org.folio.am.repository.ModuleBootstrapViewRepository;
-import org.folio.security.domain.model.descriptor.InterfaceReference;
+import org.folio.common.domain.model.InterfaceReference;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

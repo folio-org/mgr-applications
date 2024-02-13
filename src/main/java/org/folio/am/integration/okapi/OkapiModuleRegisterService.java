@@ -18,7 +18,7 @@ import org.folio.am.domain.entity.ArtifactEntity;
 import org.folio.am.repository.ModuleRepository;
 import org.folio.am.service.ApplicationDescriptorListener;
 import org.folio.am.service.ApplicationDiscoveryListener;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.ModuleDescriptor;
 
 @Log4j2
 @RequiredArgsConstructor

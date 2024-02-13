@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.service.validator.ValidationMode;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.ModuleDescriptor;
 
 @EqualsAndHashCode
 @ToString

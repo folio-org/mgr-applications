@@ -15,7 +15,7 @@ import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.exception.RequestValidationException;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.ModuleDescriptor;
 
 @RequiredArgsConstructor
 public abstract class AbstractModuleDescriptorValidator implements ApplicationValidator {
