@@ -16,7 +16,7 @@ import java.util.List;
 import org.folio.am.config.properties.HttpClientProperties;
 import org.folio.am.exception.ServiceException;
 import org.folio.am.support.TestValues;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

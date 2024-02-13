@@ -23,9 +23,9 @@ import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.entity.InterfaceReferenceEntity;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.entity.UiModuleEntity;
-import org.folio.security.domain.model.descriptor.InterfaceDescriptor;
-import org.folio.security.domain.model.descriptor.InterfaceReference;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.InterfaceDescriptor;
+import org.folio.common.domain.model.InterfaceReference;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -116,12 +116,12 @@ public class MappingMethods {
   }
 
   private List<InterfaceReferenceEntity> toInterfaceReferenceEntities(Collection<InterfaceReference> refs,
-                                                                      InterfaceReferenceEntity.ReferenceType type) {
+    InterfaceReferenceEntity.ReferenceType type) {
     return mapItems(refs, r -> toInterfaceReferenceEntity(r, type));
   }
 
   private InterfaceReferenceEntity toInterfaceReferenceEntity(InterfaceReference ref,
-                                                              InterfaceReferenceEntity.ReferenceType type) {
+    InterfaceReferenceEntity.ReferenceType type) {
     var e = new InterfaceReferenceEntity();
     e.setId(ref.getId());
     e.setVersion(ref.getVersion());

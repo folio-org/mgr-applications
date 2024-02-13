@@ -19,7 +19,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.am.config.properties.HttpClientProperties;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.exception.ServiceException;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.springframework.stereotype.Service;
 
 @Service

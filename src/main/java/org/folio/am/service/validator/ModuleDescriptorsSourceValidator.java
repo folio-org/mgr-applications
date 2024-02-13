@@ -13,8 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.exception.RequestValidationException;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.common.domain.model.error.Parameter;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
 import org.springframework.core.annotation.Order;
 
 @Order(ValidatorOrder.MODULE_DESCRIPTOR_SOURCE_VALIDATOR)

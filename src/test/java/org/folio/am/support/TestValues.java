@@ -43,9 +43,9 @@ import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.entity.UiModuleEntity;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.service.validator.ValidationMode;
-import org.folio.security.domain.model.descriptor.InterfaceDescriptor;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
-import org.folio.security.domain.model.descriptor.RoutingEntry;
+import org.folio.common.domain.model.InterfaceDescriptor;
+import org.folio.common.domain.model.ModuleDescriptor;
+import org.folio.common.domain.model.RoutingEntry;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestValues {

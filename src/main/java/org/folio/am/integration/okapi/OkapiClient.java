@@ -4,7 +4,7 @@ import static org.folio.common.utils.OkapiHeaders.TOKEN;
 
 import java.util.List;
 import org.folio.am.domain.dto.DeploymentDescriptor;
-import org.folio.security.domain.model.descriptor.ModuleDescriptor;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
