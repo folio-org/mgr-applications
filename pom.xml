@@ -37,9 +37,9 @@
     <cql2pgjson.version>35.1.1</cql2pgjson.version>
     <folio-spring-cql.version>8.0.0</folio-spring-cql.version>
     <folio-security.version>1.3.0-SNAPSHOT</folio-security.version>
-    <folio-integration-kong.version>1.2.0-SNAPSHOT</folio-integration-kong.version>
-    <folio-integration-kafka.version>1.2.0-SNAPSHOT</folio-integration-kafka.version>
-    <folio-backend-common.version>1.2.0-SNAPSHOT</folio-backend-common.version>
+    <folio-integration-kong.version>1.2.0</folio-integration-kong.version>
+    <folio-integration-kafka.version>1.2.0</folio-integration-kafka.version>
+    <folio-backend-common.version>1.2.0</folio-backend-common.version>
     <folio-backend-testing.version>1.3.0-SNAPSHOT</folio-backend-testing.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
     <semver4j.version>5.2.2</semver4j.version>
