@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 
 @Slf4j
@@ -26,7 +25,6 @@ public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback
     .withEnv(kongEnvironment())
     .withNetwork(Network.SHARED)
     .withExposedPorts(8000, 8001)
-    .withLogConsumer(new Slf4jLogConsumer(log))
     .withAccessToHost(true);
 
   @Override
@@ -63,7 +61,6 @@ public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback
     return new GenericContainer<>(KONG_DOCKER_IMAGE)
       .withEnv(kongMigrationEnvironment())
       .withCommand(command)
-      .withLogConsumer(new Slf4jLogConsumer(log))
       .withNetwork(Network.SHARED)
       .withStartupCheckStrategy(new OneShotStartupCheckStrategy().withTimeout(ofSeconds(5)));
   }

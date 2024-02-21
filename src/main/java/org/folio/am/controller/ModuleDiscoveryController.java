@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class ModuleDiscoveryController implements ModuleDiscoveryApi {
+public class ModuleDiscoveryController extends BaseController implements ModuleDiscoveryApi {
 
   private final ModuleDiscoveryService moduleDiscoveryService;
 

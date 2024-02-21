@@ -41,6 +41,8 @@ spring:
         enabled: true
 
 application:
+  router:
+    path-prefix: ${ROUTER_PATH_PREFIX:}
   http-client:
     read-timeout: 30000
     connection-timeout: 300000

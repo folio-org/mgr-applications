@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class ApplicationController implements ApplicationsApi {
+public class ApplicationController extends BaseController implements ApplicationsApi {
 
   private final ApplicationValidatorService applicationValidatorService;
   private final ApplicationService applicationService;

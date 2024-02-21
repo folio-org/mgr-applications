@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class ModuleBootstrapController implements ModuleBootstrapApi {
+public class ModuleBootstrapController extends BaseController implements ModuleBootstrapApi {
 
   private final ModuleBootstrapService service;
 
