@@ -44,14 +44,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.z3950.zing.cql.CQLParseException;
 
+@Log4j2
 @UnitTest
 @EnableKeycloakSecurity
 @WebMvcTest(ApplicationController.class)
+@TestPropertySource(properties = "application.router.path-prefix=/")
 @Import({ControllerTestConfiguration.class, ApplicationController.class})
-@Log4j2
 class ApplicationControllerTest {
 
   private static final String MODULE_ID = "mod-test-1.0.0";

@@ -26,11 +26,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @UnitTest
 @WebMvcTest(ModuleBootstrapController.class)
 @WithMockUser(username = "test-user", roles = ROLE_USER)
+@TestPropertySource(properties = "application.router.path-prefix=/")
 @Import({ControllerTestConfiguration.class, ModuleBootstrapController.class})
 class ModuleBootstrapControllerTest {
 
