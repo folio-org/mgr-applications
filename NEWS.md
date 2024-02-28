@@ -23,11 +23,6 @@
 ---
 
 ## v1.1.0 2024-02-28
-### New APIs versions
-* Provides `applications v1.0`
-* Provides `discoveries v2.0`
-* Provides `module-bootstraps v1.0`
-
 ### Features
 * Self-register routes in Kong ([MGRAPPS-2](https://issues.folio.org/browse/MGRAPPS-2))
 * Upgrade to Keycloak 23.0.6 ([KEYCLOAK-6](https://issues.folio.org/browse/KEYCLOAK-6))
