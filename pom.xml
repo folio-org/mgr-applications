@@ -44,7 +44,7 @@
 
     <!-- Test dependencies versions -->
     <testcontainer.version>1.19.7</testcontainer.version>
-    <awaitility.version>4.2.0</awaitility.version>
+    <awaitility.version>4.2.1</awaitility.version>
     <instancio.version>4.4.0</instancio.version>
 
     <!-- Plugins versions -->
