@@ -1,5 +1,8 @@
 package org.folio.am.support;
 
+import static org.folio.am.support.TestUtils.httpClientWithDummySslContext;
+
+import java.net.http.HttpClient;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -32,6 +35,8 @@ public class TestConstants {
   public static final String OKAPI_AUTH_TOKEN = "X-Okapi-Token test value";
   public static final String ROLE_ADMIN = "ADMIN";
   public static final String ROLE_USER = "USER";
+
+  public static final HttpClient HTTP_CLIENT_DUMMY_SSL = httpClientWithDummySslContext();
 
   public static String id(String name, String version) {
     return name + "-" + version;

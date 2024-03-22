@@ -2,14 +2,18 @@ package org.folio.am.it;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.am.support.TestConstants.APPLICATION_ID;
+import static org.folio.am.support.TestUtils.generateAccessToken;
+import static org.folio.am.support.TestValues.getApplicationDescriptor;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
 import static org.folio.test.extensions.impl.WireMockExtension.getWireMockAdminClient;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -23,24 +27,33 @@ import org.folio.am.support.base.BaseIntegrationTest;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
+import org.folio.security.integration.keycloak.configuration.properties.KeycloakProperties;
+import org.folio.test.extensions.EnableKeycloakDataImport;
 import org.folio.test.extensions.EnableKeycloakSecurity;
+import org.folio.test.extensions.EnableKeycloakTlsMode;
 import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
 @TestPropertySource(properties = {"application.validation.default-mode=basic"})
 @IntegrationTest
 @EnableKeycloakSecurity
-@WireMockStub(scripts = "/wiremock/stubs/keycloak/obtain-token.json")
+@EnableKeycloakTlsMode
+@EnableKeycloakDataImport
 @Sql(scripts = "classpath:/sql/application-descriptor.sql", executionPhase = BEFORE_TEST_METHOD)
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 class ApplicationIT extends BaseIntegrationTest {
 
+  @Autowired private KeycloakProperties keycloakProperties;
+
   @Test
   void getById_positive() throws Exception {
-    doGet("/applications/{id}", APPLICATION_ID)
+    mockMvc.perform(get("/applications/{id}", APPLICATION_ID)
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
       .andExpect(jsonPath("$.id", is(APPLICATION_ID)))
       .andExpect(jsonPath("$.name", is("test-app")))
       .andExpect(jsonPath("$.version", is("1.0.0")));
@@ -48,7 +61,8 @@ class ApplicationIT extends BaseIntegrationTest {
 
   @Test
   void getByQuery_positive() throws Exception {
-    doGet(get("/applications").queryParam("query", "id==\"test-app-1.0.0\""))
+    mockMvc.perform(get("/applications").queryParam("query", "id==\"test-app-1.0.0\"")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(jsonPath("$.totalRecords", is(1)))
       .andExpect(jsonPath("$.applicationDescriptors[0].id", is(APPLICATION_ID)))
       .andExpect(jsonPath("$.applicationDescriptors[0].name", is("test-app")))
@@ -57,7 +71,7 @@ class ApplicationIT extends BaseIntegrationTest {
 
   @Test
   void getByQuery_positive_allValues() throws Exception {
-    doGet(get("/applications")
+    mockMvc.perform(get("/applications")
       .queryParam("limit", "1"))
       .andExpect(jsonPath("$.totalRecords", is(3)));
   }
@@ -67,9 +81,12 @@ class ApplicationIT extends BaseIntegrationTest {
     "/wiremock/stubs/okapi/application/create-test-app.json"
   })
   void create_positive() throws Exception {
-    var applicationDescriptor = TestValues.getApplicationDescriptor("test-module-1.1.0", "1.1.0");
+    var applicationDescriptor = getApplicationDescriptor("test-module-1.1.0", "1.1.0");
 
-    doPost("/applications", applicationDescriptor)
+    mockMvc.perform(post("/applications")
+        .content(asJsonString(applicationDescriptor))
+        .contentType(APPLICATION_JSON)
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(jsonPath("$.id", is("test-0.1.1")))
       .andExpect(jsonPath("$.name", is("test")))
       .andExpect(jsonPath("$.version", is("0.1.1")));
@@ -85,7 +102,10 @@ class ApplicationIT extends BaseIntegrationTest {
       .version("0.1.1")
       .modules(List.of(module));
 
-    attemptPost("/applications", applicationDescriptor)
+    mockMvc.perform(post("/applications")
+        .content(asJsonString(applicationDescriptor))
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isBadRequest());
   }
 
@@ -106,17 +126,23 @@ class ApplicationIT extends BaseIntegrationTest {
       .moduleDescriptors(List.of(moduleDescriptor))
       .modules(List.of(module, module2));
 
-    attemptPost("/applications", applicationDescriptor)
+    mockMvc.perform(post("/applications")
+        .content(asJsonString(applicationDescriptor))
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isBadRequest());
   }
 
   @Test
   void create_negative_invalidDependencyVersion() throws Exception {
-    var descriptor = TestValues.getApplicationDescriptor("test-module-1.1.0", "1.1.0");
+    var descriptor = getApplicationDescriptor("test-module-1.1.0", "1.1.0");
     var dependency = new Dependency().name("test-app").version("xxx");
     descriptor.addDependenciesItem(dependency);
 
-    attemptPost("/applications", descriptor)
+    mockMvc.perform(post("/applications")
+        .content(asJsonString(descriptor))
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
       .andExpectAll(argumentNotValidErr("Invalid semantic version or range(s): \"xxx\"",
         "dependencies[0].version", "xxx"));
   }
@@ -131,7 +157,10 @@ class ApplicationIT extends BaseIntegrationTest {
       .name("test")
       .version("0.1.1");
 
-    var mvcResult = doPost("/applications", applicationDescriptor)
+    var mvcResult = mockMvc.perform(post("/applications")
+        .content(asJsonString(applicationDescriptor))
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
       .andExpect(jsonPath("$.id", notNullValue()))
       .andExpect(jsonPath("$.name", is("test")))
       .andExpect(jsonPath("$.version", is("0.1.1")))
@@ -147,7 +176,10 @@ class ApplicationIT extends BaseIntegrationTest {
       .version("0.1.2")
       .dependencies(List.of(dependency));
 
-    var mvcResult2 = doPost("/applications", applicationDescriptor2)
+    var mvcResult2 = mockMvc.perform(post("/applications")
+        .content(asJsonString(applicationDescriptor2))
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
       .andExpect(jsonPath("$.id", notNullValue()))
       .andExpect(jsonPath("$.name", is("test2")))
       .andExpect(jsonPath("$.version", is("0.1.2")))
@@ -173,7 +205,9 @@ class ApplicationIT extends BaseIntegrationTest {
     var applicationDescriptor = TestValues.applicationDescriptor("test", "0.1.1")
       .addModulesItem(fooModule).addUiModulesItem(barModule);
 
-    doPost("/applications", applicationDescriptor)
+    mockMvc.perform(post("/applications").content(asJsonString(applicationDescriptor))
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
       .andExpect(content().json(asJsonString(applicationDescriptor), true));
 
     var fullApplicationDescriptor = TestValues.applicationDescriptor("test", "0.1.1")
@@ -182,7 +216,8 @@ class ApplicationIT extends BaseIntegrationTest {
       .addUiModulesItem(barModule)
       .addUiModuleDescriptorsItem(new ModuleDescriptor().id("bar-module-1.0.0").name("bar-module"));
 
-    doGet("/applications/test-0.1.1?full=true", applicationDescriptor)
+    mockMvc.perform(get("/applications/test-0.1.1?full=true")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(content().json(asJsonString(fullApplicationDescriptor), true));
   }
 
@@ -197,7 +232,11 @@ class ApplicationIT extends BaseIntegrationTest {
         .name("test-module")
         .addProvidesItem(new InterfaceDescriptor().id("test-interface").version("0.1")));
 
-    attemptPost("/applications/validate", descriptor).andExpect(status().isNoContent());
+    mockMvc.perform(post("/applications/validate")
+        .content(asJsonString(descriptor))
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isNoContent());
   }
 
   @Test
@@ -213,7 +252,11 @@ class ApplicationIT extends BaseIntegrationTest {
         .addProvidesItem(new InterfaceDescriptor().id("int-bar").version("1.0"))
         .addRequiresItem(new InterfaceReference().id("int-foo").version("1.0")));
 
-    attemptPost("/applications/validate", descriptor).andExpect(status().isNoContent());
+    mockMvc.perform(post("/applications/validate")
+        .content(asJsonString(descriptor))
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isNoContent());
   }
 
   @Test
@@ -229,7 +272,10 @@ class ApplicationIT extends BaseIntegrationTest {
         .addProvidesItem(new InterfaceDescriptor().id("test-interface").version("0.1"))
         .addRequiresItem(new InterfaceReference().id("test2-interface").version("0.1")));
 
-    attemptPost("/applications/validate", descriptor)
+    mockMvc.perform(post("/applications/validate")
+        .content(asJsonString(descriptor))
+        .contentType(APPLICATION_JSON)
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.total_records", is(1)))
       .andExpect(jsonPath("$.errors[0].message", is(
