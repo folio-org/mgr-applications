@@ -177,7 +177,7 @@ The feature is controlled by two env variables `SECURITY_ENABLED` and `KEYCLOAK_
 | KC_ADMIN_PASSWORD                 | -                          | conditional | Keycloak admin password. Required only if admin secret is not set.                                                                                      |
 | KC_ADMIN_GRANT_TYPE               | client_credentials         |    false    | Keycloak admin grant type. Should be set to `password` if username/password are used instead of client secret.                                          |
 | KC_CLIENT_ID                      | mgr-applications           |    false    | client id to be imported to Keycloak.                                                                                                                   |
-| KC_CLIENT_TLS_ENABLED             | -                          |    false    | Enables TLS for keycloak clients.                                                                                                                       |
+| KC_CLIENT_TLS_ENABLED             | false                      |    false    | Enables TLS for keycloak clients.                                                                                                                       |
 | KC_CLIENT_TLS_TRUSTSTORE_PATH     | -                          |    false    | Truststore file path for keycloak clients.                                                                                                              |
 | KC_CLIENT_TLS_TRUSTSTORE_PASSWORD | -                          |    false    | Truststore password for keycloak clients.                                                                                                               |
 
