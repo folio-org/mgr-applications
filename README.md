@@ -166,17 +166,20 @@ The feature is controlled by two env variables `SECURITY_ENABLED` and `KEYCLOAK_
 
 ### Keycloak specific environment variables
 
-| Name                    | Default value               |  Required   | Description                                                                                                                                             |
-|:------------------------|:----------------------------|:-----------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| KC_URL                  | http://keycloak:8080        |    false    | Keycloak URL used to perform HTTP requests.                                                                                                             |
-| KC_INTEGRATION_ENABLED  | false                       |    false    | Defines if Keycloak integration is enabled or <br/>disabled.<br/>If it set to `false` - it will exclude all keycloak-related beans from spring context. |
-| KC_IMPORT_ENABLED       | false                       |    false    | If true - at startup, register/create necessary records in keycloak from the internal module descriptor.                                                |
-| KC_ADMIN_CLIENT_ID      | folio-backend-admin-client  |    false    | Keycloak client id. Used for register/create necessary records in keycloak from the internal module descriptor.                                         |
-| KC_ADMIN_CLIENT_SECRET  | -                           | conditional | Keycloak client secret. Required only if admin username/password are not set.                                                                           |
-| KC_ADMIN_USERNAME       | -                           | conditional | Keycloak admin username. Required only if admin secret is not set.                                                                                      |
-| KC_ADMIN_PASSWORD       | -                           | conditional | Keycloak admin password. Required only if admin secret is not set.                                                                                      |
-| KC_ADMIN_GRANT_TYPE     | client_credentials          |    false    | Keycloak admin grant type. Should be set to `password` if username/password are used instead of client secret.                                          |
-| KC_CLIENT_ID            | mgr-applications            |    false    | client id to be imported to Keycloak.                                                                                                                   |
+| Name                              | Default value              |  Required   | Description                                                                                                                                             |
+|:----------------------------------|:---------------------------|:-----------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| KC_URL                            | http://keycloak:8080       |    false    | Keycloak URL used to perform HTTP requests.                                                                                                             |
+| KC_INTEGRATION_ENABLED            | false                      |    false    | Defines if Keycloak integration is enabled or <br/>disabled.<br/>If it set to `false` - it will exclude all keycloak-related beans from spring context. |
+| KC_IMPORT_ENABLED                 | false                      |    false    | If true - at startup, register/create necessary records in keycloak from the internal module descriptor.                                                |
+| KC_ADMIN_CLIENT_ID                | folio-backend-admin-client |    false    | Keycloak client id. Used for register/create necessary records in keycloak from the internal module descriptor.                                         |
+| KC_ADMIN_CLIENT_SECRET            | -                          | conditional | Keycloak client secret. Required only if admin username/password are not set.                                                                           |
+| KC_ADMIN_USERNAME                 | -                          | conditional | Keycloak admin username. Required only if admin secret is not set.                                                                                      |
+| KC_ADMIN_PASSWORD                 | -                          | conditional | Keycloak admin password. Required only if admin secret is not set.                                                                                      |
+| KC_ADMIN_GRANT_TYPE               | client_credentials         |    false    | Keycloak admin grant type. Should be set to `password` if username/password are used instead of client secret.                                          |
+| KC_CLIENT_ID                      | mgr-applications           |    false    | client id to be imported to Keycloak.                                                                                                                   |
+| KC_CLIENT_TLS_ENABLED             | false                      |    false    | Enables TLS for keycloak clients.                                                                                                                       |
+| KC_CLIENT_TLS_TRUSTSTORE_PATH     | -                          |    false    | Truststore file path for keycloak clients.                                                                                                              |
+| KC_CLIENT_TLS_TRUSTSTORE_PASSWORD | -                          |    false    | Truststore password for keycloak clients.                                                                                                               |
 
 ## Kong Gateway Integration
 

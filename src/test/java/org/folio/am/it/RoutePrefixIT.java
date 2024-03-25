@@ -7,16 +7,12 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import org.folio.am.support.base.BaseIntegrationTest;
-import org.folio.test.extensions.EnableKeycloakSecurity;
-import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
 @IntegrationTest
-@EnableKeycloakSecurity
-@WireMockStub(scripts = "/wiremock/stubs/keycloak/obtain-token.json")
 @Sql(scripts = "classpath:/sql/application-descriptor.sql", executionPhase = BEFORE_TEST_METHOD)
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 @TestPropertySource(properties = {

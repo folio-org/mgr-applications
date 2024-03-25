@@ -4,7 +4,7 @@
     "urlPattern": "/entitlements\\?query=applicationId%3Dtest-app-[\\d\\.]+",
     "headers": {
       "X-Okapi-Token": {
-        "equalTo": "X-Okapi-Token test value"
+        "matches": "[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+"
       }
     }
   },

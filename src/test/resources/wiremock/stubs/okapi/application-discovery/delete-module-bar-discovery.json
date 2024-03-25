@@ -3,7 +3,9 @@
     "method": "DELETE",
     "url": "/_/discovery/modules/mod-bar-1.0.0/mod-bar-1.0.0",
     "headers": {
-      "X-Okapi-Token": { "equalTo": "X-Okapi-Token test value" }
+      "X-Okapi-Token": {
+        "matches": "[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+\\.[A-Za-z0-9\\-_]+"
+      }
     }
   },
   "response": {

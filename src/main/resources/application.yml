@@ -81,6 +81,10 @@ application:
       enabled: ${KC_IMPORT_ENABLED:false}
     client:
       client_id: ${KC_CLIENT_ID:mgr-applications}
+    tls:
+      enabled: ${KC_CLIENT_TLS_ENABLED:false}
+      trust-store-path: ${KC_CLIENT_TLS_TRUSTSTORE_PATH}
+      trust-store-password: ${KC_CLIENT_TLS_TRUSTSTORE_PASSWORD}
   secret-store:
     type: ${SECRET_STORE_TYPE:}
     aws-ssm:
