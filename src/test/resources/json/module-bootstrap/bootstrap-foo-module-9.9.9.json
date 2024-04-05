@@ -1,0 +1,26 @@
+{
+  "module": {
+    "moduleId": "foo-module-9.9.9",
+    "applicationId": "test-app-1.0.0",
+    "interfaces": [
+      {
+        "id": "zoo",
+        "version": "1.1",
+        "endpoints": [
+          {
+            "methods": [ "GET" ],
+            "pathPattern": "/pets",
+            "permissionsRequired": [ "pets.collection.get" ],
+            "permissionsDesired": [ "zoos.collection.get" ]
+          },
+          {
+            "methods": [ "POST" ],
+            "pathPattern": "/pets",
+            "permissionsRequired": [ "pets.item.post" ]
+          }
+        ]
+      }
+    ]
+  },
+  "requiredModules": [ ]
+}

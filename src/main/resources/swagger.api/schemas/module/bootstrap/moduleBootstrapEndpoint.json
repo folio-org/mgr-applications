@@ -24,6 +24,13 @@
       "items": {
         "type": "string"
       }
+    },
+    "permissionsDesired": {
+      "description": "Required permissions",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   }
 }
