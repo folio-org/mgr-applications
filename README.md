@@ -185,7 +185,7 @@ The feature is controlled by two env variables `SECURITY_ENABLED` and `KEYCLOAK_
 
 Kong gateway integration implemented using idempotent approach
 with [Kong Admin API](https://docs.konghq.com/gateway/latest/admin-api/).
-``
+
 ### Kong Service Registration
 
 The Kong Gateway services are added on service discovery registration per application. Each Kong Service has tag equal
@@ -215,7 +215,7 @@ Routes per tenant can be found with:
 ```shell
 curl -XGET "$KONG_ADMIN_URL/routes?tags=$moduleId,$tenantId"
 ```
-ma
+
 or
 
 ```shell
