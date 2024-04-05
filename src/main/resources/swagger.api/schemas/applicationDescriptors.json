@@ -12,6 +12,7 @@
       }
     },
     "totalRecords": {
+      "description": "Total number of application descriptors",
       "type": "integer"
     }
   },
