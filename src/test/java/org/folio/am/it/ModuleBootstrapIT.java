@@ -37,7 +37,7 @@ public class ModuleBootstrapIT extends BaseIntegrationTest {
     var wireMockUrl = WireMockExtension.getWireMockAdminClient().getWireMockUrl();
     var fooModule = TestValues.module("foo-module", "9.9.9", wireMockUrl + "/modules/foo-module-9.9.9");
     var applicationDescriptor =
-      TestValues.applicationDescriptor("test-app", "1.0.0").addModulesItem(fooModule);
+      TestValues.applicationDescriptor("test-app-desired-perms", "1.0.0").addModulesItem(fooModule);
 
     mockMvc.perform(post("/applications").content(asJsonString(applicationDescriptor))
         .header(TOKEN, generateAccessToken(keycloakProperties))
