@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @EnableKeycloakSecurity
 @EnableKeycloakTlsMode
 @EnableKeycloakDataImport
-public class ModuleBootstrapIT extends BaseIntegrationTest {
+class ModuleBootstrapIT extends BaseIntegrationTest {
 
   @Autowired KeycloakProperties keycloakProperties;
 
