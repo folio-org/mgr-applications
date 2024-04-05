@@ -251,3 +251,4 @@ While CRUD operations for application descriptors works as-is,
 the integrations with Kafka, Kong, Okapi, mgr-tenant-entitlements is disabled.
 To enable this mode set `FAR_MODE` env variable to `true` and make sure to leave other integration variables unset or
 set to `false`.
+
