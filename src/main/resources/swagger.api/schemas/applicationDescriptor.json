@@ -63,6 +63,7 @@
       }
     },
     "deployment": {
+      "description": "Deployment information",
       "$ref": "applicationDeployment.json"
     }
   },
