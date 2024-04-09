@@ -28,7 +28,6 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 * Application health and availability monitoring
 * Optional integration with Kong gateway
   * Add/remove services on application discovery update
-  * Add/remove routes per tenant on application install/uninstall
 
 ## Compiling
 
