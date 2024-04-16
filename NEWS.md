@@ -1,24 +1,14 @@
-## v1.2.0 In progress
-### Breaking changes
+## v1.3.0 In progress
+
 * Description ([ISSUE_NUMBER](https://issues.folio.org/browse/ISSUE_NUMBER))
 
-### New APIs versions
-* Provides `API_NAME vX.Y`
-* Requires `API_NAME vX.Y`
+---
 
-### Features
-* Description ([ISSUE_NUMBER](https://issues.folio.org/browse/ISSUE_NUMBER))
+## v1.2.0 2024-04-16
 
-### Bug fixes
-* Fix some bug ([ISSUE_NUMBER](https://issues.folio.org/browse/ISSUE_NUMBER))
-
-### Tech Dept
-* Description ([ISSUE_NUMBER](https://issues.folio.org/browse/ISSUE_NUMBER))
-
-### Dependencies
-* Bump `LIB_NAME` from `OLD_VERSION` to `NEW_VERSION`
-* Add `LIB_NAME` `x.x.x`
-* Remove `LIB_NAME`
+* MGRAPPS-11: desired permission in bootstrap data (#59) ([MGRAPPS-11](https://issues.folio.org/browse/MGRAPPS-11))
+* APPPOCTOOL-10: adjust test with Keycloak test container (#55) ([APPPOCTOOL-10](https://issues.folio.org/browse/APPPOCTOOL-10))
+* KONG-6: Kong timeouts should be extended (#52) ([KONG-6](https://issues.folio.org/browse/KONG-6))
 
 ---
 
