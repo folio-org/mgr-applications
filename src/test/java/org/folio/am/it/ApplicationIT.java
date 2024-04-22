@@ -14,7 +14,6 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TES
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -205,10 +204,13 @@ class ApplicationIT extends BaseIntegrationTest {
     var applicationDescriptor = TestValues.applicationDescriptor("test", "0.1.1")
       .addModulesItem(fooModule).addUiModulesItem(barModule);
 
-    mockMvc.perform(post("/applications").content(asJsonString(applicationDescriptor))
+    var mvcResult1 = mockMvc.perform(post("/applications").content(asJsonString(applicationDescriptor))
         .header(TOKEN, generateAccessToken(keycloakProperties))
         .contentType(APPLICATION_JSON))
-      .andExpect(content().json(asJsonString(applicationDescriptor), true));
+      .andReturn();
+
+    var appResult = parseResponse(mvcResult1, ApplicationDescriptor.class);
+    assertThat(appResult).isEqualTo(applicationDescriptor);
 
     var fullApplicationDescriptor = TestValues.applicationDescriptor("test", "0.1.1")
       .addModulesItem(fooModule)
@@ -216,9 +218,12 @@ class ApplicationIT extends BaseIntegrationTest {
       .addUiModulesItem(barModule)
       .addUiModuleDescriptorsItem(new ModuleDescriptor().id("bar-module-1.0.0").name("bar-module"));
 
-    mockMvc.perform(get("/applications/test-0.1.1?full=true")
+    var mvcResult2 = mockMvc.perform(get("/applications/test-0.1.1?full=true")
         .header(TOKEN, generateAccessToken(keycloakProperties)))
-      .andExpect(content().json(asJsonString(fullApplicationDescriptor), true));
+      .andReturn();
+
+    var fullAppResult = parseResponse(mvcResult2, ApplicationDescriptor.class);
+    assertThat(fullAppResult).isEqualTo(fullApplicationDescriptor);
   }
 
   @Test
