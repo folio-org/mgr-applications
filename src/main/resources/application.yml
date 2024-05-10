@@ -59,6 +59,11 @@ application:
     read-timeout: ${KONG_READ_TIMEOUT:}
     write-timeout: ${KONG_WRITE_TIMEOUT:}
     retries: ${KONG_RETRIES:}
+    tls:
+      enabled: ${KONG_TLS_ENABLED:false}
+      trust-store-path: ${KONG_TLS_TRUSTSTORE_PATH:}
+      trust-store-password: ${KONG_TLS_TRUSTSTORE_PASSWORD:}
+      trust-store-type: ${KONG_TLS_TRUSTSTORE_TYPE:}
   okapi:
     enabled: ${OKAPI_INTEGRATION_ENABLED:true}
     url: ${OKAPI_URL:${okapi.url:}}
