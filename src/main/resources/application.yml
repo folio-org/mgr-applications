@@ -111,6 +111,11 @@ application:
 tenant:
   entitlement:
     url: ${TE_URL:${te.url:http://mgr-tenant-entitlements:8081}}
+    tls:
+      enabled: ${TE_TLS_ENABLED:false}
+      trust-store-path: ${TE_TLS_TRUSTSTORE_PATH:}
+      trust-store-password: ${TE_TLS_TRUSTSTORE_PASSWORD:}
+      trust-store-type: ${TE_TLS_TRUSTSTORE_TYPE:}
 
 folio:
   jpa:
