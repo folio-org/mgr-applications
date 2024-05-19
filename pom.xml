@@ -29,7 +29,7 @@
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.5.5.Final</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.7.5</hypersistence-utils-hibernate-63.version>
-    <swagger-annotations.version>2.2.21</swagger-annotations.version>
+    <swagger-annotations.version>2.2.22</swagger-annotations.version>
     <apache-commons-lang3.version>3.14.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.4</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
