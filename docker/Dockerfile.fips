@@ -1,0 +1,15 @@
+FROM registry.access.redhat.com/ubi9/openjdk-17-runtime:latest
+
+# Install latest patch versions of packages: https://pythonspeed.com/articles/security-updates-in-docker/
+USER root
+# Update and upgrade packages for security
+RUN microdnf update -y && microdnf upgrade -y && microdnf clean all
+
+# Copy your fat jar to the container
+ENV APP_FILE mgr-applications-fat.jar
+# - should be a single jar file
+ARG JAR_FILE=./target/*.jar
+# - copy
+COPY --chown=185 ${JAR_FILE} /deployments/${APP_FILE}
+
+USER 185
