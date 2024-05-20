@@ -124,6 +124,18 @@ docker run \
 | REGISTER_MODULE_IN_KONG                  | true                         |  false   | Defines if module must be registered in Kong (it will create for itself service and list of routes from module descriptor)                                                                                 |
 | ROUTER_PATH_PREFIX                       |                              |  false   | Defines routes prefix to be added to the generated endpoints by OpenAPI generator (`/foo/entites` -> `{{prefix}}/foo/entities`). Required if load balancing group has format like `{{host}}/{{moduleId}}`  |
 
+### SSL Configuration environment variables
+
+| Name                          | Default value | Required | Description                                                            |
+|:------------------------------|:--------------|:--------:|:-----------------------------------------------------------------------|
+| SERVER_PORT                   | 8081          |  false   | Server HTTP port. Should be specified manually in case of SSL enabled. |
+| SERVER_SSL_ENABLED            | false         |  false   | Manage server's mode. If `true` then SSL will be enabled.              |
+| SERVER_SSL_KEY_STORE          |               |  false   | Path to the keystore.  Mandatory if `SERVER_SSL_ENABLED` is `true`.    |
+| SERVER_SSL_KEY_STORE_TYPE     | BCFKS         |  false   | Type of the keystore. By default `BCFKS` value is used.                |
+| SERVER_SSL_KEY_STORE_PROVIDER | BCFIPS        |  false   | Provider of the keystore.                                              |
+| SERVER_SSL_KEY_STORE_PASSWORD |               |  false   | Password for keystore.                                                 |
+| SERVER_SSL_KEY_PASSWORD       |               |  false   | Password for key in keystore.                                          |
+
 ### Secure storage environment variables
 
 #### AWS-SSM

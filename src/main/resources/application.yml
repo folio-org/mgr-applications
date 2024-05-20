@@ -123,11 +123,18 @@ folio:
       base-packages: org.folio.am.*
 
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
   max-http-request-header-size: ${MAX_HTTP_REQUEST_HEADER_SIZE:200KB}
   compression:
     enabled: true
     mime-types: text/html,text/plain,text/css,application/javascript,application/json
+  ssl:
+    enabled: ${SERVER_SSL_ENABLED:false}
+    key-store: ${SERVER_SSL_KEY_STORE}
+    key-store-type: ${SERVER_SSL_KEY_STORE_TYPE:BCFKS}
+    key-store-provider: ${SERVER_SSL_KEY_STORE_PROVIDER:BCFIPS}
+    key-store-password: ${SERVER_SSL_KEY_STORE_PASSWORD}
+    key-password: ${SERVER_SSL_KEY_PASSWORD}
 
 management:
   endpoints.web:
