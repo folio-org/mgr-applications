@@ -45,7 +45,7 @@
     <!-- Test dependencies versions -->
     <testcontainer.version>1.19.8</testcontainer.version>
     <awaitility.version>4.2.1</awaitility.version>
-    <instancio.version>4.5.1</instancio.version>
+    <instancio.version>4.6.0</instancio.version>
 
     <!-- Plugins versions -->
     <maven-checkstyle.version>10.16.0</maven-checkstyle.version>
