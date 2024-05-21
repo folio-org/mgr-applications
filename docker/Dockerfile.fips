@@ -11,5 +11,9 @@ ENV APP_FILE mgr-applications-fat.jar
 ARG JAR_FILE=./target/*.jar
 # - copy
 COPY --chown=185 ${JAR_FILE} /deployments/${APP_FILE}
+# - copy java security properties
+COPY --chown=185 ./docker/config/java.security.fips /deployments/config/java.security.fips
+
+ENV JAVA_OPTS_APPEND="-Djavax.net.debug=ssl:handshake:verbose:keymanager -Djava.security.properties=/deployments/config/java.security.fips --add-exports java.base/sun.security.provider=ALL-UNNAMED"
 
 USER 185
