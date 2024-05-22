@@ -63,10 +63,12 @@
 #
 # List of providers and their preference orders (see above):
 #
-
 security.provider.1=SunEC
 security.provider.2=org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider
 security.provider.3=org.bouncycastle.jsse.provider.BouncyCastleJsseProvider fips:BCFIPS
+# moved up as a workaround based on https://github.com/bcgit/bc-java/issues/589#issuecomment-530780788
+# to fix SSLException: Could not generate XDH keypair
+#security.provider.4=SunEC
 security.provider.4=SUN
 security.provider.5=SunRsaSign
 security.provider.6=SunJSSE
@@ -84,14 +86,15 @@ security.provider.14=SunPKCS11
 #
 # Security providers used when FIPS mode support is active
 #
-#fips.provider.1=SunPKCS11 ${java.home}/conf/security/nss.fips.cfg
-#fips.provider.2=SUN
-#fips.provider.3=SunEC
-#fips.provider.4=SunJSSE
-#fips.provider.5=SunJCE
-#fips.provider.6=SunRsaSign
-#fips.provider.7=XMLDSig
-#fips.provider.8=org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider
+fips.provider.1=SunPKCS11 ${java.home}/conf/security/nss.fips.cfg
+fips.provider.2=SUN
+fips.provider.3=SunEC
+fips.provider.4=org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider
+fips.provider.5=org.bouncycastle.jsse.provider.BouncyCastleJsseProvider fips:BCFIPS
+fips.provider.6=SunJSSE
+fips.provider.7=SunJCE
+fips.provider.8=SunRsaSign
+fips.provider.9=XMLDSig
 
 #
 # A list of known strong SecureRandom implementations.
