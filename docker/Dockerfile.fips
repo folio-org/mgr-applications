@@ -5,11 +5,11 @@ RUN mkdir /tmp/lib
 WORKDIR /tmp/lib
 
 # Bouncy Castle JAR versions to download
-ENV BC_FIPS_VERSION=1.0.2.5
-ENV BCTLS_FIPS_VERSION=1.0.19
-ENV BCPKIX_FIPS_VERSION=1.0.7
+ARG BC_FIPS_VERSION=1.0.2.5
+ARG BCTLS_FIPS_VERSION=1.0.19
+ARG BCPKIX_FIPS_VERSION=1.0.7
 
-ENV BC_MAVEN_URL=https://repo1.maven.org/maven2/org/bouncycastle
+ARG BC_MAVEN_URL=https://repo1.maven.org/maven2/org/bouncycastle
 # Download Bouncy Castle JAR files
 RUN apt-get update && apt-get install -y curl \
     && curl -O ${BC_MAVEN_URL}/bc-fips/${BC_FIPS_VERSION}/bc-fips-${BC_FIPS_VERSION}.jar \
