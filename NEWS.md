@@ -1,6 +1,11 @@
-## v1.3.0 In progress
+## v1.4.0 In progress
 
-* Description ([ISSUE_NUMBER](https://issues.folio.org/browse/ISSUE_NUMBER))
+## v1.3.0 2024-05-25
+
+* MGRAPPS-12 Create a docker file for the mgr-applications module that is based on the FIPS-140-2 compliant base image (ubi9/openjdk-17-runtime) (#77)  ([MGRAPPS-12](https://issues.folio.org/browse/MGRAPPS-12))
+* MGRAPPS-10: Secure mgr-applications HTTP end-points with SSL (#76) ([MGRAPPS-10](https://issues.folio.org/browse/MGRAPPS-10))
+* MGRAPPS-18: add HTTPS access to mgr-tenant-entitlements ([MGRAPPS-18](https://issues.folio.org/browse/MGRAPPS-18))
+* MGRAPPS-13: add HTTPS access to Kong (#69) ([MGRAPPS-13](https://issues.folio.org/browse/MGRAPPS-13))
 
 ---
 
