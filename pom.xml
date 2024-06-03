@@ -33,7 +33,7 @@
     <apache-commons-lang3.version>3.14.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.4</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
-    <spring-cloud-bom.version>2023.0.1</spring-cloud-bom.version>
+    <spring-cloud-bom.version>2023.0.2</spring-cloud-bom.version>
     <cql2pgjson.version>35.2.2</cql2pgjson.version>
     <folio-spring-cql.version>8.1.1</folio-spring-cql.version>
     <applications-poc-tools.version>1.5.0</applications-poc-tools.version>
