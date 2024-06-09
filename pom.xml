@@ -28,14 +28,14 @@
     <lombok.version>1.18.32</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.5.5.Final</mapstruct.version>
-    <hypersistence-utils-hibernate-63.version>3.7.5</hypersistence-utils-hibernate-63.version>
+    <hypersistence-utils-hibernate-63.version>3.7.6</hypersistence-utils-hibernate-63.version>
     <swagger-annotations.version>2.2.22</swagger-annotations.version>
     <apache-commons-lang3.version>3.14.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.4</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
     <spring-cloud-bom.version>2023.0.2</spring-cloud-bom.version>
     <cql2pgjson.version>35.2.2</cql2pgjson.version>
-    <folio-spring-cql.version>8.1.1</folio-spring-cql.version>
+    <folio-spring-cql.version>8.1.2</folio-spring-cql.version>
     <applications-poc-tools.version>1.5.0</applications-poc-tools.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
     <semver4j.version>5.3.0</semver4j.version>
@@ -49,7 +49,7 @@
 
     <!-- Plugins versions -->
     <maven-checkstyle.version>10.17.0</maven-checkstyle.version>
-    <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
+    <maven-checkstyle-plugin.version>3.4.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
     <openapi-generator.version>7.6.0</openapi-generator.version>
 
