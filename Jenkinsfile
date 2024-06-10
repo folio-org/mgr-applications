@@ -11,8 +11,8 @@ node('jenkins-agent-java17-bigmem') {
     }
   }
 }
-//buildMvn {
-//  publishModDescriptor = false
-//  mvnDeploy = true
-//  buildNode = 'jenkins-agent-java17-bigmem'
-//}
+buildMvn {
+  publishModDescriptor = false
+  mvnDeploy = true
+  buildNode = 'jenkins-agent-java17-bigmem'
+}
