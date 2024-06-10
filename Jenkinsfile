@@ -1,7 +1,7 @@
 import org.folio.eurekaImage.EurekaImage
 import org.jenkinsci.plugins.workflow.libs.Library
 
-@Library('pipelines-shared-library@RANCHER-1502') _
+@Library('pipelines-shared-library@master') _
 node('jenkins-agent-java17-bigmem') {
   stage('Build Docker Image') {
     dir('mgr-applications') {
@@ -11,9 +11,8 @@ node('jenkins-agent-java17-bigmem') {
     }
   }
 }
-//buildMvn {
-//  publishModDescriptor = false
-//  mvnDeploy = true
-//  buildNode = 'jenkins-agent-java17-bigmem'
-//}
-
+buildMvn {
+  publishModDescriptor = false
+  mvnDeploy = true
+  buildNode = 'jenkins-agent-java17-bigmem'
+}
