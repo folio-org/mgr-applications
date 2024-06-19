@@ -10,6 +10,7 @@ node('jenkins-agent-java17-bigmem') {
       image.makeImage()
     }
   }
+  input("Paused to decide: proceed or not...")
 }
 buildMvn {
   publishModDescriptor = false
