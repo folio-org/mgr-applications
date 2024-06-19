@@ -1,7 +1,7 @@
 import org.folio.eureka.EurekaImage
 import org.jenkinsci.plugins.workflow.libs.Library
 
-@Library('pipelines-shared-library') _
+@Library('pipelines-shared-library@RANCHER-1350-prerequisite') _
 node('jenkins-agent-java17-bigmem') {
   stage('Build Docker Image') {
     dir('mgr-applications') {
