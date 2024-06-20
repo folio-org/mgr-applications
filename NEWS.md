@@ -1,5 +1,12 @@
 ## v1.4.0 In progress
 
+## v1.3.1 2024-06-20
+
+* Add KC trust-store-type to application settings (#81)
+* RANCHER-1502: Unify custom EUREKA related docker images building process - shared lib for kong, keycloak & sidecar (#85) ([RANCHER-1502](https://issues.folio.org/browse/RANCHER-1502))
+
+---
+
 ## v1.3.0 2024-05-25
 
 * MGRAPPS-12 Create a docker file for the mgr-applications module that is based on the FIPS-140-2 compliant base image (ubi9/openjdk-17-runtime) (#77)  ([MGRAPPS-12](https://issues.folio.org/browse/MGRAPPS-12))
