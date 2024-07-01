@@ -17,7 +17,7 @@ import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback {
 
   public static final String KONG_GATEWAY_URL_PROPERTY = "kong.gateway.url";
-  public static final String KONG_DOCKER_IMAGE = "kong:3.4.1-ubuntu";
+  public static final String KONG_DOCKER_IMAGE = "kong:3.7.1-ubuntu";
   public static final String KONG_URL_PROPERTY = "kong.url";
 
   @SuppressWarnings("resource")
