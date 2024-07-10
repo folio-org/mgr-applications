@@ -1,5 +1,11 @@
 ## v1.4.0 In progress
 
+## v1.3.2 2024-07-10
+
+* KONG-10: upgrade kong version (#93) ([KONG-10](https://issues.folio.org/browse/KONG-10))
+
+---
+
 ## v1.3.1 2024-06-20
 
 * Add KC trust-store-type to application settings (#81)
