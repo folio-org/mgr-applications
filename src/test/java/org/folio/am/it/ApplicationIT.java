@@ -71,7 +71,7 @@ class ApplicationIT extends BaseIntegrationTest {
   @Test
   void getByQuery_positive_allValues() throws Exception {
     mockMvc.perform(get("/applications")
-      .queryParam("limit", "1"))
+        .queryParam("limit", "1"))
       .andExpect(jsonPath("$.totalRecords", is(3)));
   }
 
@@ -89,6 +89,18 @@ class ApplicationIT extends BaseIntegrationTest {
       .andExpect(jsonPath("$.id", is("test-0.1.1")))
       .andExpect(jsonPath("$.name", is("test")))
       .andExpect(jsonPath("$.version", is("0.1.1")));
+
+    mockMvc.perform(get("/applications/{id}", "test-0.1.1")
+        .queryParam("full", "true")
+        .contentType(APPLICATION_JSON)
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.id", is("test-0.1.1")))
+      .andExpect(jsonPath("$.name", is("test")))
+      .andExpect(jsonPath("$.version", is("0.1.1")))
+      .andExpect(jsonPath("$.moduleDescriptors[0].extensions.user.type", is("system")))
+      .andExpect(jsonPath("$.moduleDescriptors[0].extensions.user.permissions",
+        is(List.of("test.permission1", "test.permission2"))));
   }
 
   @Test

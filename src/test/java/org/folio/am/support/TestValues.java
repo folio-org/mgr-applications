@@ -21,7 +21,9 @@ import static org.folio.am.support.TestConstants.SERVICE_VERSION;
 import static org.folio.am.support.TestConstants.id;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
@@ -43,6 +45,7 @@ import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.entity.UiModuleEntity;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.service.validator.ValidationMode;
+import org.folio.common.domain.model.AnyDescriptor;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.common.domain.model.RoutingEntry;
@@ -79,7 +82,7 @@ public class TestValues {
   }
 
   public static ApplicationEntity applicationDescriptorEntity(ApplicationDescriptor descriptor,
-                                                              String appId) {
+    String appId) {
     var entity = new ApplicationEntity();
     entity.setId(Objects.requireNonNullElse(appId, APPLICATION_ID));
     entity.setName(descriptor.getName());
@@ -218,7 +221,8 @@ public class TestValues {
   public static ApplicationDescriptor getApplicationDescriptor(String moduleId, String version) {
     var moduleDescriptor = new ModuleDescriptor()
       .id(moduleId)
-      .name("test-module");
+      .name("test-module")
+      .extensions(new AnyDescriptor().set("user", systemUser()));
     var uiModuleDescriptor = new ModuleDescriptor()
       .id("ui-module-1.0.0")
       .name("ui-module");
@@ -244,7 +248,7 @@ public class TestValues {
     return new ModuleDiscoveries().totalRecords(0L).discovery(emptyList());
   }
 
-  public static ModuleDiscoveries moduleDiscoveries(ModuleDiscovery...moduleDiscoveries) {
+  public static ModuleDiscoveries moduleDiscoveries(ModuleDiscovery... moduleDiscoveries) {
     return new ModuleDiscoveries()
       .totalRecords((long) moduleDiscoveries.length)
       .discovery(List.of(moduleDiscoveries));
@@ -348,5 +352,12 @@ public class TestValues {
     return new ModuleDescriptor()
       .id(name + "-" + version)
       .name(name);
+  }
+
+  public static Map<String, Object> systemUser() {
+    var userMap = new LinkedHashMap<String, Object>();
+    userMap.put("type", "system");
+    userMap.put("permissions", List.of("test.permission1", "test.permission2"));
+    return userMap;
   }
 }
