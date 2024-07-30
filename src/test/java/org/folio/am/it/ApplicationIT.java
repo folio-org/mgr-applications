@@ -98,8 +98,8 @@ class ApplicationIT extends BaseIntegrationTest {
       .andExpect(jsonPath("$.id", is("test-0.1.1")))
       .andExpect(jsonPath("$.name", is("test")))
       .andExpect(jsonPath("$.version", is("0.1.1")))
-      .andExpect(jsonPath("$.moduleDescriptors[0].extensions.user.type", is("system")))
-      .andExpect(jsonPath("$.moduleDescriptors[0].extensions.user.permissions",
+      .andExpect(jsonPath("$.moduleDescriptors[0].metadata.user.type", is("system")))
+      .andExpect(jsonPath("$.moduleDescriptors[0].metadata.user.permissions",
         is(List.of("test.permission1", "test.permission2"))));
   }
 

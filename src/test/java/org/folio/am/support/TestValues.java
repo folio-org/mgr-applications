@@ -222,7 +222,7 @@ public class TestValues {
     var moduleDescriptor = new ModuleDescriptor()
       .id(moduleId)
       .name("test-module")
-      .extensions(new AnyDescriptor().set("user", systemUser()));
+      .metadata(new AnyDescriptor().set("user", systemUser()));
     var uiModuleDescriptor = new ModuleDescriptor()
       .id("ui-module-1.0.0")
       .name("ui-module");
