@@ -27,16 +27,16 @@
     <java.version>17</java.version>
     <lombok.version>1.18.34</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
-    <mapstruct.version>1.5.5.Final</mapstruct.version>
+    <mapstruct.version>1.6.0</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.8.2</hypersistence-utils-hibernate-63.version>
     <swagger-annotations.version>2.2.22</swagger-annotations.version>
-    <apache-commons-lang3.version>3.14.0</apache-commons-lang3.version>
+    <apache-commons-lang3.version>3.16.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.4</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
     <spring-cloud-bom.version>2023.0.3</spring-cloud-bom.version>
     <cql2pgjson.version>35.2.2</cql2pgjson.version>
     <folio-spring-cql.version>8.1.2</folio-spring-cql.version>
-    <applications-poc-tools.version>1.5.5-SNAPSHOT</applications-poc-tools.version>
+    <applications-poc-tools.version>1.5.5</applications-poc-tools.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
     <semver4j.version>5.3.0</semver4j.version>
 
