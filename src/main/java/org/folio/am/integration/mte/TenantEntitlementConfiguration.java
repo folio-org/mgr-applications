@@ -7,7 +7,7 @@ import lombok.Data;
 import okhttp3.OkHttpClient;
 import org.folio.am.utils.ConditionalOnFarModeDisabled;
 import org.folio.common.configuration.properties.TlsProperties;
-import org.folio.common.utils.FeignClientTlsUtils;
+import org.folio.common.utils.tls.FeignClientTlsUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.openfeign.FeignClientsConfiguration;
 import org.springframework.context.annotation.Bean;
