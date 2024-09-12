@@ -38,8 +38,8 @@ class ApplicationDescriptorMapperTest {
       .id(APPLICATION_ID).name("app1").version("1.0.0")
       .modules(List.of(new Module().id("module1-1.0.0").name("module1").version("1.0.0")))
       .uiModules(List.of(new Module().id("uiModule1-1.0.0").name("uiModule1").version("1.0.0")))
-      .moduleDescriptors(List.of(new ModuleDescriptor().id("module1-1.0.0").name("module1")))
-      .uiModuleDescriptors(List.of(new ModuleDescriptor().id("uiModule1-1.0.0").name("uiModule1")))
+      .moduleDescriptors(List.of(new ModuleDescriptor().id("module1-1.0.0").description("module1")))
+      .uiModuleDescriptors(List.of(new ModuleDescriptor().id("uiModule1-1.0.0").description("uiModule1")))
       .dependencies(List.of(dependency1, dependency2));
 
     var applicationDescriptorEntity = mapper.convert(descriptor);
@@ -63,7 +63,7 @@ class ApplicationDescriptorMapperTest {
     var optionalInterfaceVersion = "3.4";
 
     var module = new Module().id(moduleId).name(moduleName);
-    var moduleDescriptor = new ModuleDescriptor().id(moduleId).name(moduleName)
+    var moduleDescriptor = new ModuleDescriptor().id(moduleId).description(moduleName)
       .addProvidesItem(new InterfaceDescriptor().id(providedInterface).version(providedInterfaceVersion))
       .addRequiresItem(new InterfaceReference().id(requiredInterface).version(requiredInterfaceVersion))
       .addOptionalItem(new InterfaceReference().id(optionalInterface).version(optionalInterfaceVersion));

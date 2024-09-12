@@ -130,7 +130,7 @@ class ApplicationIT extends BaseIntegrationTest {
       .version("2");
     var moduleDescriptor = new ModuleDescriptor()
       .id("test-module-1")
-      .name("test-module");
+      .description("test-module");
     var applicationDescriptor = new ApplicationDescriptor()
       .name("test")
       .version("0.1.1")
@@ -226,9 +226,9 @@ class ApplicationIT extends BaseIntegrationTest {
 
     var fullApplicationDescriptor = TestValues.applicationDescriptor("test", "0.1.1")
       .addModulesItem(fooModule)
-      .addModuleDescriptorsItem(new ModuleDescriptor().id("foo-module-1.0.0").name("foo-module"))
+      .addModuleDescriptorsItem(new ModuleDescriptor().id("foo-module-1.0.0").description("foo-module"))
       .addUiModulesItem(barModule)
-      .addUiModuleDescriptorsItem(new ModuleDescriptor().id("bar-module-1.0.0").name("bar-module"));
+      .addUiModuleDescriptorsItem(new ModuleDescriptor().id("bar-module-1.0.0").description("bar-module"));
 
     var mvcResult2 = mockMvc.perform(get("/applications/test-0.1.1?full=true")
         .header(TOKEN, generateAccessToken(keycloakProperties)))
@@ -246,7 +246,7 @@ class ApplicationIT extends BaseIntegrationTest {
       .addModulesItem(new Module().name("test-m1").version("0.0.1"))
       .addModuleDescriptorsItem(new ModuleDescriptor()
         .id("test-m1-0.0.1")
-        .name("test-module")
+        .description("test-module")
         .addProvidesItem(new InterfaceDescriptor().id("test-interface").version("0.1")));
 
     mockMvc.perform(post("/applications/validate")
@@ -263,9 +263,9 @@ class ApplicationIT extends BaseIntegrationTest {
       .version("2.0.0")
       .addModulesItem(new Module().name("mod-foo").version("1.0.1"))
       .addModulesItem(new Module().name("mod-bar").version("1.0.0"))
-      .addModuleDescriptorsItem(new ModuleDescriptor().id("mod-foo-1.0.1").name("foo")
+      .addModuleDescriptorsItem(new ModuleDescriptor().id("mod-foo-1.0.1").description("foo")
         .addProvidesItem(new InterfaceDescriptor().id("int-foo").version("1.1")))
-      .addModuleDescriptorsItem(new ModuleDescriptor().id("mod-bar-1.0.0").name("bar")
+      .addModuleDescriptorsItem(new ModuleDescriptor().id("mod-bar-1.0.0").description("bar")
         .addProvidesItem(new InterfaceDescriptor().id("int-bar").version("1.0"))
         .addRequiresItem(new InterfaceReference().id("int-foo").version("1.0")));
 
@@ -285,7 +285,7 @@ class ApplicationIT extends BaseIntegrationTest {
       .addModulesItem(new Module().name("test-module2").version("1.0.0"))
       .addModuleDescriptorsItem(new ModuleDescriptor()
         .id("test-m1-0.0.1")
-        .name("test-module")
+        .description("test-module")
         .addProvidesItem(new InterfaceDescriptor().id("test-interface").version("0.1"))
         .addRequiresItem(new InterfaceReference().id("test2-interface").version("0.1")));
 

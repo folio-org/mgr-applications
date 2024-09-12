@@ -338,7 +338,9 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   @Test
   @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json")
   void delete_positive_noDiscovery() throws Exception {
-    doDelete("/modules/{id}/discovery", MODULE_FOO_ID);
+    mockMvc.perform(delete("/modules/{id}/discovery", MODULE_FOO_ID)
+      .contentType(APPLICATION_JSON)
+      .header(TOKEN, OKAPI_AUTH_TOKEN));
     assertThatThrownBy(() -> kongAdminClient.getService(MODULE_FOO_ID)).isInstanceOf(NotFound.class);
     KafkaEventAssertions.assertNoDiscoveryEvents();
   }

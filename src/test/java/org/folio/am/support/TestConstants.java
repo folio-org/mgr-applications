@@ -32,7 +32,13 @@ public class TestConstants {
   public static final String MODULE_URL = "http://test-module:8080";
   public static final String UPDATED_URL = "http://test-module-updated:8080";
 
-  public static final String OKAPI_AUTH_TOKEN = "X-Okapi-Token test value";
+  /**
+   * Sample JWT that will expire in 2030 year for test_tenant with randomly generated user id.
+   */
+  public static final String OKAPI_AUTH_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmb2xpbyIsInVzZXJfaWQiOiJlNmQyODVlOS03M"
+    + "mVkLTQxYTQtOGIzYi01Y2VlNGNiYzg0MjUiLCJ0eXBlIjoiYWNjZXNzIiwiZXhwIjoxODkzNTAyODAwLCJpYXQiOjE3MjUzMDM2ODgsInRlbmFud"
+    + "CI6InRlc3RfdGVuYW50In0.SdtIQTrn7_XPnyi75Ai9bBkCWa8eQ69U6VAidCCRFFQ";
+
   public static final String ROLE_ADMIN = "ADMIN";
   public static final String ROLE_USER = "USER";
 

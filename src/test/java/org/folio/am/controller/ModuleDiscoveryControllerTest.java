@@ -18,12 +18,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.folio.am.service.ModuleDiscoveryService;
+import org.folio.jwt.openid.JsonWebTokenParser;
 import org.folio.security.integration.keycloak.client.KeycloakAuthClient;
 import org.folio.security.integration.keycloak.model.TokenResponse;
 import org.folio.test.extensions.EnableKeycloakSecurity;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,7 +42,12 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import({ControllerTestConfiguration.class, ModuleDiscoveryController.class})
 class ModuleDiscoveryControllerTest {
 
+  private static final String TOKEN_ISSUER = "https://keycloak/realms/test";
+  private static final String TOKEN_SUB = UUID.randomUUID().toString();
+
   @Autowired private MockMvc mockMvc;
+  @Mock private JsonWebToken jsonWebToken;
+  @MockBean private JsonWebTokenParser jsonWebTokenParser;
   @MockBean private KeycloakAuthClient keycloakAuthClient;
   @MockBean private ModuleDiscoveryService moduleDiscoveryService;
 
@@ -86,6 +95,9 @@ class ModuleDiscoveryControllerTest {
     var request = moduleDiscovery().id(null);
     when(keycloakAuthClient.evaluatePermissions(anyMap(), anyString())).thenReturn(new TokenResponse());
     when(moduleDiscoveryService.create(MODULE_ID, request, OKAPI_AUTH_TOKEN)).thenReturn(moduleDiscovery());
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
 
     mockMvc.perform(post("/modules/{id}/discovery", MODULE_ID)
         .content(asJsonString(request))
@@ -101,6 +113,9 @@ class ModuleDiscoveryControllerTest {
     var request = moduleDiscoveries(moduleDiscovery().id(null));
     when(keycloakAuthClient.evaluatePermissions(anyMap(), anyString())).thenReturn(new TokenResponse());
     when(moduleDiscoveryService.create(request, OKAPI_AUTH_TOKEN)).thenReturn(moduleDiscoveries(moduleDiscovery()));
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
 
     mockMvc.perform(post("/modules/discovery")
         .content(asJsonString(request))
@@ -116,6 +131,9 @@ class ModuleDiscoveryControllerTest {
     var request = moduleDiscovery();
     when(keycloakAuthClient.evaluatePermissions(anyMap(), anyString())).thenReturn(new TokenResponse());
     doNothing().when(moduleDiscoveryService).update(MODULE_ID, request, OKAPI_AUTH_TOKEN);
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
 
     mockMvc.perform(put("/modules/{id}/discovery", MODULE_ID)
         .content(asJsonString(request))
@@ -128,6 +146,9 @@ class ModuleDiscoveryControllerTest {
   void deleteModuleDiscovery_positive() throws Exception {
     when(keycloakAuthClient.evaluatePermissions(anyMap(), anyString())).thenReturn(new TokenResponse());
     doNothing().when(moduleDiscoveryService).delete(MODULE_ID, OKAPI_AUTH_TOKEN);
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
 
     mockMvc.perform(delete("/modules/{id}/discovery", MODULE_ID)
         .header(TOKEN, OKAPI_AUTH_TOKEN)
