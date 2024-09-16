@@ -23,7 +23,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.dto.Dependency;
@@ -33,6 +35,7 @@ import org.folio.am.service.validator.ValidationMode;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.common.domain.model.SearchResult;
 import org.folio.common.utils.OkapiHeaders;
+import org.folio.jwt.openid.JsonWebTokenParser;
 import org.folio.security.exception.ForbiddenException;
 import org.folio.security.exception.NotAuthorizedException;
 import org.folio.security.integration.keycloak.client.KeycloakAuthClient;
@@ -40,6 +43,7 @@ import org.folio.spring.cql.CqlQueryValidationException;
 import org.folio.test.extensions.EnableKeycloakSecurity;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -57,9 +61,13 @@ import org.z3950.zing.cql.CQLParseException;
 class ApplicationControllerTest {
 
   private static final String MODULE_ID = "mod-test-1.0.0";
+  private static final String TOKEN_ISSUER = "https://keycloak/realms/test";
+  private static final String TOKEN_SUB = UUID.randomUUID().toString();
 
   @Autowired private MockMvc mockMvc;
+  @Mock private JsonWebToken jsonWebToken;
   @MockBean private KeycloakAuthClient authClient;
+  @MockBean private JsonWebTokenParser jsonWebTokenParser;
   @MockBean private ApplicationValidatorService applicationValidatorService;
   @MockBean private ApplicationService applicationService;
 
@@ -184,9 +192,7 @@ class ApplicationControllerTest {
 
   @Test
   void create_positive() throws Exception {
-    var moduleDescriptor = new ModuleDescriptor()
-      .id(MODULE_ID)
-      .name("test");
+    var moduleDescriptor = new ModuleDescriptor().id(MODULE_ID).description("test");
 
     var applicationDescriptor = new ApplicationDescriptor()
       .id(APPLICATION_ID)
@@ -195,6 +201,9 @@ class ApplicationControllerTest {
       .moduleDescriptors(singletonList(moduleDescriptor));
 
     when(applicationService.create(applicationDescriptor, OKAPI_AUTH_TOKEN, true)).thenReturn(applicationDescriptor);
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
 
     var mvcResult = mockMvc.perform(post("/applications")
         .content(asJsonString(applicationDescriptor))
@@ -210,7 +219,11 @@ class ApplicationControllerTest {
   @Test
   void create_positive_validationDisable() throws Exception {
     var applicationDescriptor = applicationDescriptor();
+
     when(applicationService.create(applicationDescriptor, OKAPI_AUTH_TOKEN, false)).thenReturn(applicationDescriptor);
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
 
     var mvcResult = mockMvc.perform(post("/applications")
         .queryParam("check", "false")
@@ -226,6 +239,10 @@ class ApplicationControllerTest {
 
   @Test
   void create_negative() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
     var descriptor = new ApplicationDescriptor().id(APPLICATION_ID).name("test");
     mockMvc.perform(post("/applications")
         .content(asJsonString(descriptor))
@@ -242,6 +259,10 @@ class ApplicationControllerTest {
 
   @Test
   void create_negative_invalidVersion() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
     var descriptor = new ApplicationDescriptor().name("test").version("1.0");
     mockMvc.perform(post("/applications")
         .content(asJsonString(descriptor))
@@ -261,6 +282,9 @@ class ApplicationControllerTest {
     var descriptor = new ApplicationDescriptor().name("test").version("1.0.0");
     when(applicationService.create(descriptor, OKAPI_AUTH_TOKEN, true))
       .thenThrow(new RuntimeException("Unknown error"));
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
 
     mockMvc.perform(post("/applications")
         .content(asJsonString(descriptor))
@@ -275,6 +299,10 @@ class ApplicationControllerTest {
 
   @Test
   void create_negative_invalidRequestBody() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
     var errorMsgSubstring = "JSON parse error: Unexpected character ('[' (code 91)): "
       + "was expecting double-quote to start field name";
     mockMvc.perform(post("/applications")
@@ -293,6 +321,10 @@ class ApplicationControllerTest {
     var descriptor = applicationDescriptor();
     descriptor.addDependenciesItem(new Dependency().name("app-foo").version("xxx"));
 
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
     mockMvc.perform(post("/applications")
         .content(asJsonString(descriptor))
         .contentType(APPLICATION_JSON)
@@ -308,7 +340,11 @@ class ApplicationControllerTest {
 
   @Test
   void delete_positive() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
     doNothing().when(applicationService).delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
+
     mockMvc.perform(delete("/applications/{id}", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
@@ -319,6 +355,9 @@ class ApplicationControllerTest {
   void delete_negative_forbidden() throws Exception {
     doNothing().when(applicationService).delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
     when(authClient.evaluatePermissions(anyMap(), anyString())).thenThrow(new ForbiddenException("test"));
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
 
     mockMvc.perform(delete("/applications/{id}", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
@@ -348,6 +387,10 @@ class ApplicationControllerTest {
 
   @Test
   void validateApplicationDescriptor_positive() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
     mockMvc.perform(post("/applications/validate")
         .content(asJsonString(applicationDescriptor()))
         .contentType(APPLICATION_JSON)
@@ -359,6 +402,10 @@ class ApplicationControllerTest {
 
   @Test
   void validateApplicationDescriptor_positive_withMode() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
     mockMvc.perform(post("/applications/validate")
         .content(asJsonString(applicationDescriptor()))
         .contentType(APPLICATION_JSON)

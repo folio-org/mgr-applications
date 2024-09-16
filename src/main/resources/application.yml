@@ -91,6 +91,10 @@ application:
       trust-store-path: ${KC_CLIENT_TLS_TRUSTSTORE_PATH}
       trust-store-password: ${KC_CLIENT_TLS_TRUSTSTORE_PASSWORD}
       trust-store-type: ${KC_CLIENT_TLS_TRUSTSTORE_TYPE}
+    jwt-cache-configuration:
+      validate-uri: ${KC_AUTH_TOKEN_VALIDATE_URI:false}
+      jwks-refresh-interval: ${KC_JWKS_REFRESH_INTERVAL:60}
+      forced-jwks-refresh-interval: ${KC_FORCED_JWKS_REFRESH_INTERVAL:60}
   secret-store:
     type: ${SECRET_STORE_TYPE:}
     aws-ssm:

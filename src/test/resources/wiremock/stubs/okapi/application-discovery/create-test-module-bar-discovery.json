@@ -3,8 +3,12 @@
     "method": "POST",
     "url": "/_/discovery/modules",
     "headers": {
-      "X-Okapi-Token": { "equalTo": "X-Okapi-Token test value" },
-      "Content-Type": { "equalTo": "application/json" }
+      "X-Okapi-Token": {
+        "matches": ".+"
+      },
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
     },
     "bodyPatterns": [
       {

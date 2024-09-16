@@ -4,7 +4,7 @@
     "url": "/_/proxy/import/modules?check=false",
     "headers": {
       "X-Okapi-Token": {
-        "equalTo": "X-Okapi-Token test value"
+        "matches": ".+"
       },
       "Content-Type": {
         "equalTo": "application/json"

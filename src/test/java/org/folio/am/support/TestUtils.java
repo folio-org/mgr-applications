@@ -4,6 +4,8 @@ import static dasniko.testcontainers.keycloak.ExtendableKeycloakContainer.MASTER
 import static java.net.URLEncoder.encode;
 import static java.net.http.HttpRequest.BodyPublishers.ofString;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier;
+import static javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory;
 import static javax.net.ssl.SSLContext.getInstance;
 import static org.folio.am.support.TestConstants.HTTP_CLIENT_DUMMY_SSL;
 import static org.folio.test.TestUtils.OBJECT_MAPPER;
@@ -19,8 +21,10 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 import lombok.SneakyThrows;
@@ -65,8 +69,24 @@ public class TestUtils {
       .collect(Collectors.joining("&"));
   }
 
+  public static void disableSslVerification() {
+    try {
+      var sc = dummySslContext();
+      setDefaultSSLSocketFactory(sc.getSocketFactory());
+      var allHostsValid = new HostnameVerifier() {
+        public boolean verify(String hostname, SSLSession session) {
+          return true;
+        }
+      };
+
+      setDefaultHostnameVerifier(allHostsValid);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to disable SSL verification", e);
+    }
+  }
+
   @SneakyThrows
-  private static SSLContext dummySslContext() {
+  public static SSLContext dummySslContext() {
     var dummyTrustManager = new X509ExtendedTrustManager() {
 
       @Override

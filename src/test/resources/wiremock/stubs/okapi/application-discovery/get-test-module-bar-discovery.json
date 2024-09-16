@@ -4,7 +4,7 @@
     "url": "/_/discovery/modules/test-module-bar-1.0.0/test-module-bar-1.0.0",
     "headers": {
       "X-Okapi-Token": {
-        "equalTo": "X-Okapi-Token test value"
+        "matches": ".+"
       }
     }
   },

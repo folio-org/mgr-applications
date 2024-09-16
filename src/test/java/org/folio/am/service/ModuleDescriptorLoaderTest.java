@@ -51,7 +51,7 @@ class ModuleDescriptorLoaderTest {
     var moduleDescriptors = moduleDescriptorLoader.loadByUrls(List.of(module));
 
     var expectedModuleDescriptor = new ModuleDescriptor()
-      .name(name).id(name + "-" + version);
+      .description(name).id(name + "-" + version);
     assertNotNull(moduleDescriptors);
     assertThat(moduleDescriptors.size()).isEqualTo(1);
     assertThat(moduleDescriptors.get(0)).isEqualTo(expectedModuleDescriptor);

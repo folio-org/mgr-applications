@@ -7,7 +7,7 @@
         "equalTo": "mgr-applications.discoveries.collection.post"
       },
       "X-Okapi-Token": {
-        "equalTo": "X-Okapi-Token test value"
+        "matches": ".+"
       },
       "X-Okapi-Tenant": {
         "equalTo": "supertenant"

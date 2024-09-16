@@ -221,11 +221,11 @@ public class TestValues {
   public static ApplicationDescriptor getApplicationDescriptor(String moduleId, String version) {
     var moduleDescriptor = new ModuleDescriptor()
       .id(moduleId)
-      .name("test-module")
+      .description("test-module")
       .metadata(new AnyDescriptor().set("user", systemUser()));
     var uiModuleDescriptor = new ModuleDescriptor()
       .id("ui-module-1.0.0")
-      .name("ui-module");
+      .description("ui-module");
     var module = new Module()
       .id(moduleId)
       .name("test-module")
@@ -351,7 +351,7 @@ public class TestValues {
   public static ModuleDescriptor moduleDescriptor(String name, String version) {
     return new ModuleDescriptor()
       .id(name + "-" + version)
-      .name(name);
+      .description(name);
   }
 
   public static Map<String, Object> systemUser() {
