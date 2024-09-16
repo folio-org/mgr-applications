@@ -27,7 +27,7 @@
     <java.version>17</java.version>
     <lombok.version>1.18.34</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
-    <mapstruct.version>1.6.0</mapstruct.version>
+    <mapstruct.version>1.6.1</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.8.2</hypersistence-utils-hibernate-63.version>
     <swagger-annotations.version>2.2.23</swagger-annotations.version>
     <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
@@ -38,7 +38,7 @@
     <folio-spring-cql.version>8.1.2</folio-spring-cql.version>
     <applications-poc-tools.version>1.5.6</applications-poc-tools.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
-    <semver4j.version>5.3.0</semver4j.version>
+    <semver4j.version>5.4.0</semver4j.version>
 
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
 
