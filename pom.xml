@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.3</version>
+    <version>3.3.4</version>
     <relativePath />
   </parent>
 
@@ -27,7 +27,7 @@
     <java.version>17</java.version>
     <lombok.version>1.18.34</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
-    <mapstruct.version>1.6.1</mapstruct.version>
+    <mapstruct.version>1.6.2</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.8.2</hypersistence-utils-hibernate-63.version>
     <swagger-annotations.version>2.2.23</swagger-annotations.version>
     <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
