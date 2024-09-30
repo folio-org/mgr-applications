@@ -1,4 +1,11 @@
-## v1.4.0 In progress
+## v1.4.1 in progress
+
+
+## v1.4.0 2024-09-30
+
+* APPPOCTOOL-28 Use folio-auth-openid library for JWT validation (#120) ([APPPOCTOOL-28](https://issues.folio.org/browse/APPPOCTOOL-28))
+
+---
 
 ## v1.3.2 2024-07-10
 
