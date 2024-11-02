@@ -1,47 +1,44 @@
-## v1.4.1 in progress
-
-
-## v1.4.0 2024-09-30
-
-* APPPOCTOOL-28 Use folio-auth-openid library for JWT validation (#120) ([APPPOCTOOL-28](https://issues.folio.org/browse/APPPOCTOOL-28))
+## Version `v2.0.0` (01.11.2024)
+* Increase version of keycloak-admin-client to v25.0.6 (KEYCLOAK-24)
 
 ---
 
-## v1.3.2 2024-07-10
-
-* KONG-10: upgrade kong version (#93) ([KONG-10](https://issues.folio.org/browse/KONG-10))
-
----
-
-## v1.3.1 2024-06-20
-
-* Add KC trust-store-type to application settings (#81)
-* RANCHER-1502: Unify custom EUREKA related docker images building process - shared lib for kong, keycloak & sidecar (#85) ([RANCHER-1502](https://issues.folio.org/browse/RANCHER-1502))
+## Version `v1.4.0` (30.09.2024)
+* Use folio-auth-openid library for JWT validation (APPPOCTOOL-28)
 
 ---
 
-## v1.3.0 2024-05-25
-
-* MGRAPPS-12 Create a docker file for the mgr-applications module that is based on the FIPS-140-2 compliant base image (ubi9/openjdk-17-runtime) (#77)  ([MGRAPPS-12](https://issues.folio.org/browse/MGRAPPS-12))
-* MGRAPPS-10: Secure mgr-applications HTTP end-points with SSL (#76) ([MGRAPPS-10](https://issues.folio.org/browse/MGRAPPS-10))
-* MGRAPPS-18: add HTTPS access to mgr-tenant-entitlements ([MGRAPPS-18](https://issues.folio.org/browse/MGRAPPS-18))
-* MGRAPPS-13: add HTTPS access to Kong (#69) ([MGRAPPS-13](https://issues.folio.org/browse/MGRAPPS-13))
+## Version `v1.3.2` (10.07.2024)
+* upgrade kong version (KONG-10)
 
 ---
 
-## v1.2.0 2024-04-16
-
-* MGRAPPS-11: desired permission in bootstrap data (#59) ([MGRAPPS-11](https://issues.folio.org/browse/MGRAPPS-11))
-* APPPOCTOOL-10: adjust test with Keycloak test container (#55) ([APPPOCTOOL-10](https://issues.folio.org/browse/APPPOCTOOL-10))
-* KONG-6: Kong timeouts should be extended (#52) ([KONG-6](https://issues.folio.org/browse/KONG-6))
+## Version `v1.3.1` (20.06.2024)
+* Add KC trust-store-type to application settings
+* Unify custom EUREKA related docker images building process - shared lib for kong, keycloak & sidecar (RANCHER-1502)
 
 ---
 
-## v1.1.0 2024-02-28
+## Version `v1.3.0` (25.05.2024)
+* Create a docker file for the mgr-applications module that is based on the FIPS-140-2 compliant base image (ubi9/openjdk-17-runtime) (MGRAPPS-12)
+* Secure mgr-applications HTTP end-points with SSL (MGRAPPS-10)
+* add HTTPS access to mgr-tenant-entitlements (MGRAPPS-18)
+* add HTTPS access to Kong (MGRAPPS-13)
+
+---
+
+## Version `v1.2.0` (16.04.2024)
+* desired permission in bootstrap data (MGRAPPS-11)
+* adjust test with Keycloak test container (APPPOCTOOL-10)
+* Kong timeouts should be extended (KONG-6)
+
+---
+
+## Version `v1.1.0` (28.02.2024)
 ### Features
-* Self-register routes in Kong ([MGRAPPS-2](https://issues.folio.org/browse/MGRAPPS-2))
-* Upgrade to Keycloak 23.0.6 ([KEYCLOAK-6](https://issues.folio.org/browse/KEYCLOAK-6))
-* Implement router prefix for the generated endpoints ([MGRAPPS-8](https://issues.folio.org/browse/MGRAPPS-8))
+* Self-register routes in Kong (MGRAPPS-2)
+* Upgrade to Keycloak 23.0.6 (KEYCLOAK-6)
+* Implement router prefix for the generated endpoints (MGRAPPS-8)
 
 ### Dependencies
 * Add `org.folio:folio-integration-kong` `1.3.0`
@@ -60,7 +57,7 @@
 
 ---
 
-## v1.0.0 2024-01-22
+## Version `v1.0.0` (22.01.2024)
 ### New APIs versions
 * Provides `applications v1.0`
 * Provides `discoveries v2.0`
@@ -79,4 +76,3 @@
 * Bump `com.puppycrawl.tools:checkstyle` from `10.12.3` to `10.12.7`
 * Bump `org.folio:folio-spring-cql` from `7.0.0` to `7.2.2`
 * Bump `io.swagger.core.v3:swagger-annotations` from `2.2.8` to `2.2.20`
-
