@@ -27,8 +27,8 @@
     <java.version>17</java.version>
     <lombok.version>1.18.34</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
-    <mapstruct.version>1.6.2</mapstruct.version>
-    <hypersistence-utils-hibernate-63.version>3.8.3</hypersistence-utils-hibernate-63.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
+    <hypersistence-utils-hibernate-63.version>3.9.0</hypersistence-utils-hibernate-63.version>
     <swagger-annotations.version>2.2.25</swagger-annotations.version>
     <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.4</apache-commons-collections4.version>
@@ -48,7 +48,7 @@
     <instancio.version>5.0.2</instancio.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>10.20.0</maven-checkstyle.version>
+    <maven-checkstyle.version>10.20.1</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <openapi-generator.version>7.9.0</openapi-generator.version>
