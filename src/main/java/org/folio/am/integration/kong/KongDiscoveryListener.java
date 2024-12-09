@@ -2,6 +2,7 @@ package org.folio.am.integration.kong;
 
 import static java.util.Collections.singletonList;
 
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.domain.dto.ModuleDiscovery;
@@ -52,7 +53,12 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
    */
   @Override
   public void onDiscoveryDelete(String serviceId, String instanceId, String token) {
-    kongGatewayService.deleteServiceRoutes(serviceId);
+    try {
+      kongGatewayService.deleteServiceRoutes(serviceId);
+    } catch (NoSuchElementException nse) {
+      // Service doesn't exist - therefore no need to delete routes
+      log.debug("Service doesn't exist: {}", serviceId);
+    }
     kongGatewayService.deleteService(serviceId);
     log.debug("discovery info removed from Kong");
   }
