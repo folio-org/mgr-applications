@@ -72,8 +72,8 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
 
   @AfterEach
   void tearDown() {
-    kongAdminClient.deleteService(MODULE_FOO_ID);
-    kongAdminClient.deleteService(MODULE_BAR_ID);
+    deleteService(MODULE_FOO_ID);
+    deleteService(MODULE_BAR_ID);
   }
 
   @Test
@@ -107,6 +107,10 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
       .andExpect(content().json(asJsonString(moduleDiscoveries(moduleDiscovery)), true));
 
     assertThatKongHasServiceWithUrl(MODULE_BAR_ID, MODULE_BAR_URL);
+
+    var routes = kongAdminClient.getServiceRoutes(MODULE_BAR_ID, null);
+    assertThat(routes.getData()).hasSize(1);
+    assertThat(routes.getData().get(0).getExpression()).contains("(http.path == \"/foo/bar\" && http.method == \"POST\")");
 
     assertDiscoveryEvents(MODULE_BAR_ID);
   }
@@ -274,5 +278,15 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
       assertThat(service.getPort()).isEqualTo(url.getPort());
       assertThat(service.getPath()).isEqualTo(stripToNull(url.getPath()));
     });
+  }
+
+  private void deleteService(String serviceId) {
+    try {
+      kongAdminClient.getServiceRoutes(serviceId, null)
+        .forEach(route -> kongAdminClient.deleteRoute(serviceId, route.getId()));
+    } catch (NotFound nf) {
+      // Do nothing
+    }
+    kongAdminClient.deleteService(serviceId);
   }
 }
