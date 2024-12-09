@@ -39,3 +39,5 @@ application:
         folio_master_folio-backend-admin-client: ${KC_ADMIN_CLIENT_SECRET}
   validation:
     default-mode: basic
+routemanagement:
+  enable: true

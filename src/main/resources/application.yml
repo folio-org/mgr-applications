@@ -163,3 +163,6 @@ messaging:
           keep-alive: 600s
       scheduling:
         enabled: true
+
+routemanagement:
+  enable: false
