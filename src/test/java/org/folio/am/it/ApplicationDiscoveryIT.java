@@ -67,7 +67,7 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @AfterEach
   void tearDown() {
-    kongAdminClient.deleteService(MODULE_FOO_ID);
+    deleteService(MODULE_FOO_ID);
   }
 
   @Test
@@ -355,5 +355,15 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
       assertThat(service.getPort()).isEqualTo(url.getPort());
       assertThat(service.getPath()).isEqualTo(stripToNull(url.getPath()));
     });
+  }
+
+  private void deleteService(String serviceId) {
+    try {
+      kongAdminClient.getServiceRoutes(serviceId, null)
+        .forEach(route -> kongAdminClient.deleteRoute(serviceId, route.getId()));
+    } catch (NotFound nf) {
+      // Do nothing
+    }
+    kongAdminClient.deleteService(serviceId);
   }
 }
