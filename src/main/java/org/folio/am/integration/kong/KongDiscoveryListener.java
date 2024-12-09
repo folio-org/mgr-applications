@@ -10,6 +10,7 @@ import org.folio.am.repository.ModuleRepository;
 import org.folio.am.service.ApplicationDiscoveryListener;
 import org.folio.tools.kong.model.Service;
 import org.folio.tools.kong.service.KongGatewayService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,9 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
 
   private final KongGatewayService kongGatewayService;
   private final ModuleRepository moduleRepository;
+
+  @Value("${routemanagement.enable:true}")
+  private boolean routeManagementEnable = true;
 
   /**
    * Creates service into API Gateway.
@@ -53,11 +57,13 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
    */
   @Override
   public void onDiscoveryDelete(String serviceId, String instanceId, String token) {
-    try {
-      kongGatewayService.deleteServiceRoutes(serviceId);
-    } catch (NoSuchElementException nse) {
-      // Service doesn't exist - therefore no need to delete routes
-      log.debug("Service doesn't exist: {}", serviceId);
+    if (routeManagementEnable) {
+      try {
+        kongGatewayService.deleteServiceRoutes(serviceId);
+      } catch (NoSuchElementException nse) {
+        // Service doesn't exist - therefore no need to delete routes
+        log.debug("Service doesn't exist: {}", serviceId);
+      }
     }
     kongGatewayService.deleteService(serviceId);
     log.debug("discovery info removed from Kong");
@@ -68,7 +74,9 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
     var service = new Service().name(serviceId).url(moduleDiscovery.getLocation());
     kongGatewayService.upsertService(service);
 
-    var moduleEntity = moduleRepository.findById(moduleDiscovery.getArtifactId()).orElseThrow();
-    kongGatewayService.addRoutes(null, singletonList(moduleEntity.getDescriptor()));
+    if (routeManagementEnable) {
+      var moduleEntity = moduleRepository.findById(moduleDiscovery.getArtifactId()).orElseThrow();
+      kongGatewayService.addRoutes(null, singletonList(moduleEntity.getDescriptor()));
+    }
   }
 }
