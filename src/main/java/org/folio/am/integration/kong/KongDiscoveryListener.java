@@ -45,6 +45,7 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
    */
   @Override
   public void onDiscoveryUpdate(ModuleDiscovery moduleDiscovery, String token) {
+    deleteServiceKongRoutes(moduleDiscovery.getId());
     upsertService(moduleDiscovery);
   }
 
@@ -57,14 +58,7 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
    */
   @Override
   public void onDiscoveryDelete(String serviceId, String instanceId, String token) {
-    if (routeManagementEnable) {
-      try {
-        kongGatewayService.deleteServiceRoutes(serviceId);
-      } catch (NoSuchElementException nse) {
-        // Service doesn't exist - therefore no need to delete routes
-        log.debug("Service doesn't exist: {}", serviceId);
-      }
-    }
+    deleteServiceKongRoutes(serviceId);
     kongGatewayService.deleteService(serviceId);
     log.debug("discovery info removed from Kong");
   }
@@ -77,6 +71,17 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
     if (routeManagementEnable) {
       var moduleEntity = moduleRepository.findById(moduleDiscovery.getArtifactId()).orElseThrow();
       kongGatewayService.addRoutes(null, singletonList(moduleEntity.getDescriptor()));
+    }
+  }
+
+  private void deleteServiceKongRoutes(String serviceId) {
+    if (routeManagementEnable) {
+      try {
+        kongGatewayService.deleteServiceRoutes(serviceId);
+      } catch (NoSuchElementException nse) {
+        // Service doesn't exist - therefore no need to delete routes
+        log.debug("Service doesn't exist: {}", serviceId);
+      }
     }
   }
 }

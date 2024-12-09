@@ -55,6 +55,7 @@ class KongDiscoveryListenerTest {
     var updatedService = kongService(UPDATED_URL);
     service.onDiscoveryUpdate(moduleDiscovery(SERVICE_NAME, SERVICE_VERSION, UPDATED_URL), null);
     verify(kongAdminClient).upsertService(updatedService);
+    verify(kongAdminClient).deleteServiceRoutes(MODULE_ID);
     verify(kongAdminClient).addRoutes(null, Collections.singletonList(mockModuleDescriptor));
   }
 
