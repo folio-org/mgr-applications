@@ -42,6 +42,7 @@ import org.folio.am.support.base.BaseIntegrationTest;
 import org.folio.common.utils.OkapiHeaders;
 import org.folio.test.types.IntegrationTest;
 import org.folio.tools.kong.client.KongAdminClient;
+import org.folio.tools.kong.model.Route;
 import org.folio.tools.kong.model.Service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -222,6 +223,10 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
   void delete_positive() throws Exception {
     kongAdminClient.upsertService(MODULE_BAR_ID, new Service().name(MODULE_BAR_ID).url(MODULE_BAR_URL));
     kongAdminClient.upsertService(MODULE_FOO_ID, new Service().name(MODULE_FOO_ID).url(MODULE_FOO_URL));
+    kongAdminClient.upsertRoute(MODULE_FOO_ID, MODULE_FOO_ID + "_testroute1",
+      new Route().name("testroute1foo").expression("http.path == \"/foo/foo\" && http.method == \"POST\""));
+    kongAdminClient.upsertRoute(MODULE_BAR_ID, MODULE_BAR_ID + "_testroute1",
+      new Route().name("testroute1bar").expression("http.path == \"/foo/foo\" && http.method == \"POST\""));
 
     mockMvc.perform(delete("/modules/{id}/discovery", MODULE_FOO_ID)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
