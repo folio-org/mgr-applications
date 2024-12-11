@@ -42,6 +42,7 @@ import org.folio.am.support.base.BaseIntegrationTest;
 import org.folio.common.utils.OkapiHeaders;
 import org.folio.test.types.IntegrationTest;
 import org.folio.tools.kong.client.KongAdminClient;
+import org.folio.tools.kong.model.Route;
 import org.folio.tools.kong.model.Service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -72,8 +73,8 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
 
   @AfterEach
   void tearDown() {
-    kongAdminClient.deleteService(MODULE_FOO_ID);
-    kongAdminClient.deleteService(MODULE_BAR_ID);
+    deleteService(MODULE_FOO_ID);
+    deleteService(MODULE_BAR_ID);
   }
 
   @Test
@@ -107,6 +108,11 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
       .andExpect(content().json(asJsonString(moduleDiscoveries(moduleDiscovery)), true));
 
     assertThatKongHasServiceWithUrl(MODULE_BAR_ID, MODULE_BAR_URL);
+
+    var routes = kongAdminClient.getServiceRoutes(MODULE_BAR_ID, null);
+    assertThat(routes.getData()).hasSize(1);
+    assertThat(routes.getData().get(0).getExpression()).contains(
+      "(http.path == \"/foo/bar\" && http.method == \"POST\")");
 
     assertDiscoveryEvents(MODULE_BAR_ID);
   }
@@ -217,6 +223,10 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
   void delete_positive() throws Exception {
     kongAdminClient.upsertService(MODULE_BAR_ID, new Service().name(MODULE_BAR_ID).url(MODULE_BAR_URL));
     kongAdminClient.upsertService(MODULE_FOO_ID, new Service().name(MODULE_FOO_ID).url(MODULE_FOO_URL));
+    kongAdminClient.upsertRoute(MODULE_FOO_ID, MODULE_FOO_ID + "_testroute1",
+      new Route().name("testroute1foo").expression("http.path == \"/foo/foo\" && http.method == \"POST\""));
+    kongAdminClient.upsertRoute(MODULE_BAR_ID, MODULE_BAR_ID + "_testroute1",
+      new Route().name("testroute1bar").expression("http.path == \"/foo/foo\" && http.method == \"POST\""));
 
     mockMvc.perform(delete("/modules/{id}/discovery", MODULE_FOO_ID)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
@@ -274,5 +284,15 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
       assertThat(service.getPort()).isEqualTo(url.getPort());
       assertThat(service.getPath()).isEqualTo(stripToNull(url.getPath()));
     });
+  }
+
+  private void deleteService(String serviceId) {
+    try {
+      kongAdminClient.getServiceRoutes(serviceId, null)
+        .forEach(route -> kongAdminClient.deleteRoute(serviceId, route.getId()));
+    } catch (NotFound nf) {
+      // Do nothing
+    }
+    kongAdminClient.deleteService(serviceId);
   }
 }

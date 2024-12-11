@@ -36,7 +36,7 @@
     <spring-cloud-bom.version>2023.0.4</spring-cloud-bom.version>
     <cql2pgjson.version>35.3.0</cql2pgjson.version>
     <folio-spring-cql.version>8.2.1</folio-spring-cql.version>
-    <applications-poc-tools.version>2.1.0-SNAPSHOT</applications-poc-tools.version>
+    <applications-poc-tools.version>2.2.0-SNAPSHOT</applications-poc-tools.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
     <semver4j.version>5.4.1</semver4j.version>
 
