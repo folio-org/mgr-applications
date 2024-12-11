@@ -165,4 +165,4 @@ messaging:
         enabled: true
 
 routemanagement:
-  enable: false
+  enable: ${ROUTEMANAGEMENT_ENABLE:false}
