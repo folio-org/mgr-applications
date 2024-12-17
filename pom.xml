@@ -39,6 +39,7 @@
     <applications-poc-tools.version>2.2.0-SNAPSHOT</applications-poc-tools.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
     <semver4j.version>5.4.1</semver4j.version>
+    <jackson-bom.version>2.17.2</jackson-bom.version>
 
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
 
