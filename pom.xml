@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.1</version>
+    <version>3.4.2</version>
     <relativePath />
   </parent>
 
@@ -38,7 +38,7 @@
     <folio-spring-cql.version>8.2.2</folio-spring-cql.version>
     <applications-poc-tools.version>2.2.0-SNAPSHOT</applications-poc-tools.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
-    <semver4j.version>5.5.0</semver4j.version>
+    <semver4j.version>5.6.0</semver4j.version>
     <jackson-bom.version>2.17.2</jackson-bom.version>
 
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
@@ -49,10 +49,10 @@
     <instancio.version>5.2.1</instancio.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>10.21.1</maven-checkstyle.version>
+    <maven-checkstyle.version>10.21.2</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
-    <openapi-generator.version>7.10.0</openapi-generator.version>
+    <openapi-generator.version>7.11.0</openapi-generator.version>
 
     <sonar.exclusions>
       <!--
