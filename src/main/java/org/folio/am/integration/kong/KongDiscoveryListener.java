@@ -70,7 +70,7 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
 
     if (routeManagementEnable) {
       var moduleEntity = moduleRepository.findById(moduleDiscovery.getArtifactId()).orElseThrow();
-      kongGatewayService.addRoutes(singletonList(moduleEntity.getDescriptor()));
+      kongGatewayService.addRoutes(null, singletonList(moduleEntity.getDescriptor()));
     }
   }
 
