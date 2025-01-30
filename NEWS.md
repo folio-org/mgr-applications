@@ -1,3 +1,7 @@
+## Version `v2.0.1` (30.01.2025)
+* Bump application-poc-tools version to update Keycloak (MGRAPPS-37)
+---
+
 ## Version `v2.0.0` (01.11.2024)
 * Increase version of keycloak-admin-client to v25.0.6 (KEYCLOAK-24)
 
