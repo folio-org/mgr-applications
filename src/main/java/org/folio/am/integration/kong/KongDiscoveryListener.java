@@ -34,6 +34,7 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
    */
   @Override
   public void onDiscoveryCreate(ModuleDiscovery moduleDiscovery, String token) {
+    log.info("Discovery information created for {}", moduleDiscovery.getId());
     upsertService(moduleDiscovery);
   }
 
@@ -45,6 +46,7 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
    */
   @Override
   public void onDiscoveryUpdate(ModuleDiscovery moduleDiscovery, String token) {
+    log.info("Discovery information updated for {}", moduleDiscovery.getId());
     deleteServiceKongRoutes(moduleDiscovery.getId());
     upsertService(moduleDiscovery);
   }
@@ -58,25 +60,31 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
    */
   @Override
   public void onDiscoveryDelete(String serviceId, String instanceId, String token) {
+    log.info("Discovery information deleted for {} {}", serviceId, instanceId);
     deleteServiceKongRoutes(serviceId);
     kongGatewayService.deleteService(serviceId);
-    log.debug("discovery info removed from Kong");
   }
 
   private void upsertService(ModuleDiscovery moduleDiscovery) {
     var serviceId = moduleDiscovery.getId();
     var service = new Service().name(serviceId).url(moduleDiscovery.getLocation());
+
+    log.info("Upserting Kong service {}", serviceId);
     kongGatewayService.upsertService(service);
 
     if (routeManagementEnable) {
       var moduleEntity = moduleRepository.findById(moduleDiscovery.getArtifactId()).orElseThrow();
+      log.info("Adding Kong service {} module {} routes", serviceId, moduleEntity.getId());
       kongGatewayService.addRoutes(null, singletonList(moduleEntity.getDescriptor()));
+    } else {
+      log.info("Kong routes management disabled for modules.");
     }
   }
 
   private void deleteServiceKongRoutes(String serviceId) {
     if (routeManagementEnable) {
       try {
+        log.info("Deleting Kong service {}", serviceId);
         kongGatewayService.deleteServiceRoutes(serviceId);
       } catch (NoSuchElementException nse) {
         // Service doesn't exist - therefore no need to delete routes
