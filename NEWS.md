@@ -1,3 +1,6 @@
+## Version `v2.0.2` (03.02.2025)
+* Added module route management based on discovery information (MGRAPPS-35)
+
 ## Version `v2.0.1` (30.01.2025)
 * Bump application-poc-tools version to update Keycloak (MGRAPPS-37)
 ---
