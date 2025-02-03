@@ -1,3 +1,8 @@
+## v1.4.1 2025-02-03
+
+* KEYCLOAK-37 Add support for Keycloak v26.1.0 ([KEYCLOAK-37](https://issues.folio.org/browse/KEYCLOAK-37))
+
+
 ## v1.4.0 2024-09-30
 
 * APPPOCTOOL-28 Use folio-auth-openid library for JWT validation (#120) ([APPPOCTOOL-28](https://issues.folio.org/browse/APPPOCTOOL-28))
