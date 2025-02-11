@@ -6,7 +6,7 @@ import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
 
 @UnitTest
-public class ModuleIdUtilsTest {
+class ModuleIdUtilsTest {
 
   @Test
   void testParse_positive() {
