@@ -1,9 +1,12 @@
 package org.folio.am.service;
 
 import static org.folio.am.utils.CollectionUtils.toStream;
+import static org.folio.am.utils.ModuleIdUtils.getNameAndVersion;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -18,19 +21,21 @@ import org.folio.am.repository.ModuleBootstrapViewRepository;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
+import org.folio.common.utils.InterfaceComparisonUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class ModuleBootstrapService {
+
   private final ModuleBootstrapViewRepository repository;
   private final ModuleBootstrapMapper mapper;
 
   /**
-   * Retrieves a module bootstrap data including information for the modules
-   * that provides interfaces listed in required/optional section of the module descriptor.
-   * Endpoint information is only returned for interfaces which the specified module actually uses.
+   * Retrieves a module bootstrap data including information for the modules that provides interfaces listed in
+   * required/optional section of the module descriptor. Endpoint information is only returned for interfaces which the
+   * specified module actually uses.
    *
    * @param moduleId - the module identifier
    * @return Module bootstrap data
@@ -45,9 +50,34 @@ public class ModuleBootstrapService {
     var requiredInterfaces = getRequiredOptionalInterfaces(moduleView);
     var requiredModules = toModuleDiscoveries(requiredInterfaces, views);
 
+    requiredModules = deduplicateRequiredModules(requiredModules);
+
     return new ModuleBootstrap()
       .module(module)
       .requiredModules(requiredModules);
+  }
+
+  private List<ModuleBootstrapDiscovery> deduplicateRequiredModules(List<ModuleBootstrapDiscovery> requiredModules) {
+    var results = new HashMap<String, ModuleBootstrapDiscovery>();
+
+    for (var moduleBootstrapDiscovery : requiredModules) {
+      var moduleNameAndVersion = getNameAndVersion(moduleBootstrapDiscovery.getModuleId());
+      var moduleName = moduleNameAndVersion.getLeft();
+      var moduleVersion = moduleNameAndVersion.getRight();
+
+      var existingValue = results.get(moduleName);
+      if (existingValue == null) {
+        results.put(moduleName, moduleBootstrapDiscovery);
+      } else {
+        var existingValueVersion = getNameAndVersion(existingValue.getModuleId()).getRight();
+        if (InterfaceComparisonUtils.compare("", moduleVersion,
+          "", existingValueVersion) > 0) {
+          results.put(moduleName, moduleBootstrapDiscovery);
+        }
+      }
+    }
+
+    return results.values().stream().toList();
   }
 
   private ModuleBootstrapView removeModuleViewById(String moduleId, List<ModuleBootstrapView> result) {
