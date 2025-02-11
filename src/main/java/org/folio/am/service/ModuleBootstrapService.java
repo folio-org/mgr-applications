@@ -4,7 +4,6 @@ import static org.folio.am.utils.CollectionUtils.toStream;
 import static org.folio.am.utils.ModuleIdUtils.getNameAndVersion;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
