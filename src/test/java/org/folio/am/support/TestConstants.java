@@ -15,7 +15,11 @@ public class TestConstants {
 
   public static final String MODULE_FOO_NAME = "test-module-foo";
   public static final String MODULE_FOO_VERSION = "1.0.0";
+  public static final String MODULE_FOO_VERSION1_1 = "1.1.0";
+  public static final String MODULE_FOO_VERSION1_0_1 = "1.0.1";
   public static final String MODULE_FOO_ID = MODULE_FOO_NAME + "-" + MODULE_FOO_VERSION;
+  public static final String MODULE_FOO1_1_ID = MODULE_FOO_NAME + "-" + MODULE_FOO_VERSION1_1;
+  public static final String MODULE_FOO1_0_1_ID = MODULE_FOO_NAME + "-" + MODULE_FOO_VERSION1_0_1;
   public static final String MODULE_FOO_URL = "http://test-module-foo:8080";
   public static final String MODULE_FOO_INTERFACE_ID = "test-foo-interface";
 
