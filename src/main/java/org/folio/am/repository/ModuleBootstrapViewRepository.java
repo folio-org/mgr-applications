@@ -16,9 +16,9 @@ public interface ModuleBootstrapViewRepository extends JpaRepository<ModuleBoots
    * @param moduleId the module identifier
    * @return List of module views
    */
-  @Query(value = "SELECT DISTINCT view FROM ModuleBootstrapView view WHERE view.id=:moduleId OR view.id IN "
-    + "(SELECT p.moduleId FROM InterfaceReferenceEntity p WHERE p.type='PROVIDES' AND "
+  @Query(value = "SELECT DISTINCT view FROM ModuleBootstrapView view WHERE (view.id = :moduleId OR view.id IN "
+    + "(SELECT p.moduleId FROM InterfaceReferenceEntity p WHERE p.type = 'PROVIDES' AND "
     + "p.id IN (SELECT r.id FROM InterfaceReferenceEntity r WHERE r.moduleId = :moduleId AND "
-    + "(r.type='REQUIRES' OR r.type='OPTIONAL')))")
+    + "(r.type = 'REQUIRES' OR r.type = 'OPTIONAL')))) and (view.location is not null OR view.id = :moduleId)")
   List<ModuleBootstrapView> findAllRequiredByModuleId(@Param("moduleId") String moduleId);
 }

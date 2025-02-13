@@ -24,23 +24,39 @@ import org.springframework.test.context.jdbc.Sql;
 )
 class ModuleBootstrapViewRepositoryIT extends BaseRepositoryTest {
 
-  private static final String MODULE_FOO_APP_ID = "test-app-1.0.0";
-  private static final String MODULE_BAR_APP_ID = "test-app-2.0.0";
+  private static final String APP_1_0_0_ID = "test-app-1.0.0";
+  private static final String APP_2_0_0_ID = "test-app-2.0.0";
   private static final String MODULE_FOO_ID = "test-module-foo-1.0.0";
   private static final String MODULE_BAR_ID = "test-module-bar-1.0.0";
+  private static final String MODULE_BAZ_ID = "test-module-baz-1.0.0";
   private static final String MODULE_FOO_DISCOVERY_URL = "http://test-module-foo:8080";
   private static final String MODULE_BAR_DISCOVERY_URL = "http://test-module-bar:8080";
+  private static final String MODULE_BAZ_DISCOVERY_URL = "http://test-module-baz:8080";
 
   @Autowired
   private ModuleBootstrapViewRepository repository;
 
+  @Autowired
+  private ModuleRepository moduleRepository;
+
   @Test
-  void shouldReturnAllRequiredModules() {
+  void shouldReturnAllRequiredModulesWithDiscoveryUrls() {
     var result = repository.findAllRequiredByModuleId(MODULE_FOO_ID);
     assertThat(result)
+      .hasSize(3)
+      .anyMatch(matchView(MODULE_FOO_ID, APP_1_0_0_ID, MODULE_FOO_DISCOVERY_URL))
+      .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL))
+      .anyMatch(matchView(MODULE_BAZ_ID, APP_2_0_0_ID, MODULE_BAZ_DISCOVERY_URL));
+
+    moduleRepository.findById(MODULE_BAZ_ID).stream().peek(moduleEntity -> moduleEntity.setDiscoveryUrl(null))
+      .forEach(moduleRepository::save);
+    moduleRepository.flush();
+
+    result = repository.findAllRequiredByModuleId(MODULE_FOO_ID);
+    assertThat(result)
       .hasSize(2)
-      .anyMatch(matchView(MODULE_FOO_ID, MODULE_FOO_APP_ID, MODULE_FOO_DISCOVERY_URL))
-      .anyMatch(matchView(MODULE_BAR_ID, MODULE_BAR_APP_ID, MODULE_BAR_DISCOVERY_URL));
+      .anyMatch(matchView(MODULE_FOO_ID, APP_1_0_0_ID, MODULE_FOO_DISCOVERY_URL))
+      .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL));
   }
 
   @Test
@@ -48,7 +64,7 @@ class ModuleBootstrapViewRepositoryIT extends BaseRepositoryTest {
     var result = repository.findAllRequiredByModuleId(MODULE_BAR_ID);
     assertThat(result)
       .hasSize(1)
-      .anyMatch(matchView(MODULE_BAR_ID, MODULE_BAR_APP_ID, MODULE_BAR_DISCOVERY_URL));
+      .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL));
   }
 
   private Predicate<ModuleBootstrapView> matchView(String moduleId, String appId, String location) {
