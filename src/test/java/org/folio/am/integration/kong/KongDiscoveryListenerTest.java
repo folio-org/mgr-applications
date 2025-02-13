@@ -43,7 +43,7 @@ class KongDiscoveryListenerTest {
     var kongService = kongService(MODULE_URL);
     service.onDiscoveryCreate(moduleDiscovery(), null);
     verify(kongAdminClient).upsertService(kongService);
-    verify(kongAdminClient).addRoutes(null, Collections.singletonList(mockModuleDescriptor));
+    verify(kongAdminClient).addRoutes(Collections.singletonList(mockModuleDescriptor));
   }
 
   @Test
@@ -56,7 +56,7 @@ class KongDiscoveryListenerTest {
     service.onDiscoveryUpdate(moduleDiscovery(SERVICE_NAME, SERVICE_VERSION, UPDATED_URL), null);
     verify(kongAdminClient).upsertService(updatedService);
     verify(kongAdminClient).deleteServiceRoutes(MODULE_ID);
-    verify(kongAdminClient).addRoutes(null, Collections.singletonList(mockModuleDescriptor));
+    verify(kongAdminClient).addRoutes(Collections.singletonList(mockModuleDescriptor));
   }
 
   @Test
