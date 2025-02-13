@@ -15,8 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.folio.am.domain.dto.ModuleBootstrap;
 import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
 import org.folio.am.domain.entity.ModuleBootstrapView;
+import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.mapper.ModuleBootstrapMapper;
 import org.folio.am.repository.ModuleBootstrapViewRepository;
+import org.folio.am.repository.ModuleRepository;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
@@ -28,8 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ModuleBootstrapService {
 
-  private final ModuleBootstrapViewRepository repository;
+  private final ModuleBootstrapViewRepository bootstrapViewRepository;
   private final ModuleBootstrapMapper mapper;
+  private final ModuleRepository moduleRepository;
 
   /**
    * Retrieves a module bootstrap data including information for the modules that provides interfaces listed in
@@ -41,10 +44,13 @@ public class ModuleBootstrapService {
    */
   @Transactional(readOnly = true)
   public ModuleBootstrap getById(String moduleId) {
-    var views = repository.findAllRequiredByModuleId(moduleId);
+    var views = bootstrapViewRepository.findAllRequiredByModuleId(moduleId);
 
     var moduleView = removeModuleViewById(moduleId, views);
     var module = mapper.convert(moduleView);
+    module.setPermissionSets(
+      moduleRepository.findById(moduleId).map(ModuleEntity::getDescriptor).map(ModuleDescriptor::getPermissionSets)
+        .orElse(List.of()));
 
     var requiredInterfaces = getRequiredOptionalInterfaces(moduleView);
     var requiredModules = toModuleDiscoveries(requiredInterfaces, views);
