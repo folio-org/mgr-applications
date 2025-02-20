@@ -12,15 +12,21 @@ import static org.folio.am.support.TestConstants.MODULE_FOO_INTERFACE_ID;
 import static org.folio.am.support.TestValues.moduleBootstrap;
 import static org.folio.am.support.TestValues.moduleBootstrapDiscovery;
 import static org.folio.am.support.TestValues.moduleBootstrapView;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.mapper.ModuleBootstrapMapperImpl;
 import org.folio.am.repository.ModuleBootstrapViewRepository;
+import org.folio.am.repository.ModuleRepository;
 import org.folio.common.domain.model.InterfaceReference;
+import org.folio.common.domain.model.ModuleDescriptor;
+import org.folio.common.domain.model.Permission;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,28 +39,35 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ModuleBootstrapServiceTest {
 
   @Mock private ModuleBootstrapViewRepository repository;
+  @Mock private ModuleRepository moduleRepository;
 
   private ModuleBootstrapService service;
 
   @BeforeEach
   void setUp() {
-    service = new ModuleBootstrapService(repository, new ModuleBootstrapMapperImpl());
+    service = new ModuleBootstrapService(repository,  new ModuleBootstrapMapperImpl(), moduleRepository);
   }
 
   @Test
   void getById_positive() {
+    var moduleEntityMock = mock(ModuleEntity.class);
+    var mockModuleDescriptor = mock(ModuleDescriptor.class);
+    var mockPermission = new Permission();
+    mockPermission.setPermissionName("MockPerm");
+    when(moduleEntityMock.getDescriptor()).thenReturn(mockModuleDescriptor);
+    when(mockModuleDescriptor.getPermissionSets()).thenReturn(List.of(mockPermission));
+
     var expectedView = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
     expectedView.getDescriptor().addRequiresItem(new InterfaceReference().id(MODULE_BAR_INTERFACE_ID));
-
     var expectedDependencyView = moduleBootstrapView(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID, "not-required-interface");
     var expectedViews = new ArrayList<>(asList(expectedView, expectedDependencyView));
-
-    var expectedModuleDiscovery = moduleBootstrapDiscovery(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
-    var expectedDependencyDiscovery = moduleBootstrapDiscovery(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID);
-
     when(repository.findAllRequiredByModuleId(MODULE_FOO_ID)).thenReturn(expectedViews);
+    when(moduleRepository.findById(MODULE_FOO_ID)).thenReturn(Optional.of(moduleEntityMock));
 
     var actual = service.getById(MODULE_FOO_ID);
+    var expectedModuleDiscovery = moduleBootstrapDiscovery(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
+    expectedModuleDiscovery.setPermissionSets(List.of(mockPermission));
+    var expectedDependencyDiscovery = moduleBootstrapDiscovery(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID);
     assertThat(actual).isEqualTo(moduleBootstrap(expectedModuleDiscovery, expectedDependencyDiscovery));
   }
 
@@ -68,6 +81,7 @@ class ModuleBootstrapServiceTest {
     var expectedModuleDiscovery = moduleBootstrapDiscovery(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
 
     when(repository.findAllRequiredByModuleId(MODULE_FOO_ID)).thenReturn(expectedViews);
+    when(moduleRepository.findById(MODULE_FOO_ID)).thenReturn(Optional.of(mock(ModuleEntity.class)));
 
     var actual = service.getById(MODULE_FOO_ID);
     assertThat(actual).isEqualTo(moduleBootstrap(expectedModuleDiscovery));
@@ -87,6 +101,7 @@ class ModuleBootstrapServiceTest {
 
     when(repository.findAllRequiredByModuleId(MODULE_BAR_ID)).thenReturn(new ArrayList<>(
       List.of(expectedView, expectedDependencyView1, expectedDependencyView2, expectedDependencyView3)));
+    when(moduleRepository.findById(MODULE_BAR_ID)).thenReturn(Optional.of(mock(ModuleEntity.class)));
 
     var actual = service.getById(MODULE_BAR_ID);
     assertThat(actual.getRequiredModules()).hasSize(1);
