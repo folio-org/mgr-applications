@@ -75,7 +75,7 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
     if (routeManagementEnable) {
       var moduleEntity = moduleRepository.findById(moduleDiscovery.getArtifactId()).orElseThrow();
       log.info("Adding Kong service {} module {} routes", serviceId, moduleEntity.getId());
-      kongGatewayService.addRoutes(null, singletonList(moduleEntity.getDescriptor()));
+      kongGatewayService.addRoutes(singletonList(moduleEntity.getDescriptor()));
     } else {
       log.info("Kong routes management disabled for modules.");
     }
