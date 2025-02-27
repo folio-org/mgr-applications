@@ -21,14 +21,6 @@
       "items": {
         "$ref": "moduleBootstrapInterface.json"
       }
-    },
-    "permissionSets": {
-      "description": "List of module permissions",
-      "type": "array",
-      "id": "permissionModel",
-      "items": {
-        "$ref": "permissionModel.json"
-      }
     }
   },
   "required": [

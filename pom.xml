@@ -532,8 +532,12 @@
               <generateSupportingFiles>true</generateSupportingFiles>
               <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
               <generateModelDocumentation>true</generateModelDocumentation>
-              <importMappings>ModuleDescriptor=org.folio.common.domain.model.ModuleDescriptor,Permission=org.folio.common.domain.model.Permission</importMappings>
-              <schemaMappings>moduleDescriptor=ModuleDescriptor,permissionModel=Permission</schemaMappings>
+              <importMappings>
+                ModuleDescriptor=org.folio.common.domain.model.ModuleDescriptor
+              </importMappings>
+              <schemaMappings>
+                moduleDescriptor=ModuleDescriptor
+              </schemaMappings>
               <configOptions>
                 <java8>true</java8>
                 <dateLibrary>java</dateLibrary>
