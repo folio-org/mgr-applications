@@ -4,6 +4,8 @@ import static org.folio.am.support.TestUtils.generateAccessToken;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.readString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.json.JsonCompareMode.STRICT;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,7 +21,6 @@ import org.folio.test.extensions.impl.WireMockExtension;
 import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @IntegrationTest
 @EnableKeycloakSecurity
@@ -44,9 +45,9 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
 
-    mockMvc.perform(MockMvcRequestBuilders.get("/modules/foo-module-9.9.9")
+    mockMvc.perform(get("/modules/foo-module-9.9.9")
         .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(status().isOk())
-      .andExpect(content().json(readString("json/module-bootstrap/bootstrap-foo-module-9.9.9.json")));
+      .andExpect(content().json(readString("json/module-bootstrap/bootstrap-foo-module-9.9.9.json"), STRICT));
   }
 }
