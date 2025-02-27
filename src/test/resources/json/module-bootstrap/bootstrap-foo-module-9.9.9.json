@@ -11,12 +11,15 @@
             "methods": [ "GET" ],
             "pathPattern": "/pets",
             "permissionsRequired": [ "pets.collection.get" ],
-            "permissionsDesired": [ "zoos.collection.get" ]
+            "permissionsDesired": [ "zoos.collection.get" ],
+            "modulePermissions": [ "pet-storage.collection.get" ]
           },
           {
             "methods": [ "POST" ],
             "pathPattern": "/pets",
-            "permissionsRequired": [ "pets.item.post" ]
+            "permissionsRequired": [ "pets.item.post" ],
+            "permissionsDesired" : [ ],
+            "modulePermissions": [ "pet-storage.item.post" ]
           }
         ]
       }
