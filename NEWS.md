@@ -1,4 +1,7 @@
-## Version `v3.0.3` (12.02.2025)
+## Version `2.1.0` (06.03.2025)
+* Added module permissions to bootstrap API
+
+## Version `v2.0.3` (12.02.2025)
 * Fixed issue with different versions of same module being returned as dependencies in module bootstrap information.
 
 ## Version `v2.0.2` (03.02.2025)
