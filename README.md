@@ -115,7 +115,7 @@ docker run \
 | TE_TLS_TRUSTSTORE_PATH                   | -                            |  false   | Truststore file path for TLS connection to mgr-tenant-entitlements module.                                                                                                                                 |
 | TE_TLS_TRUSTSTORE_PASSWORD               | -                            |  false   | Truststore password for TLS connection to mgr-tenant-entitlements module.                                                                                                                                  |
 | TE_TLS_TRUSTSTORE_TYPE                   | -                            |  false   | Truststore file type for TLS connection to mgr-tenant-entitlements module.                                                                                                                                 |
-| SECURITY_ENABLED                         | false                        |  false   | Allows to enable/disable security. If true and KEYCLOAK_INTEGRATION_ENABLED is also true - the Keycloak will be used as a security provider.                                                               |
+| SECURITY_ENABLED                         | false                        |  false   | Allows to enable/disable security. If true and KC_INTEGRATION_ENABLED is also true - the Keycloak will be used as a security provider.                                                               |
 | FAR_MODE                                 | false                        |  false   | Allows to enable Folio Application Registry mode, if FAR mode is enabled, kong integration must disabled using environment variable `KONG_INTEGRATION_ENABLED`.                                            |
 | MOD_AUTHTOKEN_URL                        | -                            |   true   | Mod-authtoken URL. Required if OKAPI_INTEGRATION_ENABLED is true and SECURITY_ENABLED is true and KC_INTEGRATION_ENABLED is false.                                                                         |
 | SECRET_STORE_TYPE                        | -                            |   true   | Secure storage type. Supported values: `EPHEMERAL`, `AWS_SSM`, `VAULT`                                                                                                                                     |
@@ -182,7 +182,7 @@ As startup, the application creates/updates necessary records in Keycloak from t
 Keycloak can be used as a security provider. If enabled - application will delegate endpoint permissions evaluation to
 Keycloak.
 A valid Keycloak JWT token must be passed for accessing secured resources.
-The feature is controlled by two env variables `SECURITY_ENABLED` and `KEYCLOAK_INTEGRATION_ENABLED`.
+The feature is controlled by two env variables `SECURITY_ENABLED` and `KC_INTEGRATION_ENABLED`.
 
 ### Keycloak specific environment variables
 
