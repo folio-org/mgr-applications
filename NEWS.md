@@ -1,3 +1,14 @@
+## Version `v3.0.0` (12.03.2025)
+* Add module permissions to bootstrap API (MGRAPPS-48)
+* Upgrade to Java 21. (MGRAPPS-46)
+* Remove tenant-specific routes logic (MGRENTITLE-92)
+* Return module permissions in module bootstrap info (MGRAPPS-44)
+* Not able to entitle applications after routes migration (MGRAPPS-45)
+* Reduce number of redundant routes in Kong (MGRAPPS-35)
+* Increase version of keycloak-admin-client to v26.0.4 (KEYCLOAK-25) 
+
+---
+
 ## Version `v2.0.0` (01.11.2024)
 * Increase version of keycloak-admin-client to v25.0.6 (KEYCLOAK-24)
 
