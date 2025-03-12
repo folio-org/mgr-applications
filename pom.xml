@@ -12,7 +12,7 @@
   <name>mgr-applications</name>
   <groupId>org.folio</groupId>
   <artifactId>mgr-applications</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1-SNAPSHOT</version>
   <description>Application Manager</description>
   <packaging>jar</packaging>
 
