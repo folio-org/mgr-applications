@@ -49,7 +49,7 @@ application:
   far-mode:
     enabled: ${FAR_MODE:false}
   security:
-    enabled: ${SECURITY_ENABLED:false}
+    enabled: ${SECURITY_ENABLED:true}
   kong:
     enabled: ${KONG_INTEGRATION_ENABLED:true}
     url: ${KONG_ADMIN_URL:${kong.url:}}
@@ -75,7 +75,7 @@ application:
         numPartitions: ${KAFKA_DISCOVERY_TOPIC_PARTITIONS:1}
         replicationFactor: ${KAFKA_DISCOVERY_TOPIC_REPLICATION_FACTOR:}
   keycloak:
-    enabled: ${KC_INTEGRATION_ENABLED:false}
+    enabled: ${KC_INTEGRATION_ENABLED:true}
     url: ${KC_URL:http://keycloak:8080}
     admin:
       client_id: ${KC_ADMIN_CLIENT_ID:folio-backend-admin-client}
