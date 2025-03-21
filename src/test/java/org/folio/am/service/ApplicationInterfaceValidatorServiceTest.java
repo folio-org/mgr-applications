@@ -34,9 +34,11 @@ class ApplicationInterfaceValidatorServiceTest {
   @Test
   void validate_negative_providedSameApplicationWithDifferentVersion() {
     var applicationEntity1 = new ApplicationEntity();
+    applicationEntity1.setId("app1-1.0.0");
     applicationEntity1.setName("app1");
     applicationEntity1.setVersion("1.0.0");
     var applicationEntity2 = new ApplicationEntity();
+    applicationEntity2.setId("app1-2.0.1");
     applicationEntity2.setName("app1");
     applicationEntity2.setVersion("2.0.1");
     applicationEntity2.setApplicationDescriptor(new ApplicationDescriptor());
@@ -58,12 +60,14 @@ class ApplicationInterfaceValidatorServiceTest {
   @Test
   void validate_negative_applicationDependencyByNameIsMissed() {
     var applicationEntity1 = new ApplicationEntity();
+    applicationEntity1.setId("app1-1.0.0");
     applicationEntity1.setName("app1");
     applicationEntity1.setVersion("1.0.0");
     var dependency = new Dependency().name("app3").version("1.0.0");
     var applicationDescriptor1 = new ApplicationDescriptor().dependencies(List.of(dependency));
     applicationEntity1.setApplicationDescriptor(applicationDescriptor1);
     var applicationEntity2 = new ApplicationEntity();
+    applicationEntity2.setId("app2-3.0.1");
     applicationEntity2.setName("app2");
     applicationEntity2.setVersion("3.0.1");
     applicationEntity2.setApplicationDescriptor(new ApplicationDescriptor());
@@ -81,12 +85,14 @@ class ApplicationInterfaceValidatorServiceTest {
   @Test
   void validate_negative_applicationDependencyByVersionIsMissed() {
     var applicationEntity1 = new ApplicationEntity();
+    applicationEntity1.setId("app1-1.0.0");
     applicationEntity1.setName("app1");
     applicationEntity1.setVersion("1.0.0");
     var dependency = new Dependency().name("app2").version("^2.0.1");
     var applicationDescriptor1 = new ApplicationDescriptor().dependencies(List.of(dependency));
     applicationEntity1.setApplicationDescriptor(applicationDescriptor1);
     var applicationEntity2 = new ApplicationEntity();
+    applicationEntity2.setId("app2-3.0.1");
     applicationEntity2.setName("app2");
     applicationEntity2.setVersion("3.0.1");
     applicationEntity2.setApplicationDescriptor(new ApplicationDescriptor());

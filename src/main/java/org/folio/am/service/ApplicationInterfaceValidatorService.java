@@ -1,6 +1,7 @@
 package org.folio.am.service;
 
 import static java.lang.String.format;
+import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
@@ -43,15 +44,25 @@ public class ApplicationInterfaceValidatorService {
   public void validate(ApplicationReferences applicationReferences) {
     var applicationEntities = applicationService
       .findByIdsWithModules(new ArrayList<>(applicationReferences.getApplicationIds()));
-    validateApplications(applicationEntities);
+    var foundIds = applicationEntities
+     .stream()
+     .map(ApplicationEntity::getId)
+     .collect(toSet());
+    var notFoundId = applicationReferences.getApplicationIds()
+      .stream()
+      .filter(not(foundIds::contains))
+      .collect(joining(","));
+    if (isNotEmpty(notFoundId)) {
+      var errorMessage = format("validate:: applications not exist by ids : %s", notFoundId);
+      log.info(errorMessage);
+      throw new RequestValidationException(errorMessage);
+    }
+    log.info("validate:: validate applications ids {}", () -> String.join(",", foundIds));
+    validateDependencies(applicationEntities);
     validateInterfaces(applicationEntities);
   }
 
-  private void validateApplications(List<ApplicationEntity> applicationEntities) {
-    log.info("validateApplications:: validate {}", () -> applicationEntities
-      .stream()
-      .map(ApplicationEntity::getId)
-      .collect(joining(",")));
+  private void validateDependencies(List<ApplicationEntity> applicationEntities) {
     var appNamesWithSeveralVersions = applicationEntities
       .stream()
       .collect(groupingBy(ApplicationEntity::getName, mapping(ApplicationEntity::getVersion, toSet())))
@@ -98,10 +109,6 @@ public class ApplicationInterfaceValidatorService {
   }
 
   private void validateInterfaces(List<ApplicationEntity> applicationEntities) {
-    log.info("validateApplications:: validate {}", () -> applicationEntities
-      .stream()
-      .map(ApplicationEntity::getId)
-      .collect(joining(",")));
     var provided = getProvidedInterfaces(applicationEntities);
     var missedInterfacesPerApplication = applicationEntities
       .stream()
@@ -124,7 +131,7 @@ public class ApplicationInterfaceValidatorService {
   private Set<InterfaceReference> getProvidedInterfaces(List<ApplicationEntity> applicationEntities) {
     return applicationEntities
       .stream()
-      .map(this::getModuleDescriptorsOfApplication)
+      .map(this::getModuleDescriptors)
       .flatMap(Collection::stream)
       .map(ModuleDescriptor::getProvides)
       .flatMap(Collection::stream)
@@ -134,7 +141,7 @@ public class ApplicationInterfaceValidatorService {
   }
 
   private Set<InterfaceReference> getRequiredInterfaces(ApplicationEntity applicationEntity) {
-    var descriptors = getModuleDescriptorsOfApplication(applicationEntity);
+    var descriptors = getModuleDescriptors(applicationEntity);
     return descriptors
       .stream()
       .map(ModuleDescriptor::getRequires)
@@ -142,7 +149,7 @@ public class ApplicationInterfaceValidatorService {
       .collect(toCollection(LinkedHashSet::new));
   }
 
-  private List<ModuleDescriptor> getModuleDescriptorsOfApplication(ApplicationEntity applicationEntity) {
+  private List<ModuleDescriptor> getModuleDescriptors(ApplicationEntity applicationEntity) {
     var beModuleDescriptors = applicationEntity.getModules()
       .stream()
       .map(ModuleEntity::getDescriptor)

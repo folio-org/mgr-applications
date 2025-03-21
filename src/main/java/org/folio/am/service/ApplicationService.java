@@ -89,7 +89,7 @@ public class ApplicationService {
   }
 
   /**
-   * Returns list of application their ids with modules.
+   * Returns list of applications entities by their ids with modules.
    *
    * @param ids - application ids
    * @return {@link List} with {@link ApplicationEntity} objects
