@@ -46,8 +46,8 @@ public class ApplicationInterfaceValidatorService {
       .findByIdsWithModules(new ArrayList<>(applicationReferences.getApplicationIds()));
     var foundIds = applicationEntities
       .stream()
-      .map(ApplicationEntity::getId).
-      collect(toSet());
+      .map(ApplicationEntity::getId)
+      .collect(toSet());
     var notFoundId = applicationReferences.getApplicationIds()
       .stream()
       .filter(not(foundIds::contains))
