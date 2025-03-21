@@ -89,6 +89,17 @@ public class ApplicationService {
   }
 
   /**
+   * Returns list of application their ids with modules.
+   *
+   * @param ids - application ids
+   * @return {@link List} with {@link ApplicationEntity} objects
+   */
+  @Transactional(readOnly = true)
+  public List<ApplicationEntity> findByIdsWithModules(List<String> ids) {
+    return appRepository.findByIdsWihModules(ids);
+  }
+
+  /**
    * Retrieves application descriptors by CQL query.
    *
    * @param query - CQL query with search and filter conditions.

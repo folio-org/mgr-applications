@@ -109,6 +109,25 @@ paths:
         '500':
           $ref: '#/components/responses/internal-server-error'
 
+  /applications/validate-interfaces:
+    post:
+      operationId: validateModulesInterfaceIntegrity
+      description: Validate module interface integrity.
+      tags:
+        - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/applicationReferences'
+      responses:
+        '204':
+          description: No content
+        '400':
+          $ref: '#/components/responses/bad-request'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
   /applications/{id}/discovery:
     get:
       operationId: getDiscovery
