@@ -48,12 +48,12 @@ public class ApplicationInterfaceValidatorService {
       .stream()
       .map(ApplicationEntity::getId)
       .collect(toSet());
-    var notFoundId = applicationReferences.getApplicationIds()
+    var notFoundIds = applicationReferences.getApplicationIds()
       .stream()
       .filter(not(foundIds::contains))
       .collect(joining(","));
-    if (isNotEmpty(notFoundId)) {
-      var errorMessage = format("validate:: applications not exist by ids : %s", notFoundId);
+    if (isNotEmpty(notFoundIds)) {
+      var errorMessage = format("validate:: applications not exist by ids : %s", notFoundIds);
       log.info(errorMessage);
       throw new RequestValidationException(errorMessage);
     }
