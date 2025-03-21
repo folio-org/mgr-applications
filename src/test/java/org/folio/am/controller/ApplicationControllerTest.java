@@ -29,6 +29,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.dto.Dependency;
+import org.folio.am.service.ApplicationInterfaceValidatorService;
 import org.folio.am.service.ApplicationService;
 import org.folio.am.service.ApplicationValidatorService;
 import org.folio.am.service.validator.ValidationMode;
@@ -70,6 +71,7 @@ class ApplicationControllerTest {
   @MockBean private JsonWebTokenParser jsonWebTokenParser;
   @MockBean private ApplicationValidatorService applicationValidatorService;
   @MockBean private ApplicationService applicationService;
+  @MockBean private ApplicationInterfaceValidatorService applicationInterfaceValidatorService;
 
   @Test
   void get_positive() throws Exception {
