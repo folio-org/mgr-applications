@@ -59,10 +59,6 @@ public class TestValues {
     return applicationDescriptor(APPLICATION_ID);
   }
 
-  public static ApplicationReferences applicationReferences() {
-    return new ApplicationReferences().applicationIds(Set.of("test-application-1.0.0"));
-  }
-
   public static ApplicationDescriptor applicationDescriptor(String id) {
     return applicationDescriptor(id, APPLICATION_NAME, APPLICATION_VERSION)
       .addModulesItem(new Module().id("test-module-1.0.0").name("test-module").version("1.0.0"))
@@ -365,5 +361,9 @@ public class TestValues {
     userMap.put("type", "system");
     userMap.put("permissions", List.of("test.permission1", "test.permission2"));
     return userMap;
+  }
+
+  public static ApplicationReferences applicationReferences() {
+    return new ApplicationReferences().applicationIds(Set.of("test-application-1.0.0"));
   }
 }
