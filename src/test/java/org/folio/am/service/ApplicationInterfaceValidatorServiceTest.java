@@ -40,7 +40,7 @@ class ApplicationInterfaceValidatorServiceTest {
     applicationEntity1.setVersion("1.0.0");
     applicationEntity1.setId("app1-1.0.0");
     var beModuleDescriptor = new ModuleDescriptor()
-      .requires(List.of(new InterfaceReference().id("configuration").version("1.0.0")));
+      .requires(List.of(new InterfaceReference().id("configuration").version("1.0.0 2.0.0")));
     var beModule = new ModuleEntity();
     beModule.setDescriptor(beModuleDescriptor);
     var uiModuleDescriptor = new ModuleDescriptor()

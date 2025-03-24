@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.folio.am.utils.CollectionUtils.union;
 
@@ -27,6 +28,7 @@ import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.entity.UiModuleEntity;
 import org.folio.am.exception.RequestValidationException;
+import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.common.domain.model.error.Parameter;
@@ -114,7 +116,8 @@ public class ApplicationInterfaceValidatorService {
       .stream()
       .collect(toMap(ApplicationEntity::getId, applicationEntity -> {
         var neededInterfaces = getRequiredInterfaces(applicationEntity);
-        neededInterfaces.removeAll(provided);
+        neededInterfaces.removeIf(interfaceToCheck -> provided.containsKey(interfaceToCheck.getId())
+          && contains(interfaceToCheck.getVersion(), provided.get(interfaceToCheck.getId())));
         return interfaceReferencesAsString(neededInterfaces);
       }));
     var errorParameters = new ArrayList<Parameter>();
@@ -128,16 +131,14 @@ public class ApplicationInterfaceValidatorService {
     }
   }
 
-  private Set<InterfaceReference> getProvidedInterfaces(List<ApplicationEntity> applicationEntities) {
+  private Map<String, String> getProvidedInterfaces(List<ApplicationEntity> applicationEntities) {
     return applicationEntities
       .stream()
       .map(this::getModuleDescriptors)
       .flatMap(Collection::stream)
       .map(ModuleDescriptor::getProvides)
       .flatMap(Collection::stream)
-      .map(interfaceDescriptor -> InterfaceReference.of(interfaceDescriptor.getId(),
-        interfaceDescriptor.getVersion()))
-      .collect(toSet());
+      .collect(toMap(InterfaceDescriptor::getId, InterfaceDescriptor::getVersion));
   }
 
   private Set<InterfaceReference> getRequiredInterfaces(ApplicationEntity applicationEntity) {
