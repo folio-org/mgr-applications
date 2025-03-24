@@ -53,8 +53,8 @@ public class ApplicationInterfaceValidatorService {
       .filter(not(foundIds::contains))
       .collect(joining(","));
     if (isNotEmpty(notFoundIds)) {
-      var errorMessage = format("validate:: applications not exist by ids : %s", notFoundIds);
-      log.info(errorMessage);
+      var errorMessage = format("Applications not exist by ids : %s", notFoundIds);
+      log.info("validate:: {}", errorMessage);
       throw new RequestValidationException(errorMessage);
     }
     log.info("validate:: validate applications ids {}", () -> String.join(",", foundIds));
@@ -118,9 +118,9 @@ public class ApplicationInterfaceValidatorService {
         return interfaceReferencesAsString(neededInterfaces);
       }));
     var errorParameters = new ArrayList<Parameter>();
-    for (var appId : missedInterfacesPerApplication.keySet()) {
-      if (isNotEmpty(missedInterfacesPerApplication.get(appId))) {
-        errorParameters.add(new Parameter().key(appId).value(missedInterfacesPerApplication.get(appId)));
+    for (var entry : missedInterfacesPerApplication.entrySet()) {
+      if (isNotEmpty(entry.getValue())) {
+        errorParameters.add(new Parameter().key(entry.getKey()).value(entry.getValue()));
       }
     }
     if (!errorParameters.isEmpty()) {

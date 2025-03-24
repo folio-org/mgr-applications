@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.am.support.TestConstants.APPLICATION_ID;
 import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
 import static org.folio.am.support.TestValues.applicationDescriptor;
+import static org.folio.am.support.TestValues.applicationReferences;
 import static org.folio.am.support.TestValues.validationContext;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
@@ -47,9 +48,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.z3950.zing.cql.CQLParseException;
 
@@ -67,11 +68,11 @@ class ApplicationControllerTest {
 
   @Autowired private MockMvc mockMvc;
   @Mock private JsonWebToken jsonWebToken;
-  @MockBean private KeycloakAuthClient authClient;
-  @MockBean private JsonWebTokenParser jsonWebTokenParser;
-  @MockBean private ApplicationValidatorService applicationValidatorService;
-  @MockBean private ApplicationService applicationService;
-  @MockBean private ApplicationInterfaceValidatorService applicationInterfaceValidatorService;
+  @MockitoBean private KeycloakAuthClient authClient;
+  @MockitoBean private JsonWebTokenParser jsonWebTokenParser;
+  @MockitoBean private ApplicationValidatorService applicationValidatorService;
+  @MockitoBean private ApplicationService applicationService;
+  @MockitoBean private ApplicationInterfaceValidatorService applicationInterfaceValidatorService;
 
   @Test
   void get_positive() throws Exception {
@@ -416,5 +417,20 @@ class ApplicationControllerTest {
       .andExpect(status().isNoContent());
 
     verify(applicationValidatorService).validate(validationContext(), ValidationMode.BASIC);
+  }
+
+  @Test
+  void validateModulesInterfaceIntegrity_positive() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    mockMvc.perform(post("/applications/validate-interfaces")
+        .content(asJsonString(applicationReferences()))
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNoContent());
+
+    verify(applicationInterfaceValidatorService).validate(applicationReferences());
   }
 }

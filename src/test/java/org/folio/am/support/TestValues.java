@@ -25,10 +25,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.folio.am.domain.dto.ApplicationDescriptor;
+import org.folio.am.domain.dto.ApplicationReferences;
 import org.folio.am.domain.dto.DeploymentDescriptor;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.dto.ModuleBootstrap;
@@ -55,6 +57,10 @@ public class TestValues {
 
   public static ApplicationDescriptor applicationDescriptor() {
     return applicationDescriptor(APPLICATION_ID);
+  }
+
+  public static ApplicationReferences applicationReferences() {
+    return new ApplicationReferences().applicationIds(Set.of("test-application-1.0.0"));
   }
 
   public static ApplicationDescriptor applicationDescriptor(String id) {
