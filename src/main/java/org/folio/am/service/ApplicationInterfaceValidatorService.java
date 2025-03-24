@@ -55,9 +55,9 @@ public class ApplicationInterfaceValidatorService {
       .filter(not(foundIds::contains))
       .collect(joining(","));
     if (isNotEmpty(notFoundIds)) {
-      var errorMessage = format("Applications not exist by ids : %s", notFoundIds);
-      log.info("validate:: {}", errorMessage);
-      throw new RequestValidationException(errorMessage);
+      var validationMessage = format("Applications not exist by ids : %s", notFoundIds);
+      log.info("validate:: {}", validationMessage);
+      throw new RequestValidationException(validationMessage);
     }
     log.info("validate:: validate applications ids {}", () -> String.join(",", foundIds));
     validateDependencies(applicationEntities);
@@ -75,9 +75,9 @@ public class ApplicationInterfaceValidatorService {
       .collect(joining(";"));
     if (isNotEmpty(appNamesWithSeveralVersions)) {
       var parameter = new Parameter().key("applicationNames").value(appNamesWithSeveralVersions);
-      var errorMessage = "Provided same applications with different versions";
-      log.info("validateApplications:: {}", errorMessage + " " + appNamesWithSeveralVersions);
-      throw new RequestValidationException(errorMessage, List.of(parameter));
+      var validationMessage = "Provided same applications with different versions";
+      log.info("validateApplications:: {}", validationMessage + " " + appNamesWithSeveralVersions);
+      throw new RequestValidationException(validationMessage, List.of(parameter));
     }
     var mapApplicationNameToVersions = applicationEntities
       .stream()
@@ -95,17 +95,17 @@ public class ApplicationInterfaceValidatorService {
     Map<String, String> mapApplicationNameToVersions) {
     for (var dependency : dependencies) {
       if (!mapApplicationNameToVersions.containsKey(dependency.getName())) {
-        var errorMessage = format("Application dependency by name %s not exist", dependency.getName());
-        log.info("validateApplicationDependencies:: {}", errorMessage);
-        throw new RequestValidationException(errorMessage);
+        var validationMessage = format("Application dependency by name %s not exist", dependency.getName());
+        log.info("validateApplicationDependencies:: {}", validationMessage);
+        throw new RequestValidationException(validationMessage);
       }
       var existVersion = mapApplicationNameToVersions.get(dependency.getName());
       var requiredVersionRanges = RangesListFactory.create(dependency.getVersion());
       if (!requiredVersionRanges.isSatisfiedBy(new Semver(existVersion))) {
-        var errorMessage = format("Application dependency by name %s and version %s not exist",
+        var validationMessage = format("Application dependency by name %s and version %s not exist",
           dependency.getName(), dependency.getVersion());
-        log.info("validateApplicationDependencies:: {}", errorMessage);
-        throw new RequestValidationException(errorMessage);
+        log.info("validateApplicationDependencies:: {}", validationMessage);
+        throw new RequestValidationException(validationMessage);
       }
     }
   }
