@@ -1,6 +1,7 @@
 package org.folio.am.service;
 
 import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
@@ -59,7 +60,7 @@ public class ApplicationInterfaceValidatorService {
       log.info("validate:: {}", validationMessage);
       throw new RequestValidationException(validationMessage);
     }
-    log.info("validate:: validate applications ids {}", () -> String.join(",", foundIds));
+    log.info("validate:: validate applications ids {}", () -> join(",", foundIds));
     validateDependencies(applicationEntities);
     validateInterfaces(applicationEntities);
   }
