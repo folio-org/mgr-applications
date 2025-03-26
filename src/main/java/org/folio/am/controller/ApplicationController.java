@@ -6,9 +6,11 @@ import static org.springframework.http.HttpStatus.CREATED;
 import lombok.RequiredArgsConstructor;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
+import org.folio.am.domain.dto.ApplicationReferences;
 import org.folio.am.domain.dto.ValidationMode;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.rest.resource.ApplicationsApi;
+import org.folio.am.service.ApplicationInterfaceValidatorService;
 import org.folio.am.service.ApplicationService;
 import org.folio.am.service.ApplicationValidatorService;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApplicationController extends BaseController implements ApplicationsApi {
 
   private final ApplicationValidatorService applicationValidatorService;
+  private final ApplicationInterfaceValidatorService applicationInterfaceValidatorService;
   private final ApplicationService applicationService;
 
   @Override
@@ -59,6 +62,12 @@ public class ApplicationController extends BaseController implements Application
       applicationValidatorService.validate(validationContext, toServiceMode(mode));
     }
 
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<Void> validateModulesInterfaceIntegrity(ApplicationReferences applicationReferences) {
+    applicationInterfaceValidatorService.validate(applicationReferences);
     return ResponseEntity.noContent().build();
   }
 

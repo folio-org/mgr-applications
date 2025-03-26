@@ -3,6 +3,7 @@ package org.folio.am.repository;
 import java.util.List;
 import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.spring.cql.JpaCqlRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,10 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
 
   @Query(value = "SELECT entity FROM ApplicationEntity entity WHERE entity.id IN :ids")
   List<ApplicationEntity> findByIds(@Param("ids") List<String> applicationIds);
+
+  @EntityGraph(attributePaths = {"modules", "uiModules"})
+  @Query(value = "SELECT entity FROM ApplicationEntity entity WHERE entity.id IN :ids")
+  List<ApplicationEntity> findByIdsWihModules(@Param("ids") List<String> applicationIds);
 
   @Query(value = """
     SELECT DISTINCT entity FROM ApplicationEntity entity
