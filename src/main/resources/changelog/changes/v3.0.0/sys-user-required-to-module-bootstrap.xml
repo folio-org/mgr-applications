@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
-    <changeSet id="update-module-bootstrap-view" author="dmtkachenko">
+    <changeSet id="add-system-user-required-to-module-bootstrap-view" author="dmtkachenko">
         <createView viewName="module_bootstrap" replaceIfExists="true">
             SELECT m.*,
                    am.application_id,
