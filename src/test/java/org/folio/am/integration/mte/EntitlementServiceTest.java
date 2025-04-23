@@ -9,9 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import org.folio.am.domain.model.ResultList;
 import org.folio.am.exception.ServiceException;
 import org.folio.am.integration.mte.model.Entitlement;
+import org.folio.common.domain.model.ResultList;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

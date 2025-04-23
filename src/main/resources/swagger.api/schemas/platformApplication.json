@@ -3,7 +3,7 @@
   "title": "Platform Descriptor Schema",
   "description": "Platform Descriptor for Application Manager Installer",
   "type": "object",
-  "x-implements": [ "org.folio.am.domain.model.Artifact" ],
+  "x-implements": [ "org.folio.common.domain.model.Artifact" ],
   "allOf": [
     {
       "$ref": "common/artifact.json"

@@ -1,3 +1,8 @@
+## Version `v3.x.x` (TBD)
+* Provide "System User required" attribute as part of module bootstrap data (MGRAPPS-54)
+
+---
+
 ## Version `v3.0.0` (12.03.2025)
 * Add module permissions to bootstrap API (MGRAPPS-48)
 * Upgrade to Java 21. (MGRAPPS-46)
