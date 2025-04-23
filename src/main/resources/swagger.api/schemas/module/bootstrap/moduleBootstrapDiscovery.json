@@ -15,6 +15,11 @@
       "description": "Module location",
       "type": "string"
     },
+    "systemUserRequired": {
+      "description": "Whether the module requires system user or not",
+      "type": "boolean",
+      "default": false
+    },
     "interfaces": {
       "description": "Provided interfaces",
       "type": "array",

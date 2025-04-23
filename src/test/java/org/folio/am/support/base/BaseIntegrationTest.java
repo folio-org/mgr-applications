@@ -12,6 +12,7 @@ import org.folio.test.base.BaseBackendIntegrationTest;
 import org.folio.test.extensions.EnableKafka;
 import org.folio.test.extensions.EnableWireMock;
 import org.folio.test.extensions.impl.KafkaTestExecutionListener;
+import org.folio.test.extensions.impl.WireMockAdminClient;
 import org.folio.test.extensions.impl.WireMockExecutionListener;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ import org.springframework.test.context.TestExecutionListeners;
 public abstract class BaseIntegrationTest extends BaseBackendIntegrationTest {
 
   protected static FakeKafkaConsumer fakeKafkaConsumer;
+  protected static WireMockAdminClient wireMockAdminClient;
 
   static {
     TestUtils.disableSslVerification();

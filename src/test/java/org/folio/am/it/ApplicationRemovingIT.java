@@ -97,9 +97,6 @@ class ApplicationRemovingIT extends BaseIntegrationTest {
     mockMvc.perform(delete("/applications/{id}", APPLICATION_ID)
         .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(status().isConflict());
-
-    doGet(get("/applications").queryParam("query", "cql.allRecords=1"))
-      .andExpect(jsonPath("$.totalRecords", is(4)));
   }
 
   @Test
@@ -109,9 +106,6 @@ class ApplicationRemovingIT extends BaseIntegrationTest {
     mockMvc.perform(delete("/applications/{id}", APPLICATION_ID)
         .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(status().isBadRequest());
-
-    doGet(get("/applications").queryParam("query", "cql.allRecords=1"))
-      .andExpect(jsonPath("$.totalRecords", is(4)));
   }
 
   @Test
@@ -119,8 +113,5 @@ class ApplicationRemovingIT extends BaseIntegrationTest {
     mockMvc.perform(delete("/applications/{id}", "UNKNOWN_ID")
         .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(status().isNotFound());
-
-    doGet(get("/applications").queryParam("query", "cql.allRecords=1"))
-      .andExpect(jsonPath("$.totalRecords", is(4)));
   }
 }

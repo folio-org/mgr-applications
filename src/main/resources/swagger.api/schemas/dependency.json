@@ -11,7 +11,7 @@
     "version": {
       "description": "The concrete version of an artifact (semantic version) or the version range",
       "type": "string",
-      "x-extra-annotation": "@org.folio.am.domain.validation.constraints.SemVersionOrRange"
+      "x-extra-annotation": "@org.folio.common.domain.validation.constraints.SemVersionOrRange"
     }
   },
   "additionalProperties": false,

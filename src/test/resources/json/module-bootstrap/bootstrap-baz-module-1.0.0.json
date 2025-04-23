@@ -1,0 +1,30 @@
+{
+  "module": {
+    "moduleId": "baz-module-1.0.0",
+    "applicationId": "test-app-1.0.0",
+    "systemUserRequired": true,
+    "interfaces": [
+      {
+        "id": "food",
+        "version": "1.0",
+        "endpoints": [
+          {
+            "methods": ["GET"],
+            "pathPattern": "/food",
+            "permissionsRequired": ["food.collection.get"],
+            "permissionsDesired": ["zoos.collection.get"],
+            "modulePermissions": ["food-storage.collection.get"]
+          },
+          {
+            "methods": ["POST"],
+            "pathPattern": "/food",
+            "permissionsRequired": ["food.item.post"],
+            "permissionsDesired": [],
+            "modulePermissions": ["food-storage.item.post"]
+          }
+        ]
+      }
+    ]
+  },
+  "requiredModules": []
+}
