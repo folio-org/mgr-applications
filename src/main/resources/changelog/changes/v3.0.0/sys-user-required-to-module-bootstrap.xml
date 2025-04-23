@@ -1,0 +1,18 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="add-system-user-required-to-module-bootstrap-view" author="dmtkachenko">
+        <createView viewName="module_bootstrap" replaceIfExists="true">
+            SELECT m.*,
+                   am.application_id,
+                   COALESCE(m.descriptor, '{}'::jsonb) @> '{"metadata": {"user": {"type": "system"}}}'
+                       AS system_user_required
+              FROM module m
+              INNER JOIN application_module am ON m.id = am.module_id
+        </createView>
+    </changeSet>
+
+</databaseChangeLog>

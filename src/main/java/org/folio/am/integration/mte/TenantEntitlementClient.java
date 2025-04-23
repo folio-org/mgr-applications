@@ -3,8 +3,8 @@ package org.folio.am.integration.mte;
 import static org.folio.common.utils.OkapiHeaders.TOKEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import org.folio.am.domain.model.ResultList;
 import org.folio.am.integration.mte.model.Entitlement;
+import org.folio.common.domain.model.ResultList;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;

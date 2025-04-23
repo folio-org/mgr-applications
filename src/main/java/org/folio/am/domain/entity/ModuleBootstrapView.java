@@ -26,6 +26,9 @@ public class ModuleBootstrapView {
   @Column(name = "discovery_url")
   private String location;
 
+  @Column(name = "system_user_required", nullable = false)
+  private boolean systemUserRequired;
+
   @Type(JsonBinaryType.class)
   @Column(name = "descriptor", columnDefinition = "jsonb")
   @EqualsAndHashCode.Exclude

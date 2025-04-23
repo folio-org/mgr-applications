@@ -1,3 +1,7 @@
+## Version `v3.0.6` (03.12.2025)
+* Provide "System User required" attribute as part of module bootstrap data (MGRAPPS-54)
+---
+
 ## Version `v3.0.5` (15.10.2025)
 * Add support for custom Keycloak base URL for JWKS endpoint, new environment variable `KC_JWKS_BASE_URL` (MODSIDECAR-148)
 ---
