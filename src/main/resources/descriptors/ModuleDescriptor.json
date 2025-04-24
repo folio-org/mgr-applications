@@ -1,10 +1,10 @@
 {
-  "id": "mgr-applications-1.0.0",
+  "id": "mgr-applications-4.0.0",
   "name": "Manager Applications",
   "provides": [
     {
       "id": "applications",
-      "version": "1.1",
+      "version": "1.2",
       "handlers": [
         {
           "type": "internal",
