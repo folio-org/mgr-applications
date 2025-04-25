@@ -25,7 +25,7 @@ class KongRegistrationIT extends BaseIntegrationTest {
 
   @Test
   void verifyModuleRegistration() {
-    var moduleName = "mgr-applications-1.0.0";
+    var moduleName = "mgr-applications-4.0.0";
     var service = kongAdminClient.getService(moduleName);
     assertThat(service).satisfies(s -> {
       assertThat(s.getProtocol()).isEqualTo("https");
