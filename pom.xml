@@ -40,7 +40,7 @@
     <folio-spring-cql.version>9.1.0</folio-spring-cql.version>
     <applications-poc-tools.version>3.1.0-SNAPSHOT</applications-poc-tools.version>
     <folio-java-checkstyle.version>1.1.0</folio-java-checkstyle.version>
-    <semver4j.version>5.6.0</semver4j.version>
+    <semver4j.version>5.7.0</semver4j.version>
     <jackson-bom.version>2.17.2</jackson-bom.version>
 
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
@@ -51,7 +51,7 @@
     <instancio.version>5.4.1</instancio.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>10.23.0</maven-checkstyle.version>
+    <maven-checkstyle.version>10.23.1</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <openapi-generator.version>7.13.0</openapi-generator.version>
