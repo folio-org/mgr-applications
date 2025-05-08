@@ -95,6 +95,12 @@ public class ApplicationInterfaceValidatorService {
   private void validateApplicationDependencies(List<Dependency> dependencies,
     Map<String, String> mapApplicationNameToVersions) {
     for (var dependency : dependencies) {
+      if (Boolean.TRUE.equals(dependency.getOptional())) {
+        log.debug("validateApplicationDependencies:: Skipping validation for optional dependency: {}",
+          dependency.getName());
+        continue;
+      }
+      
       if (!mapApplicationNameToVersions.containsKey(dependency.getName())) {
         var validationMessage = format("Application dependency by name %s not exist", dependency.getName());
         log.info("validateApplicationDependencies:: {}", validationMessage);

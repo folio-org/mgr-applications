@@ -32,7 +32,7 @@ class ApplicationDescriptorMapperTest {
   @Test
   void convert_applicationDescriptor_to_applicationDescriptorEntity_success() {
     var dependency1 = new Dependency().name("dep1").version("0.0.1");
-    var dependency2 = new Dependency().name("dep2").version("0.0.2");
+    var dependency2 = new Dependency().name("dep2").version("0.0.2").optional(true);
 
     var descriptor = new ApplicationDescriptor()
       .id(APPLICATION_ID).name("app1").version("1.0.0")
@@ -49,6 +49,13 @@ class ApplicationDescriptorMapperTest {
     assertThat(applicationDescriptorEntity.getVersion()).isEqualTo("1.0.0");
     assertThat(takeOne(applicationDescriptorEntity.getModules()).getId()).isEqualTo("module1-1.0.0");
     assertThat(takeOne(applicationDescriptorEntity.getUiModules()).getId()).isEqualTo("uiModule1-1.0.0");
+
+    var deps = applicationDescriptorEntity.getApplicationDescriptor().getDependencies();
+    assertThat(deps).hasSize(2);
+    var dep1 = deps.stream().filter(dep -> "dep1".equals(dep.getName())).findFirst().orElseThrow();
+    var dep2 = deps.stream().filter(dep -> "dep2".equals(dep.getName())).findFirst().orElseThrow();
+    assertEquals(false, dep1.getOptional());
+    assertEquals(true, dep2.getOptional());
   }
 
   @Test
