@@ -30,7 +30,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.dto.Dependency;
-import org.folio.am.service.ApplicationInterfaceValidatorService;
+import org.folio.am.service.ApplicationReferencesValidationService;
 import org.folio.am.service.ApplicationService;
 import org.folio.am.service.ApplicationValidatorService;
 import org.folio.am.service.validator.ValidationMode;
@@ -72,7 +72,7 @@ class ApplicationControllerTest {
   @MockitoBean private JsonWebTokenParser jsonWebTokenParser;
   @MockitoBean private ApplicationValidatorService applicationValidatorService;
   @MockitoBean private ApplicationService applicationService;
-  @MockitoBean private ApplicationInterfaceValidatorService applicationInterfaceValidatorService;
+  @MockitoBean private ApplicationReferencesValidationService applicationReferencesValidationService;
 
   @Test
   void get_positive() throws Exception {
@@ -431,6 +431,6 @@ class ApplicationControllerTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isNoContent());
 
-    verify(applicationInterfaceValidatorService).validate(applicationReferences());
+    verify(applicationReferencesValidationService).validate(applicationReferences());
   }
 }
