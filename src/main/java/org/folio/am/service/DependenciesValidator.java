@@ -87,7 +87,6 @@ public class DependenciesValidator {
           dependency.getName());
         continue;
       }
-
       if (!mapApplicationNameToVersions.containsKey(dependency.getName())) {
         var validationMessage = format("Application dependency by name %s not exist", dependency.getName());
         log.info("validateApplicationDependencies:: {}", validationMessage);

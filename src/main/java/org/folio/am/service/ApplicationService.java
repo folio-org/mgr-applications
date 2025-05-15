@@ -122,6 +122,11 @@ public class ApplicationService {
     return SearchResult.of((int) page.getTotalElements(), applicationDescriptors);
   }
 
+  @Transactional(readOnly = true)
+  public List<ApplicationEntity> findByName(String name) {
+    return appRepository.findByName(name);
+  }
+
   /**
    * Saves application descriptor to the database and register Module Descriptors in Okapi.
    *
