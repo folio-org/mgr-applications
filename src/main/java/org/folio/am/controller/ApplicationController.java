@@ -1,15 +1,19 @@
 package org.folio.am.controller;
 
 import static java.lang.Boolean.TRUE;
+import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.CREATED;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
+import org.folio.am.domain.dto.ApplicationDescriptorsValidation;
 import org.folio.am.domain.dto.ApplicationReferences;
 import org.folio.am.domain.dto.ValidationMode;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.rest.resource.ApplicationsApi;
+import org.folio.am.service.ApplicationDescriptorsValidationService;
 import org.folio.am.service.ApplicationReferencesValidationService;
 import org.folio.am.service.ApplicationService;
 import org.folio.am.service.ApplicationValidatorService;
@@ -22,6 +26,7 @@ public class ApplicationController extends BaseController implements Application
 
   private final ApplicationValidatorService applicationValidatorService;
   private final ApplicationReferencesValidationService applicationReferencesValidationService;
+  private final ApplicationDescriptorsValidationService applicationDescriptorsValidationService;
   private final ApplicationService applicationService;
 
   @Override
@@ -69,6 +74,14 @@ public class ApplicationController extends BaseController implements Application
   public ResponseEntity<Void> validateModulesInterfaceIntegrity(ApplicationReferences applicationReferences) {
     applicationReferencesValidationService.validate(applicationReferences);
     return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<List<String>> validateDescriptorsDependenciesIntegrity(
+    ApplicationDescriptorsValidation applicationDescriptorsValidation) {
+    var applicationIds = applicationDescriptorsValidationService
+      .validate(applicationDescriptorsValidation.getApplicationDescriptors());
+    return ResponseEntity.status(ACCEPTED).body(applicationIds);
   }
 
   private static org.folio.am.service.validator.ValidationMode toServiceMode(ValidationMode mode) {

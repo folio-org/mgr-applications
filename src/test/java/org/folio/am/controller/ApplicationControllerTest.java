@@ -24,12 +24,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
+import org.folio.am.domain.dto.ApplicationDescriptorsValidation;
 import org.folio.am.domain.dto.Dependency;
+import org.folio.am.service.ApplicationDescriptorsValidationService;
 import org.folio.am.service.ApplicationReferencesValidationService;
 import org.folio.am.service.ApplicationService;
 import org.folio.am.service.ApplicationValidatorService;
@@ -73,6 +76,7 @@ class ApplicationControllerTest {
   @MockitoBean private ApplicationValidatorService applicationValidatorService;
   @MockitoBean private ApplicationService applicationService;
   @MockitoBean private ApplicationReferencesValidationService applicationReferencesValidationService;
+  @MockitoBean private ApplicationDescriptorsValidationService applicationDescriptorsValidationService;
 
   @Test
   void get_positive() throws Exception {
@@ -432,5 +436,21 @@ class ApplicationControllerTest {
       .andExpect(status().isNoContent());
 
     verify(applicationReferencesValidationService).validate(applicationReferences());
+  }
+
+  @Test
+  void validateDescriptorsDependenciesIntegrity_positive() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    var requestBody = new ApplicationDescriptorsValidation();
+    requestBody.setApplicationDescriptors(List.of(applicationDescriptor()));
+
+    mockMvc.perform(post("/applications/validate-descriptors")
+        .content(asJsonString(requestBody))
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isAccepted());
   }
 }

@@ -27,7 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @UnitTest
 @ExtendWith(MockitoExtension.class)
-public class ApplicationDescriptorsValidationServiceTest {
+class ApplicationDescriptorsValidationServiceTest {
 
   @Mock private ApplicationService applicationService;
   @Spy private ApplicationDescriptorToDtoMapper applicationDescriptorToDtoMapper =
