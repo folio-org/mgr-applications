@@ -63,7 +63,7 @@ class ApplicationDescriptorsValidationServiceTest {
       .provides(List.of(new InterfaceDescriptor().id("ui-settings").version("1.0.0")));
     applicationDescriptor2.setUiModuleDescriptors(List.of(uiModuleDescriptor2));
 
-    var actual =  applicationDescriptorsValidationService
+    var actual = applicationDescriptorsValidationService
       .validate(List.of(applicationDescriptor1, applicationDescriptor2));
     var expected = List.of("app1-1.0.0", "app2-2.0.1");
 
@@ -95,7 +95,7 @@ class ApplicationDescriptorsValidationServiceTest {
     assertThatThrownBy(() -> applicationDescriptorsValidationService
       .validate(descriptors))
       .isInstanceOf(RequestValidationException.class)
-      .hasMessage("Provided same applications with different versions")
+      .hasMessage("Used same applications with different versions")
       .satisfies(error -> {
         var params = ((RequestValidationException) error).getErrorParameters();
         assertThat(params).isEqualTo(List.of(new Parameter().key("applicationNames").value("app2")));
@@ -136,11 +136,74 @@ class ApplicationDescriptorsValidationServiceTest {
     when(applicationService.findByName("app2")).thenReturn(List.of(applicationEntity1, applicationEntity2));
     when(applicationService.findByName("app3")).thenReturn(List.of(applicationEntity3));
 
-    var actual =  applicationDescriptorsValidationService.validate(List.of(applicationDescriptor1));
+    var actual = applicationDescriptorsValidationService.validate(List.of(applicationDescriptor1));
     var expected = List.of("app1-1.0.0", "app2-2.0.3", "app3-3.0.0");
 
     assertThat(actual).isEqualTo(expected);
     verify(dependenciesValidator).validateDependencies(anyList());
     verify(dependenciesValidator).validateInterfaces(anyList());
+  }
+
+  @Test
+  void validate_positive_byLatestRetrievedOrProvidedDependencyVersionIfProvidedIsLast() {
+    var applicationDescriptor1 = new ApplicationDescriptor();
+    applicationDescriptor1.setName("app1");
+    applicationDescriptor1.setVersion("1.0.0");
+    applicationDescriptor1.setId("app1-1.0.0");
+    var dependency1 = new Dependency().name("app2").version("^2.0.1");
+    applicationDescriptor1.setDependencies(List.of(dependency1));
+
+    var applicationDescriptor2 = new ApplicationDescriptor();
+    applicationDescriptor2.setName("app2");
+    applicationDescriptor2.setVersion("2.0.3");
+    applicationDescriptor2.setId("app2-2.0.3");
+
+    var applicationEntity1 = new ApplicationEntity();
+    applicationEntity1.setName("app2");
+    applicationEntity1.setVersion("2.0.2");
+    applicationEntity1.setId("app2-2.0.2");
+
+    when(applicationService.findByName("app2")).thenReturn(List.of(applicationEntity1));
+
+    var actual =
+      applicationDescriptorsValidationService.validate(List.of(applicationDescriptor1, applicationDescriptor2));
+    var expected = List.of("app1-1.0.0", "app2-2.0.3");
+
+    assertThat(actual).isEqualTo(expected);
+    verify(dependenciesValidator).validateDependencies(anyList());
+    verify(dependenciesValidator).validateInterfaces(anyList());
+  }
+
+  @Test
+  void validate_negative_byLatestRetrievedOrProvidedDependencyVersionIfRetrievedIsLast() {
+    var applicationDescriptor1 = new ApplicationDescriptor();
+    applicationDescriptor1.setName("app1");
+    applicationDescriptor1.setVersion("1.0.0");
+    applicationDescriptor1.setId("app1-1.0.0");
+    var dependency1 = new Dependency().name("app2").version("^2.0.1");
+    applicationDescriptor1.setDependencies(List.of(dependency1));
+
+    var applicationDescriptor2 = new ApplicationDescriptor();
+    applicationDescriptor2.setName("app2");
+    applicationDescriptor2.setVersion("2.0.2");
+    applicationDescriptor2.setId("app2-2.0.2");
+
+    var applicationEntity1 = new ApplicationEntity();
+    applicationEntity1.setName("app2");
+    applicationEntity1.setVersion("2.0.3");
+    applicationEntity1.setId("app2-2.0.3");
+
+    when(applicationService.findByName("app2")).thenReturn(List.of(applicationEntity1));
+
+    var descriptors = List.of(applicationDescriptor1, applicationDescriptor2);
+
+    assertThatThrownBy(() -> applicationDescriptorsValidationService
+      .validate(descriptors))
+      .isInstanceOf(RequestValidationException.class)
+      .hasMessage("Used same applications with different versions")
+      .satisfies(error -> {
+        var params = ((RequestValidationException) error).getErrorParameters();
+        assertThat(params).isEqualTo(List.of(new Parameter().key("applicationNames").value("app2")));
+      });
   }
 }

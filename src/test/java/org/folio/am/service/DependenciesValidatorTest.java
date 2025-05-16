@@ -35,7 +35,7 @@ class DependenciesValidatorTest {
 
     assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDtos))
       .isInstanceOf(RequestValidationException.class)
-      .hasMessage("Provided same applications with different versions")
+      .hasMessage("Used same applications with different versions")
       .satisfies(error -> {
         var params = ((RequestValidationException) error).getErrorParameters();
         assertThat(params).isEqualTo(List.of(new Parameter().key("applicationNames").value("app1")));

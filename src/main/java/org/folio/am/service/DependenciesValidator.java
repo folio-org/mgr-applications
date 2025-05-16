@@ -44,7 +44,7 @@ public class DependenciesValidator {
       .collect(joining(";"));
     if (isNotEmpty(appNamesWithSeveralVersions)) {
       var parameter = new Parameter().key("applicationNames").value(appNamesWithSeveralVersions);
-      var validationMessage = "Provided same applications with different versions";
+      var validationMessage = "Used same applications with different versions";
       log.info("validateApplications:: {}", validationMessage + " " + appNamesWithSeveralVersions);
       throw new RequestValidationException(validationMessage, List.of(parameter));
     }
