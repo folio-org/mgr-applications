@@ -11,6 +11,7 @@ import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -452,5 +453,7 @@ class ApplicationControllerTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isAccepted());
+
+    verify(applicationDescriptorsValidationService).validate(any());
   }
 }
