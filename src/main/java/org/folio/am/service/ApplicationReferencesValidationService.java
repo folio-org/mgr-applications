@@ -45,7 +45,6 @@ public class ApplicationReferencesValidationService {
       throw new RequestValidationException(validationMessage);
     }
     log.info("validate:: validate applications ids {}", () -> join(",", foundIds));
-    dependenciesValidator.validateDependencies(applicationDtos);
-    dependenciesValidator.validateInterfaces(applicationDtos);
+    dependenciesValidator.validate(new ArrayList<>(applicationDtos));
   }
 }

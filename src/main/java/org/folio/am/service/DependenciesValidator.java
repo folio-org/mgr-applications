@@ -33,7 +33,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class DependenciesValidator {
 
-  public void validateDependencies(List<ApplicationDto> applicationDtos) {
+  public void validate(List<ApplicationDto> applicationDtos) {
+    validateDependencies(applicationDtos);
+    validateInterfaces(applicationDtos);
+  }
+
+  void validateDependencies(List<ApplicationDto> applicationDtos) {
     var appNamesWithSeveralVersions = applicationDtos
       .stream()
       .collect(groupingBy(ApplicationDto::getName, mapping(ApplicationDto::getVersion, toSet())))
@@ -57,7 +62,7 @@ public class DependenciesValidator {
     }
   }
 
-  public void validateInterfaces(List<ApplicationDto> applicationDtos) {
+  void validateInterfaces(List<ApplicationDto> applicationDtos) {
     var provided = getProvidedInterfaces(applicationDtos);
     var missedInterfacesPerApplication = applicationDtos
       .stream()

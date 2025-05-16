@@ -57,8 +57,7 @@ public class ApplicationDescriptorsValidationService {
         });
       }
     }
-    dependenciesValidator.validateDependencies(new ArrayList<>(applicationDtos));
-    dependenciesValidator.validateInterfaces(new ArrayList<>(applicationDtos));
+    dependenciesValidator.validate(new ArrayList<>(applicationDtos));
     return applicationDtos
       .stream()
       .map(ApplicationDto::getId)

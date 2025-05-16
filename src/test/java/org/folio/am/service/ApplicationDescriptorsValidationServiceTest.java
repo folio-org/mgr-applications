@@ -68,8 +68,7 @@ class ApplicationDescriptorsValidationServiceTest {
     var expected = List.of("app1-1.0.0", "app2-2.0.1");
 
     assertThat(actual).isEqualTo(expected);
-    verify(dependenciesValidator).validateDependencies(anyList());
-    verify(dependenciesValidator).validateInterfaces(anyList());
+    verify(dependenciesValidator).validate(anyList());
   }
 
   @Test
@@ -100,6 +99,7 @@ class ApplicationDescriptorsValidationServiceTest {
         var params = ((RequestValidationException) error).getErrorParameters();
         assertThat(params).isEqualTo(List.of(new Parameter().key("applicationNames").value("app2")));
       });
+    verify(dependenciesValidator).validate(anyList());
   }
 
   @Test
@@ -140,8 +140,7 @@ class ApplicationDescriptorsValidationServiceTest {
     var expected = List.of("app1-1.0.0", "app2-2.0.3", "app3-3.0.0");
 
     assertThat(actual).isEqualTo(expected);
-    verify(dependenciesValidator).validateDependencies(anyList());
-    verify(dependenciesValidator).validateInterfaces(anyList());
+    verify(dependenciesValidator).validate(anyList());
   }
 
   @Test
@@ -170,8 +169,7 @@ class ApplicationDescriptorsValidationServiceTest {
     var expected = List.of("app1-1.0.0", "app2-2.0.3");
 
     assertThat(actual).isEqualTo(expected);
-    verify(dependenciesValidator).validateDependencies(anyList());
-    verify(dependenciesValidator).validateInterfaces(anyList());
+    verify(dependenciesValidator).validate(anyList());
   }
 
   @Test
@@ -205,5 +203,6 @@ class ApplicationDescriptorsValidationServiceTest {
         var params = ((RequestValidationException) error).getErrorParameters();
         assertThat(params).isEqualTo(List.of(new Parameter().key("applicationNames").value("app2")));
       });
+    verify(dependenciesValidator).validate(anyList());
   }
 }

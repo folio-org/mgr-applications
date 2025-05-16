@@ -3,6 +3,7 @@ package org.folio.am.service;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashSet;
@@ -80,6 +81,7 @@ class ApplicationReferencesValidationServiceTest {
       applicationEntity2));
 
     assertThatNoException().isThrownBy(() -> applicationReferencesValidationService.validate(applicationReferences));
+    verify(dependenciesValidator).validate(anyList());
   }
 
   @Test
