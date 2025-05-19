@@ -66,7 +66,7 @@ public class ApplicationDescriptorsValidationService {
 
   private Optional<ApplicationDto> getByLatestDependencyVersion(Dependency dependency, Set<ApplicationDto> existDtos) {
     var requiredVersionRanges = RangesListFactory.create(dependency.getVersion());
-    var dtos = getApplicationDtoByName(dependency.getName());
+    var dtos = findApplicationDtosByName(dependency.getName());
     var retrievedSatisfied = dtos
       .stream()
       .filter(dto -> requiredVersionRanges.isSatisfiedBy(dto.getSemver()))
@@ -82,7 +82,7 @@ public class ApplicationDescriptorsValidationService {
       .max(Comparator.comparing(ApplicationDto::getSemver));
   }
 
-  private List<ApplicationDto> getApplicationDtoByName(String name) {
+  private List<ApplicationDto> findApplicationDtosByName(String name) {
     return applicationService.findByName(name)
       .stream()
       .map(applicationEntityToDtoMapper::convert)
