@@ -35,6 +35,7 @@ public class ApplicationDescriptorsValidationService {
   private final DependenciesValidator dependenciesValidator;
 
   public List<String> validate(List<ApplicationDescriptor> descriptors) {
+    log.info("validate:: descriptors ids {}", getDescriptorIdsAsStr(descriptors));
     var applicationDtos = descriptors
       .stream()
       .map(applicationDescriptorToDtoMapper::convert)
@@ -57,6 +58,8 @@ public class ApplicationDescriptorsValidationService {
         });
       }
     }
+    log.info("validate:: applications including dependencies by ids {}",
+      getApplicationDtosIdsAsStr(applicationDtos));
     dependenciesValidator.validate(new ArrayList<>(applicationDtos));
     return applicationDtos
       .stream()
@@ -83,9 +86,23 @@ public class ApplicationDescriptorsValidationService {
   }
 
   private List<ApplicationDto> findApplicationDtosByName(String name) {
-    return applicationService.findByName(name)
+    return applicationService.findByNameWithModules(name)
       .stream()
       .map(applicationEntityToDtoMapper::convert)
       .toList();
+  }
+
+  private String getDescriptorIdsAsStr(List<ApplicationDescriptor> descriptors) {
+    return descriptors
+      .stream()
+      .map(ApplicationDescriptor::getId)
+      .collect(Collectors.joining(","));
+  }
+
+  private String getApplicationDtosIdsAsStr(Set<ApplicationDto> applicationDtos) {
+    return applicationDtos
+      .stream()
+      .map(ApplicationDto::getId)
+      .collect(Collectors.joining(","));
   }
 }

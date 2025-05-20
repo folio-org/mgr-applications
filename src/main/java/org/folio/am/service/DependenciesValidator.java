@@ -80,7 +80,7 @@ public class DependenciesValidator {
       }
     }
     if (!errorParameters.isEmpty()) {
-      throw new RequestValidationException("Missing dependencies found for the applications", errorParameters);
+      throw new RequestValidationException("Missing interfaces found for the applications", errorParameters);
     }
   }
 

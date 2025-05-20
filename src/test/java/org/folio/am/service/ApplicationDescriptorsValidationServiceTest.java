@@ -133,8 +133,8 @@ class ApplicationDescriptorsValidationServiceTest {
     applicationEntity3.setVersion("3.0.0");
     applicationEntity3.setId("app3-3.0.0");
 
-    when(applicationService.findByName("app2")).thenReturn(List.of(applicationEntity1, applicationEntity2));
-    when(applicationService.findByName("app3")).thenReturn(List.of(applicationEntity3));
+    when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1, applicationEntity2));
+    when(applicationService.findByNameWithModules("app3")).thenReturn(List.of(applicationEntity3));
 
     var actual = applicationDescriptorsValidationService.validate(List.of(applicationDescriptor1));
     var expected = List.of("app1-1.0.0", "app2-2.0.3", "app3-3.0.0");
@@ -162,7 +162,7 @@ class ApplicationDescriptorsValidationServiceTest {
     applicationEntity1.setVersion("2.0.2");
     applicationEntity1.setId("app2-2.0.2");
 
-    when(applicationService.findByName("app2")).thenReturn(List.of(applicationEntity1));
+    when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1));
 
     var actual =
       applicationDescriptorsValidationService.validate(List.of(applicationDescriptor1, applicationDescriptor2));
@@ -191,7 +191,7 @@ class ApplicationDescriptorsValidationServiceTest {
     applicationEntity1.setVersion("2.0.3");
     applicationEntity1.setId("app2-2.0.3");
 
-    when(applicationService.findByName("app2")).thenReturn(List.of(applicationEntity1));
+    when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1));
 
     var descriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 

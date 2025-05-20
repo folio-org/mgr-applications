@@ -110,7 +110,7 @@ class DependenciesValidatorTest {
 
     assertThatThrownBy(() -> dependenciesValidator.validateInterfaces(applicationDtos))
       .isInstanceOf(RequestValidationException.class)
-      .hasMessage("Missing dependencies found for the applications")
+      .hasMessage("Missing interfaces found for the applications")
       .satisfies(error ->
         assertThat(((RequestValidationException) error).getErrorParameters())
           .hasSize(2)

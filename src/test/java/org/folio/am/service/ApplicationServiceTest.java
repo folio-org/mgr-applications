@@ -125,6 +125,17 @@ class ApplicationServiceTest {
   }
 
   @Test
+  void findByNameWithModules() {
+    var applicationName = "applicationName";
+
+    when(repository.findByNameWithModules(applicationName))
+      .thenReturn(singletonList(TestValues.applicationDescriptorEntity()));
+    service.findByNameWithModules(applicationName);
+
+    verify(repository).findByNameWithModules(applicationName);
+  }
+
+  @Test
   void create_positive() {
     var descriptor = TestValues.applicationDescriptor();
     var context = TestValues.validationContext(descriptor, List.of(ON_CREATE));
