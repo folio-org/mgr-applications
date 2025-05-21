@@ -436,7 +436,7 @@ class ApplicationControllerTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isNoContent());
 
-    verify(applicationReferencesValidationService).validate(applicationReferences());
+    verify(applicationReferencesValidationService).validateReferences(applicationReferences());
   }
 
   @Test
@@ -454,6 +454,6 @@ class ApplicationControllerTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isAccepted());
 
-    verify(applicationDescriptorsValidationService).validate(any());
+    verify(applicationDescriptorsValidationService).validateDescriptors(any());
   }
 }

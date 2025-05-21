@@ -34,8 +34,8 @@ public class ApplicationDescriptorsValidationService {
   private final ApplicationEntityToDtoMapper applicationEntityToDtoMapper;
   private final DependenciesValidator dependenciesValidator;
 
-  public List<String> validate(List<ApplicationDescriptor> descriptors) {
-    log.info("validate:: descriptors ids {}", getDescriptorIdsAsStr(descriptors));
+  public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors) {
+    log.info("validateDescriptors:: validate descriptors ids {}", getDescriptorIdsAsStr(descriptors));
     var applicationDtos = descriptors
       .stream()
       .map(applicationDescriptorToDtoMapper::convert)
@@ -58,7 +58,7 @@ public class ApplicationDescriptorsValidationService {
         });
       }
     }
-    log.info("validate:: applications including dependencies by ids {}",
+    log.info("validateDescriptors:: validate applications including dependencies by ids {}",
       getApplicationDtosIdsAsStr(applicationDtos));
     dependenciesValidator.validate(new ArrayList<>(applicationDtos));
     return applicationDtos

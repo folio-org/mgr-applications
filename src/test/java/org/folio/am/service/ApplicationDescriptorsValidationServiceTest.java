@@ -64,7 +64,7 @@ class ApplicationDescriptorsValidationServiceTest {
     applicationDescriptor2.setUiModuleDescriptors(List.of(uiModuleDescriptor2));
 
     var actual = applicationDescriptorsValidationService
-      .validate(List.of(applicationDescriptor1, applicationDescriptor2));
+      .validateDescriptors(List.of(applicationDescriptor1, applicationDescriptor2));
     var expected = List.of("app1-1.0.0", "app2-2.0.1");
 
     assertThat(actual).isEqualTo(expected);
@@ -92,7 +92,7 @@ class ApplicationDescriptorsValidationServiceTest {
 
     var descriptors = List.of(applicationDescriptor1, applicationDescriptor2, applicationDescriptor3);
     assertThatThrownBy(() -> applicationDescriptorsValidationService
-      .validate(descriptors))
+      .validateDescriptors(descriptors))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Used same applications with different versions")
       .satisfies(error -> {
@@ -136,7 +136,7 @@ class ApplicationDescriptorsValidationServiceTest {
     when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1, applicationEntity2));
     when(applicationService.findByNameWithModules("app3")).thenReturn(List.of(applicationEntity3));
 
-    var actual = applicationDescriptorsValidationService.validate(List.of(applicationDescriptor1));
+    var actual = applicationDescriptorsValidationService.validateDescriptors(List.of(applicationDescriptor1));
     var expected = List.of("app1-1.0.0", "app2-2.0.3", "app3-3.0.0");
 
     assertThat(actual).isEqualTo(expected);
@@ -165,7 +165,7 @@ class ApplicationDescriptorsValidationServiceTest {
     when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1));
 
     var actual =
-      applicationDescriptorsValidationService.validate(List.of(applicationDescriptor1, applicationDescriptor2));
+      applicationDescriptorsValidationService.validateDescriptors(List.of(applicationDescriptor1, applicationDescriptor2));
     var expected = List.of("app1-1.0.0", "app2-2.0.3");
 
     assertThat(actual).isEqualTo(expected);
@@ -196,7 +196,7 @@ class ApplicationDescriptorsValidationServiceTest {
     var descriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 
     assertThatThrownBy(() -> applicationDescriptorsValidationService
-      .validate(descriptors))
+      .validateDescriptors(descriptors))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Used same applications with different versions")
       .satisfies(error -> {

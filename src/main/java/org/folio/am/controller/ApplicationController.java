@@ -72,7 +72,7 @@ public class ApplicationController extends BaseController implements Application
 
   @Override
   public ResponseEntity<Void> validateModulesInterfaceIntegrity(ApplicationReferences applicationReferences) {
-    applicationReferencesValidationService.validate(applicationReferences);
+    applicationReferencesValidationService.validateReferences(applicationReferences);
     return ResponseEntity.noContent().build();
   }
 
@@ -80,7 +80,7 @@ public class ApplicationController extends BaseController implements Application
   public ResponseEntity<List<String>> validateDescriptorsDependenciesIntegrity(
     ApplicationDescriptorsValidation applicationDescriptorsValidation) {
     var applicationIds = applicationDescriptorsValidationService
-      .validate(applicationDescriptorsValidation.getApplicationDescriptors());
+      .validateDescriptors(applicationDescriptorsValidation.getApplicationDescriptors());
     return ResponseEntity.status(ACCEPTED).body(applicationIds);
   }
 

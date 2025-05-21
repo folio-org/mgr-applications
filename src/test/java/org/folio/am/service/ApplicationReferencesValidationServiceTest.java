@@ -80,7 +80,7 @@ class ApplicationReferencesValidationServiceTest {
     when(applicationService.findByIdsWithModules(apps)).thenReturn(List.of(applicationEntity1,
       applicationEntity2));
 
-    assertThatNoException().isThrownBy(() -> applicationReferencesValidationService.validate(applicationReferences));
+    assertThatNoException().isThrownBy(() -> applicationReferencesValidationService.validateReferences(applicationReferences));
     verify(dependenciesValidator).validate(anyList());
   }
 
@@ -100,7 +100,7 @@ class ApplicationReferencesValidationServiceTest {
 
     when(applicationService.findByIdsWithModules(apps)).thenReturn(List.of(applicationEntity1));
 
-    assertThatThrownBy(() -> applicationReferencesValidationService.validate(applicationReferences))
+    assertThatThrownBy(() -> applicationReferencesValidationService.validateReferences(applicationReferences))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Applications not exist by ids : app1-2.0.1");
   }

@@ -25,7 +25,7 @@ public class ApplicationReferencesValidationService {
   private final ApplicationEntityToDtoMapper applicationEntityToDtoMapper;
   private final DependenciesValidator dependenciesValidator;
 
-  public void validate(ApplicationReferences applicationReferences) {
+  public void validateReferences(ApplicationReferences applicationReferences) {
     var applicationDtos = applicationService
       .findByIdsWithModules(new ArrayList<>(applicationReferences.getApplicationIds()))
       .stream()
@@ -41,10 +41,10 @@ public class ApplicationReferencesValidationService {
       .collect(joining(","));
     if (isNotEmpty(notFoundIds)) {
       var validationMessage = format("Applications not exist by ids : %s", notFoundIds);
-      log.info("validate:: {}", validationMessage);
+      log.info("validateReferences:: {}", validationMessage);
       throw new RequestValidationException(validationMessage);
     }
-    log.info("validate:: validate applications ids {}", () -> join(",", foundIds));
+    log.info("validateReferences:: validate applications ids {}", () -> join(",", foundIds));
     dependenciesValidator.validate(new ArrayList<>(applicationDtos));
   }
 }
