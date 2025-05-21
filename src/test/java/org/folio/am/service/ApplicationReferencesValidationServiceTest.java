@@ -80,7 +80,8 @@ class ApplicationReferencesValidationServiceTest {
     when(applicationService.findByIdsWithModules(apps)).thenReturn(List.of(applicationEntity1,
       applicationEntity2));
 
-    assertThatNoException().isThrownBy(() -> applicationReferencesValidationService.validateReferences(applicationReferences));
+    assertThatNoException().isThrownBy(() -> applicationReferencesValidationService
+      .validateReferences(applicationReferences));
     verify(dependenciesValidator).validate(anyList());
   }
 

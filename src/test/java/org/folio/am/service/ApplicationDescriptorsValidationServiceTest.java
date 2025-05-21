@@ -164,8 +164,8 @@ class ApplicationDescriptorsValidationServiceTest {
 
     when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1));
 
-    var actual =
-      applicationDescriptorsValidationService.validateDescriptors(List.of(applicationDescriptor1, applicationDescriptor2));
+    var actual = applicationDescriptorsValidationService
+      .validateDescriptors(List.of(applicationDescriptor1, applicationDescriptor2));
     var expected = List.of("app1-1.0.0", "app2-2.0.3");
 
     assertThat(actual).isEqualTo(expected);
