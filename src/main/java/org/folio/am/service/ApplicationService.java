@@ -100,6 +100,17 @@ public class ApplicationService {
   }
 
   /**
+   * Returns list of applications entities with modules by their name.
+   *
+   * @param applicationName - application name
+   * @return {@link List} with {@link ApplicationEntity} objects
+   */
+  @Transactional(readOnly = true)
+  public List<ApplicationEntity> findByNameWithModules(String applicationName) {
+    return appRepository.findByNameWithModules(applicationName);
+  }
+
+  /**
    * Retrieves application descriptors by CQL query.
    *
    * @param query - CQL query with search and filter conditions.
