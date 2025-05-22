@@ -125,7 +125,7 @@ class ApplicationServiceTest {
   }
 
   @Test
-  void findByNameWithModules() {
+  void findByNameWithModules_positive() {
     var applicationName = "applicationName";
 
     when(repository.findByNameWithModules(applicationName))
