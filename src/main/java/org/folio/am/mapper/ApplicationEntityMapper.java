@@ -1,13 +1,9 @@
 package org.folio.am.mapper;
 
-import static java.util.stream.Collectors.toCollection;
-import static org.folio.am.utils.CollectionUtils.union;
-
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import org.folio.am.domain.dto.ApplicationDto;
+import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.am.domain.entity.ModuleEntity;
@@ -18,24 +14,33 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
-public interface ApplicationEntityToDtoMapper {
+public interface ApplicationEntityMapper {
 
   @Mapping(target = "moduleDescriptors", expression = "java(addModuleDescriptors(applicationEntity))")
+  @Mapping(target = "uiModuleDescriptors", expression = "java(addUiModuleDescriptors(applicationEntity))")
   @Mapping(target = "dependencies", expression = "java(addDependencies(applicationEntity))")
-  ApplicationDto convert(ApplicationEntity applicationEntity);
+  @Mapping(target = "modules", ignore = true)
+  @Mapping(target = "uiModules", ignore = true)
+  @Mapping(target = "description", ignore = true)
+  @Mapping(target = "metadata", ignore = true)
+  @Mapping(target = "platform", ignore = true)
+  @Mapping(target = "deployment", ignore = true)
+  ApplicationDescriptor convert(ApplicationEntity applicationEntity);
 
   default List<ModuleDescriptor> addModuleDescriptors(ApplicationEntity applicationEntity) {
-    var beModuleDescriptors = applicationEntity.getModules()
+    return applicationEntity.getModules()
       .stream()
       .map(ModuleEntity::getDescriptor)
       .filter(Objects::nonNull)
-      .collect(toCollection(LinkedHashSet::new));
-    var uiModuleDescriptors = applicationEntity.getUiModules()
+      .toList();
+  }
+
+  default List<ModuleDescriptor> addUiModuleDescriptors(ApplicationEntity applicationEntity) {
+    return applicationEntity.getUiModules()
       .stream()
       .map(UiModuleEntity::getDescriptor)
       .filter(Objects::nonNull)
-      .collect(toCollection(LinkedHashSet::new));
-    return union(beModuleDescriptors, uiModuleDescriptors);
+      .toList();
   }
 
   default List<Dependency> addDependencies(ApplicationEntity applicationEntity) {

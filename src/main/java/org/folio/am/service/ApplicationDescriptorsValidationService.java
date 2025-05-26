@@ -17,11 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
-import org.folio.am.domain.dto.ApplicationDto;
 import org.folio.am.domain.dto.Dependency;
-import org.folio.am.mapper.ApplicationDescriptorToDtoMapper;
-import org.folio.am.mapper.ApplicationEntityToDtoMapper;
+import org.folio.am.mapper.ApplicationEntityMapper;
 import org.semver4j.RangesListFactory;
+import org.semver4j.Semver;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -30,19 +29,15 @@ import org.springframework.stereotype.Service;
 public class ApplicationDescriptorsValidationService {
 
   private final ApplicationService applicationService;
-  private final ApplicationDescriptorToDtoMapper applicationDescriptorToDtoMapper;
-  private final ApplicationEntityToDtoMapper applicationEntityToDtoMapper;
+  private final ApplicationEntityMapper applicationEntityMapper;
   private final DependenciesValidator dependenciesValidator;
 
   public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors) {
     log.info("validateDescriptors:: validate descriptors ids {}", getDescriptorIdsAsStr(descriptors));
-    var applicationDtos = descriptors
+    var applicationDescriptorsSet = new LinkedHashSet<>(descriptors);
+    var dependencyQueue = applicationDescriptorsSet
       .stream()
-      .map(applicationDescriptorToDtoMapper::convert)
-      .collect(Collectors.toCollection(LinkedHashSet::new));
-    var dependencyQueue = applicationDtos
-      .stream()
-      .map(ApplicationDto::getDependencies)
+      .map(ApplicationDescriptor::getDependencies)
       .flatMap(Collection::stream)
       .filter(Objects::nonNull)
       .collect(Collectors.toCollection(LinkedList::new));
@@ -50,59 +45,57 @@ public class ApplicationDescriptorsValidationService {
     while (!dependencyQueue.isEmpty()) {
       var dependency = dependencyQueue.poll();
       if (!visited.contains(dependency)) {
-        var applicationDtoOpt = getByLatestDependencyVersion(dependency, applicationDtos);
-        applicationDtoOpt.ifPresent(applicationDto -> {
-          applicationDtos.add(applicationDto);
-          dependencyQueue.addAll(applicationDto.getDependencies());
+        var descriptorOpt = getByLatestDependencyVersion(dependency, applicationDescriptorsSet);
+        descriptorOpt.ifPresent(descriptor -> {
+          applicationDescriptorsSet.add(descriptor);
+          dependencyQueue.addAll(descriptor.getDependencies());
           visited.add(dependency);
         });
       }
     }
     log.info("validateDescriptors:: validate applications including dependencies by ids {}",
-      getApplicationDtosIdsAsStr(applicationDtos));
-    dependenciesValidator.validate(new ArrayList<>(applicationDtos));
-    return applicationDtos
+      getDescriptorIdsAsStr(new ArrayList<>(applicationDescriptorsSet)));
+    dependenciesValidator.validate(new ArrayList<>(applicationDescriptorsSet));
+    return applicationDescriptorsSet
       .stream()
-      .map(ApplicationDto::getId)
+      .map(ApplicationDescriptor::getId)
       .toList();
   }
 
-  private Optional<ApplicationDto> getByLatestDependencyVersion(Dependency dependency, Set<ApplicationDto> existDtos) {
+  private Optional<ApplicationDescriptor> getByLatestDependencyVersion(Dependency dependency,
+    Set<ApplicationDescriptor> existDescriptors) {
     var requiredVersionRanges = RangesListFactory.create(dependency.getVersion());
-    var dtos = findApplicationDtosByName(dependency.getName());
-    var retrievedSatisfied = dtos
+    var descriptors = findApplicationDescriptorsByName(dependency.getName());
+    var retrievedSatisfied = descriptors
       .stream()
-      .filter(dto -> requiredVersionRanges.isSatisfiedBy(dto.getSemver()))
+      .filter(descriptor -> requiredVersionRanges.isSatisfiedBy(getSemver(descriptor.getVersion())))
       .toList();
-    var existSatisfied = existDtos
+    var existSatisfied = existDescriptors
       .stream()
-      .filter(dto -> StringUtils.equals(dto.getName(), dependency.getName())
-        && requiredVersionRanges.isSatisfiedBy(dto.getSemver()))
+      .filter(descriptor -> StringUtils.equals(descriptor.getName(), dependency.getName())
+        && requiredVersionRanges.isSatisfiedBy(getSemver(descriptor.getVersion())))
       .toList();
     var unionDtos = union(retrievedSatisfied, existSatisfied);
     return unionDtos
       .stream()
-      .max(Comparator.comparing(ApplicationDto::getSemver));
+      .max(Comparator.comparing(descriptor -> new Semver(descriptor.getVersion())));
   }
 
-  private List<ApplicationDto> findApplicationDtosByName(String name) {
+  private List<ApplicationDescriptor> findApplicationDescriptorsByName(String name) {
     return applicationService.findByNameWithModules(name)
       .stream()
-      .map(applicationEntityToDtoMapper::convert)
+      .map(applicationEntityMapper::convert)
       .toList();
+  }
+
+  private Semver getSemver(String version) {
+    return new Semver(version);
   }
 
   private String getDescriptorIdsAsStr(List<ApplicationDescriptor> descriptors) {
     return descriptors
       .stream()
       .map(ApplicationDescriptor::getId)
-      .collect(Collectors.joining(","));
-  }
-
-  private String getApplicationDtosIdsAsStr(Set<ApplicationDto> applicationDtos) {
-    return applicationDtos
-      .stream()
-      .map(ApplicationDto::getId)
       .collect(Collectors.joining(","));
   }
 }

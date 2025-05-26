@@ -16,7 +16,7 @@ import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.entity.UiModuleEntity;
 import org.folio.am.exception.RequestValidationException;
-import org.folio.am.mapper.ApplicationEntityToDtoMapper;
+import org.folio.am.mapper.ApplicationEntityMapper;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
@@ -33,8 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ApplicationReferencesValidationServiceTest {
 
   @Mock private ApplicationService applicationService;
-  @Spy private ApplicationEntityToDtoMapper applicationEntityToDtoMapper =
-    new org.folio.am.mapper.ApplicationEntityToDtoMapperImpl();
+  @Spy private ApplicationEntityMapper applicationEntityMapper = new org.folio.am.mapper.ApplicationEntityMapperImpl();
   @Spy private DependenciesValidator dependenciesValidator;
   @InjectMocks private ApplicationReferencesValidationService applicationReferencesValidationService;
 

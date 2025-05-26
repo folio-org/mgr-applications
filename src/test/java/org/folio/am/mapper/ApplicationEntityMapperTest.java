@@ -14,10 +14,9 @@ import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
 
 @UnitTest
-class ApplicationEntityToDtoMapperTest {
+class ApplicationEntityMapperTest {
 
-  private final ApplicationEntityToDtoMapper mapper =
-    new org.folio.am.mapper.ApplicationEntityToDtoMapperImpl();
+  private final ApplicationEntityMapper mapper = new org.folio.am.mapper.ApplicationEntityMapperImpl();
 
   @Test
   void convert() {
@@ -48,6 +47,7 @@ class ApplicationEntityToDtoMapperTest {
     assertThat(applicationDto.getVersion()).isEqualTo(applicationEntity.getVersion());
     assertThat(applicationDto.getId()).isEqualTo(applicationEntity.getId());
     assertThat(applicationDto.getDependencies()).containsOnly(dependency);
-    assertThat(applicationDto.getModuleDescriptors()).contains(beModuleDescriptor, uiModuleDescriptor);
+    assertThat(applicationDto.getModuleDescriptors()).contains(beModuleDescriptor);
+    assertThat(applicationDto.getUiModuleDescriptors()).contains(uiModuleDescriptor);
   }
 }

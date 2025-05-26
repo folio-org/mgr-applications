@@ -10,10 +10,10 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.am.domain.dto.ApplicationDto;
+import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationReferences;
 import org.folio.am.exception.RequestValidationException;
-import org.folio.am.mapper.ApplicationEntityToDtoMapper;
+import org.folio.am.mapper.ApplicationEntityMapper;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -22,18 +22,18 @@ import org.springframework.stereotype.Service;
 public class ApplicationReferencesValidationService {
 
   private final ApplicationService applicationService;
-  private final ApplicationEntityToDtoMapper applicationEntityToDtoMapper;
+  private final ApplicationEntityMapper applicationEntityMapperr;
   private final DependenciesValidator dependenciesValidator;
 
   public void validateReferences(ApplicationReferences applicationReferences) {
-    var applicationDtos = applicationService
+    var applicationDescriptors = applicationService
       .findByIdsWithModules(new ArrayList<>(applicationReferences.getApplicationIds()))
       .stream()
-      .map(applicationEntityToDtoMapper::convert)
+      .map(applicationEntityMapperr::convert)
       .toList();
-    var foundIds = applicationDtos
+    var foundIds = applicationDescriptors
       .stream()
-      .map(ApplicationDto::getId)
+      .map(ApplicationDescriptor::getId)
       .collect(toSet());
     var notFoundIds = applicationReferences.getApplicationIds()
       .stream()
@@ -45,6 +45,6 @@ public class ApplicationReferencesValidationService {
       throw new RequestValidationException(validationMessage);
     }
     log.info("validateReferences:: validate applications ids {}", () -> join(",", foundIds));
-    dependenciesValidator.validate(new ArrayList<>(applicationDtos));
+    dependenciesValidator.validate(new ArrayList<>(applicationDescriptors));
   }
 }

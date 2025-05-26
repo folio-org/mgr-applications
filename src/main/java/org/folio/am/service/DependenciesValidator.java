@@ -9,6 +9,7 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.folio.am.utils.CollectionUtils.union;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,7 +20,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.am.domain.dto.ApplicationDto;
+import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.exception.RequestValidationException;
 import org.folio.common.domain.model.InterfaceReference;
@@ -33,15 +34,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class DependenciesValidator {
 
-  public void validate(List<ApplicationDto> applicationDtos) {
-    validateDependencies(applicationDtos);
-    validateInterfaces(applicationDtos);
+  public void validate(List<ApplicationDescriptor> applicationDescriptors) {
+    validateDependencies(applicationDescriptors);
+    validateInterfaces(applicationDescriptors);
   }
 
-  void validateDependencies(List<ApplicationDto> applicationDtos) {
-    var appNamesWithSeveralVersions = applicationDtos
+  void validateDependencies(List<ApplicationDescriptor> applicationDescriptors) {
+    var appNamesWithSeveralVersions = applicationDescriptors
       .stream()
-      .collect(groupingBy(ApplicationDto::getName, mapping(ApplicationDto::getVersion, toSet())))
+      .collect(groupingBy(ApplicationDescriptor::getName, mapping(ApplicationDescriptor::getVersion, toSet())))
       .entrySet()
       .stream()
       .filter(entry -> entry.getValue().size() > 1)
@@ -53,21 +54,21 @@ public class DependenciesValidator {
       log.info("validateApplications:: {}", validationMessage + " " + appNamesWithSeveralVersions);
       throw new RequestValidationException(validationMessage, List.of(parameter));
     }
-    var mapApplicationNameToVersions = applicationDtos
+    var mapApplicationNameToVersions = applicationDescriptors
       .stream()
-      .collect(toMap(ApplicationDto::getName, ApplicationDto::getVersion));
-    for (var applicationDto : applicationDtos) {
+      .collect(toMap(ApplicationDescriptor::getName, ApplicationDescriptor::getVersion));
+    for (var applicationDto : applicationDescriptors) {
       var dependencies = applicationDto.getDependencies();
       validateApplicationDependencies(dependencies, mapApplicationNameToVersions);
     }
   }
 
-  void validateInterfaces(List<ApplicationDto> applicationDtos) {
-    var provided = getProvidedInterfaces(applicationDtos);
-    var missedInterfacesPerApplication = applicationDtos
+  void validateInterfaces(List<ApplicationDescriptor> applicationDescriptors) {
+    var provided = getProvidedInterfaces(applicationDescriptors);
+    var missedInterfacesPerApplication = applicationDescriptors
       .stream()
-      .collect(toMap(ApplicationDto::getId, applicationDto -> {
-        var neededInterfaces = getRequiredInterfaces(applicationDto);
+      .collect(toMap(ApplicationDescriptor::getId, applicationDescriptor -> {
+        var neededInterfaces = getRequiredInterfaces(applicationDescriptor);
         neededInterfaces.removeIf(interfaceToCheck -> provided
           .stream().anyMatch(pr -> StringUtils.equals(pr.getId(), interfaceToCheck.getId())
             && contains(interfaceToCheck.getVersion(), pr.getVersion())));
@@ -108,10 +109,10 @@ public class DependenciesValidator {
     }
   }
 
-  private Set<InterfaceReference> getProvidedInterfaces(List<ApplicationDto> applicationDtos) {
-    return applicationDtos
+  private Set<InterfaceReference> getProvidedInterfaces(List<ApplicationDescriptor> applicationDescriptors) {
+    return applicationDescriptors
       .stream()
-      .map(ApplicationDto::getModuleDescriptors)
+      .map(this::getModuleDescriptors)
       .flatMap(Collection::stream)
       .map(ModuleDescriptor::getProvides)
       .flatMap(Collection::stream)
@@ -120,13 +121,17 @@ public class DependenciesValidator {
       .collect(toSet());
   }
 
-  private Set<InterfaceReference> getRequiredInterfaces(ApplicationDto applicationDto) {
-    var descriptors = applicationDto.getModuleDescriptors();
+  private Set<InterfaceReference> getRequiredInterfaces(ApplicationDescriptor applicationDescriptor) {
+    var descriptors = getModuleDescriptors(applicationDescriptor);
     return descriptors
       .stream()
       .map(ModuleDescriptor::getRequires)
       .flatMap(Collection::stream)
       .collect(toCollection(LinkedHashSet::new));
+  }
+
+  private List<ModuleDescriptor> getModuleDescriptors(ApplicationDescriptor applicationDescriptor) {
+    return union(applicationDescriptor.getModuleDescriptors(), applicationDescriptor.getUiModuleDescriptors());
   }
 
   private String interfaceReferencesAsString(Set<InterfaceReference> interfaceReferences) {
