@@ -9,6 +9,7 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.folio.am.utils.CollectionUtils.toStream;
 import static org.folio.am.utils.CollectionUtils.union;
 
 import java.util.ArrayList;
@@ -40,8 +41,7 @@ public class DependenciesValidator {
   }
 
   void validateDependencies(List<ApplicationDescriptor> applicationDescriptors) {
-    var appNamesWithSeveralVersions = applicationDescriptors
-      .stream()
+    var appNamesWithSeveralVersions = toStream(applicationDescriptors)
       .collect(groupingBy(ApplicationDescriptor::getName, mapping(ApplicationDescriptor::getVersion, toSet())))
       .entrySet()
       .stream()
@@ -54,8 +54,7 @@ public class DependenciesValidator {
       log.info("validateApplications:: {}", validationMessage + " " + appNamesWithSeveralVersions);
       throw new RequestValidationException(validationMessage, List.of(parameter));
     }
-    var mapApplicationNameToVersions = applicationDescriptors
-      .stream()
+    var mapApplicationNameToVersions = toStream(applicationDescriptors)
       .collect(toMap(ApplicationDescriptor::getName, ApplicationDescriptor::getVersion));
     for (var applicationDto : applicationDescriptors) {
       var dependencies = applicationDto.getDependencies();
@@ -64,15 +63,11 @@ public class DependenciesValidator {
   }
 
   void validateInterfaces(List<ApplicationDescriptor> applicationDescriptors) {
-    var provided = getProvidedInterfaces(applicationDescriptors);
-    var missedInterfacesPerApplication = applicationDescriptors
-      .stream()
+    var providedInterfaces = getProvidedInterfaces(applicationDescriptors);
+    var missedInterfacesPerApplication = toStream(applicationDescriptors)
       .collect(toMap(ApplicationDescriptor::getId, applicationDescriptor -> {
-        var neededInterfaces = getRequiredInterfaces(applicationDescriptor);
-        neededInterfaces.removeIf(interfaceToCheck -> provided
-          .stream().anyMatch(pr -> StringUtils.equals(pr.getId(), interfaceToCheck.getId())
-            && contains(interfaceToCheck.getVersion(), pr.getVersion())));
-        return interfaceReferencesAsString(neededInterfaces);
+        var missedInterfaces = getMissedInterfaces(providedInterfaces, applicationDescriptor);
+        return interfaceReferencesAsString(missedInterfaces);
       }));
     var errorParameters = new ArrayList<Parameter>();
     for (var entry : missedInterfacesPerApplication.entrySet()) {
@@ -110,8 +105,7 @@ public class DependenciesValidator {
   }
 
   private Set<InterfaceReference> getProvidedInterfaces(List<ApplicationDescriptor> applicationDescriptors) {
-    return applicationDescriptors
-      .stream()
+    return toStream(applicationDescriptors)
       .map(this::getModuleDescriptors)
       .flatMap(Collection::stream)
       .map(ModuleDescriptor::getProvides)
@@ -121,10 +115,18 @@ public class DependenciesValidator {
       .collect(toSet());
   }
 
+  private Set<InterfaceReference> getMissedInterfaces(Set<InterfaceReference> providedInterfaces,
+    ApplicationDescriptor applicationDescriptor)  {
+    var missedInterfaces = getRequiredInterfaces(applicationDescriptor);
+    missedInterfaces.removeIf(interfaceToCheck -> toStream(providedInterfaces)
+      .anyMatch(pr -> StringUtils.equals(pr.getId(), interfaceToCheck.getId())
+        && contains(interfaceToCheck.getVersion(), pr.getVersion())));
+    return missedInterfaces;
+  }
+
   private Set<InterfaceReference> getRequiredInterfaces(ApplicationDescriptor applicationDescriptor) {
     var descriptors = getModuleDescriptors(applicationDescriptor);
-    return descriptors
-      .stream()
+    return toStream(descriptors)
       .map(ModuleDescriptor::getRequires)
       .flatMap(Collection::stream)
       .collect(toCollection(LinkedHashSet::new));
@@ -135,8 +137,7 @@ public class DependenciesValidator {
   }
 
   private String interfaceReferencesAsString(Set<InterfaceReference> interfaceReferences) {
-    return interfaceReferences
-      .stream()
+    return toStream(interfaceReferences)
       .map(interfaceReference -> interfaceReference.getId() + " " + interfaceReference.getVersion())
       .collect(joining(";"));
   }

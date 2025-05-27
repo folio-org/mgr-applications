@@ -4,8 +4,10 @@ import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.folio.am.utils.CollectionUtils.mapItemsToSet;
+import static org.folio.am.utils.CollectionUtils.toStream;
+import static org.folio.common.utils.CollectionUtils.mapItems;
 
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
@@ -26,17 +28,11 @@ public class ApplicationReferencesValidationService {
   private final DependenciesValidator dependenciesValidator;
 
   public void validateReferences(ApplicationReferences applicationReferences) {
-    var applicationDescriptors = applicationService
-      .findByIdsWithModules(new ArrayList<>(applicationReferences.getApplicationIds()))
-      .stream()
-      .map(applicationEntityMapperr::convert)
-      .toList();
-    var foundIds = applicationDescriptors
-      .stream()
-      .map(ApplicationDescriptor::getId)
-      .collect(toSet());
-    var notFoundIds = applicationReferences.getApplicationIds()
-      .stream()
+    var applicationEntities = applicationService
+      .findByIdsWithModules(new ArrayList<>(applicationReferences.getApplicationIds()));
+    var applicationDescriptors = mapItems(applicationEntities, applicationEntityMapperr::convert);
+    var foundIds = mapItemsToSet(applicationDescriptors, ApplicationDescriptor::getId);
+    var notFoundIds = toStream(applicationReferences.getApplicationIds())
       .filter(not(foundIds::contains))
       .collect(joining(","));
     if (isNotEmpty(notFoundIds)) {

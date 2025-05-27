@@ -1,8 +1,9 @@
 package org.folio.am.mapper;
 
+import static org.folio.common.utils.CollectionUtils.mapItems;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.domain.entity.ApplicationEntity;
@@ -28,19 +29,11 @@ public interface ApplicationEntityMapper {
   ApplicationDescriptor convert(ApplicationEntity applicationEntity);
 
   default List<ModuleDescriptor> addModuleDescriptors(ApplicationEntity applicationEntity) {
-    return applicationEntity.getModules()
-      .stream()
-      .map(ModuleEntity::getDescriptor)
-      .filter(Objects::nonNull)
-      .toList();
+    return mapItems(applicationEntity.getModules(), ModuleEntity::getDescriptor);
   }
 
   default List<ModuleDescriptor> addUiModuleDescriptors(ApplicationEntity applicationEntity) {
-    return applicationEntity.getUiModules()
-      .stream()
-      .map(UiModuleEntity::getDescriptor)
-      .filter(Objects::nonNull)
-      .toList();
+    return mapItems(applicationEntity.getUiModules(), UiModuleEntity::getDescriptor);
   }
 
   default List<Dependency> addDependencies(ApplicationEntity applicationEntity) {

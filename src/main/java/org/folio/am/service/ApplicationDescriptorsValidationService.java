@@ -1,6 +1,9 @@
 package org.folio.am.service;
 
+import static java.lang.String.join;
+import static org.folio.am.utils.CollectionUtils.toStream;
 import static org.folio.am.utils.CollectionUtils.union;
+import static org.folio.common.utils.CollectionUtils.mapItems;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,8 +38,7 @@ public class ApplicationDescriptorsValidationService {
   public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors) {
     log.info("validateDescriptors:: validate descriptors ids {}", getDescriptorIdsAsStr(descriptors));
     var applicationDescriptorsSet = new LinkedHashSet<>(descriptors);
-    var dependencyQueue = applicationDescriptorsSet
-      .stream()
+    var dependencyQueue = toStream(applicationDescriptorsSet)
       .map(ApplicationDescriptor::getDependencies)
       .flatMap(Collection::stream)
       .filter(Objects::nonNull)
@@ -56,36 +58,27 @@ public class ApplicationDescriptorsValidationService {
     log.info("validateDescriptors:: validate applications including dependencies by ids {}",
       getDescriptorIdsAsStr(new ArrayList<>(applicationDescriptorsSet)));
     dependenciesValidator.validate(new ArrayList<>(applicationDescriptorsSet));
-    return applicationDescriptorsSet
-      .stream()
-      .map(ApplicationDescriptor::getId)
-      .toList();
+    return mapItems(applicationDescriptorsSet, ApplicationDescriptor::getId);
   }
 
   private Optional<ApplicationDescriptor> getByLatestDependencyVersion(Dependency dependency,
     Set<ApplicationDescriptor> existDescriptors) {
     var requiredVersionRanges = RangesListFactory.create(dependency.getVersion());
     var descriptors = findApplicationDescriptorsByName(dependency.getName());
-    var retrievedSatisfied = descriptors
-      .stream()
+    var retrievedSatisfied = toStream(descriptors)
       .filter(descriptor -> requiredVersionRanges.isSatisfiedBy(getSemver(descriptor.getVersion())))
       .toList();
-    var existSatisfied = existDescriptors
-      .stream()
+    var existSatisfied = toStream(existDescriptors)
       .filter(descriptor -> StringUtils.equals(descriptor.getName(), dependency.getName())
         && requiredVersionRanges.isSatisfiedBy(getSemver(descriptor.getVersion())))
       .toList();
-    var unionDtos = union(retrievedSatisfied, existSatisfied);
-    return unionDtos
-      .stream()
+    var unionDescriptors = union(retrievedSatisfied, existSatisfied);
+    return toStream(unionDescriptors)
       .max(Comparator.comparing(descriptor -> new Semver(descriptor.getVersion())));
   }
 
   private List<ApplicationDescriptor> findApplicationDescriptorsByName(String name) {
-    return applicationService.findByNameWithModules(name)
-      .stream()
-      .map(applicationEntityMapper::convert)
-      .toList();
+    return mapItems(applicationService.findByNameWithModules(name), applicationEntityMapper::convert);
   }
 
   private Semver getSemver(String version) {
@@ -93,9 +86,7 @@ public class ApplicationDescriptorsValidationService {
   }
 
   private String getDescriptorIdsAsStr(List<ApplicationDescriptor> descriptors) {
-    return descriptors
-      .stream()
-      .map(ApplicationDescriptor::getId)
-      .collect(Collectors.joining(","));
+    var applicationDescriptorIds = mapItems(descriptors, ApplicationDescriptor::getId);
+    return join(",", applicationDescriptorIds);
   }
 }
