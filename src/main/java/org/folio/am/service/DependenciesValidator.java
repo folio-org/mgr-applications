@@ -9,8 +9,8 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.folio.am.utils.CollectionUtils.toStream;
 import static org.folio.am.utils.CollectionUtils.union;
+import static org.folio.common.utils.CollectionUtils.toStream;
 
 import java.util.ArrayList;
 import java.util.Collection;

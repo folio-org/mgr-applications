@@ -1,9 +1,9 @@
 package org.folio.am.service;
 
 import static java.lang.String.join;
-import static org.folio.am.utils.CollectionUtils.toStream;
 import static org.folio.am.utils.CollectionUtils.union;
 import static org.folio.common.utils.CollectionUtils.mapItems;
+import static org.folio.common.utils.CollectionUtils.toStream;
 
 import java.util.ArrayList;
 import java.util.Collection;

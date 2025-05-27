@@ -9,7 +9,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.ClassUtils.getShortClassName;
-import static org.folio.am.utils.CollectionUtils.toStream;
+import static org.folio.common.utils.CollectionUtils.toStream;
 import static org.springframework.core.annotation.OrderUtils.getOrder;
 
 import java.util.List;

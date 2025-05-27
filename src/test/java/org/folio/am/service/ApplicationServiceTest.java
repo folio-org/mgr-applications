@@ -15,7 +15,7 @@ import static org.folio.am.support.TestConstants.MODULE_FOO_NAME;
 import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
 import static org.folio.am.support.TestConstants.SERVICE_ID;
 import static org.folio.am.support.TestConstants.SERVICE_VERSION;
-import static org.folio.am.utils.CollectionUtils.mapItemsToSet;
+import static org.folio.common.utils.CollectionUtils.mapItemsToSet;
 import static org.folio.test.TestConstants.TENANT_ID;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;

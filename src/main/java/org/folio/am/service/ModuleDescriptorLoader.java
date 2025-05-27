@@ -5,7 +5,7 @@ import static java.net.URI.create;
 import static java.net.http.HttpResponse.BodyHandlers.ofString;
 import static java.time.Duration.ofMillis;
 import static java.util.stream.Collectors.toList;
-import static org.folio.am.utils.CollectionUtils.toStream;
+import static org.folio.common.utils.CollectionUtils.toStream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;

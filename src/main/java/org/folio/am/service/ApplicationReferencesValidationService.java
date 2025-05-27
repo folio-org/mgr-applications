@@ -5,9 +5,9 @@ import static java.lang.String.join;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.folio.am.utils.CollectionUtils.mapItemsToSet;
-import static org.folio.am.utils.CollectionUtils.toStream;
 import static org.folio.common.utils.CollectionUtils.mapItems;
+import static org.folio.common.utils.CollectionUtils.mapItemsToSet;
+import static org.folio.common.utils.CollectionUtils.toStream;
 
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
