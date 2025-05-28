@@ -41,13 +41,13 @@ class ApplicationEntityMapperTest {
     applicationDescriptor.setDependencies(List.of(dependency));
     applicationEntity.setApplicationDescriptor(applicationDescriptor);
 
-    var applicationDto = mapper.convert(applicationEntity);
+    var actualApplicationDescriptor = mapper.convert(applicationEntity);
 
-    assertThat(applicationDto.getName()).isEqualTo(applicationEntity.getName());
-    assertThat(applicationDto.getVersion()).isEqualTo(applicationEntity.getVersion());
-    assertThat(applicationDto.getId()).isEqualTo(applicationEntity.getId());
-    assertThat(applicationDto.getDependencies()).containsOnly(dependency);
-    assertThat(applicationDto.getModuleDescriptors()).contains(beModuleDescriptor);
-    assertThat(applicationDto.getUiModuleDescriptors()).contains(uiModuleDescriptor);
+    assertThat(actualApplicationDescriptor.getName()).isEqualTo(applicationEntity.getName());
+    assertThat(actualApplicationDescriptor.getVersion()).isEqualTo(applicationEntity.getVersion());
+    assertThat(actualApplicationDescriptor.getId()).isEqualTo(applicationEntity.getId());
+    assertThat(actualApplicationDescriptor.getDependencies()).containsOnly(dependency);
+    assertThat(actualApplicationDescriptor.getModuleDescriptors()).contains(beModuleDescriptor);
+    assertThat(actualApplicationDescriptor.getUiModuleDescriptors()).contains(uiModuleDescriptor);
   }
 }

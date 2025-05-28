@@ -31,9 +31,9 @@ class DependenciesValidatorTest {
     applicationDescriptor2.setName("app1");
     applicationDescriptor2.setVersion("2.0.1");
 
-    var applicationDtos = List.of(applicationDescriptor, applicationDescriptor2);
+    var applicationDescriptors = List.of(applicationDescriptor, applicationDescriptor2);
 
-    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDtos))
+    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Used same applications with different versions")
       .satisfies(error -> {
@@ -44,21 +44,21 @@ class DependenciesValidatorTest {
 
   @Test
   void validateDependencies_negative_applicationDependencyByNameIsMissed() {
-    var applicationDto1 = new ApplicationDescriptor();
-    applicationDto1.setId("app1-1.0.0");
-    applicationDto1.setName("app1");
-    applicationDto1.setVersion("1.0.0");
+    var applicationDescriptor1 = new ApplicationDescriptor();
+    applicationDescriptor1.setId("app1-1.0.0");
+    applicationDescriptor1.setName("app1");
+    applicationDescriptor1.setVersion("1.0.0");
     var dependency = new Dependency().name("app3").version("1.0.0");
-    applicationDto1.setDependencies(List.of(dependency));
+    applicationDescriptor1.setDependencies(List.of(dependency));
 
-    var applicationDto2 = new ApplicationDescriptor();
-    applicationDto2.setId("app2-3.0.1");
-    applicationDto2.setName("app2");
-    applicationDto2.setVersion("3.0.1");
+    var applicationDescriptor2 = new ApplicationDescriptor();
+    applicationDescriptor2.setId("app2-3.0.1");
+    applicationDescriptor2.setName("app2");
+    applicationDescriptor2.setVersion("3.0.1");
 
-    var applicationDtos = List.of(applicationDto1, applicationDto2);
+    var applicationDescriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 
-    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDtos))
+    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Application dependency by name app3 not exist");
   }
@@ -77,9 +77,9 @@ class DependenciesValidatorTest {
     applicationDescriptor2.setName("app2");
     applicationDescriptor2.setVersion("3.0.1");
 
-    var applicationDtos = List.of(applicationDescriptor1, applicationDescriptor2);
+    var applicationDescriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 
-    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDtos))
+    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Application dependency by name app2 and version ^2.0.1 not exist");
   }

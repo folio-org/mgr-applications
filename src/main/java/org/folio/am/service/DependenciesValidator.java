@@ -56,8 +56,8 @@ public class DependenciesValidator {
     }
     var mapApplicationNameToVersions = toStream(applicationDescriptors)
       .collect(toMap(ApplicationDescriptor::getName, ApplicationDescriptor::getVersion));
-    for (var applicationDto : applicationDescriptors) {
-      var dependencies = applicationDto.getDependencies();
+    for (var applicationDescriptor : applicationDescriptors) {
+      var dependencies = applicationDescriptor.getDependencies();
       validateApplicationDependencies(dependencies, mapApplicationNameToVersions);
     }
   }
