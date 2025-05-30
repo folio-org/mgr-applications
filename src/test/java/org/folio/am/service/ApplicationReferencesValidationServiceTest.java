@@ -102,6 +102,6 @@ class ApplicationReferencesValidationServiceTest {
 
     assertThatThrownBy(() -> applicationReferencesValidationService.validateReferences(applicationReferences))
       .isInstanceOf(RequestValidationException.class)
-      .hasMessage("Applications not exist by ids : app1-2.0.1");
+      .hasMessage("Applications not exist: ids = app1-2.0.1");
   }
 }

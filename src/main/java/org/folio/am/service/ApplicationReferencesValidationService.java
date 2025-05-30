@@ -36,11 +36,11 @@ public class ApplicationReferencesValidationService {
       .filter(not(foundIds::contains))
       .collect(joining(","));
     if (isNotEmpty(notFoundIds)) {
-      var validationMessage = format("Applications not exist by ids : %s", notFoundIds);
-      log.info("validateReferences:: {}", validationMessage);
+      var validationMessage = format("Applications not exist: ids = %s", notFoundIds);
+      log.info(validationMessage);
       throw new RequestValidationException(validationMessage);
     }
-    log.info("validateReferences:: validate applications ids {}", () -> join(",", foundIds));
+    log.info("Validate applications: ids = {}", () -> join(",", foundIds));
     dependenciesValidator.validate(new ArrayList<>(applicationDescriptors));
   }
 }

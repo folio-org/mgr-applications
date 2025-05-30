@@ -60,7 +60,7 @@ class DependenciesValidatorTest {
 
     assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors))
       .isInstanceOf(RequestValidationException.class)
-      .hasMessage("Application dependency by name app3 not exist");
+      .hasMessage("Application dependency not exist: name = app3");
   }
 
   @Test
@@ -81,7 +81,7 @@ class DependenciesValidatorTest {
 
     assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors))
       .isInstanceOf(RequestValidationException.class)
-      .hasMessage("Application dependency by name app2 and version ^2.0.1 not exist");
+      .hasMessage("Application dependency not exist: name = app2, version = ^2.0.1");
   }
 
   @Test
@@ -163,6 +163,6 @@ class DependenciesValidatorTest {
     // Should throw exception because app4 dependency is required but missing
     assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors))
       .isInstanceOf(RequestValidationException.class)
-      .hasMessage("Application dependency by name app4 not exist");
+      .hasMessage("Application dependency not exist: name = app4");
   }
 }

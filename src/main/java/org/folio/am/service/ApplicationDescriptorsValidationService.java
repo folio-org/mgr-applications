@@ -36,7 +36,7 @@ public class ApplicationDescriptorsValidationService {
   private final DependenciesValidator dependenciesValidator;
 
   public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors) {
-    log.info("validateDescriptors:: validate descriptors ids {}", getDescriptorIdsAsStr(descriptors));
+    log.info("Validate descriptors: ids = {}", getDescriptorIdsAsStr(descriptors));
     var applicationDescriptorsSet = new LinkedHashSet<>(descriptors);
     var dependencyQueue = toStream(applicationDescriptorsSet)
       .map(ApplicationDescriptor::getDependencies)
@@ -55,7 +55,7 @@ public class ApplicationDescriptorsValidationService {
         });
       }
     }
-    log.info("validateDescriptors:: validate applications including dependencies by ids {}",
+    log.info("Validate applications including dependencies: ids = {}",
       getDescriptorIdsAsStr(new ArrayList<>(applicationDescriptorsSet)));
     dependenciesValidator.validate(new ArrayList<>(applicationDescriptorsSet));
     return mapItems(applicationDescriptorsSet, ApplicationDescriptor::getId);
