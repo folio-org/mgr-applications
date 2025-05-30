@@ -1,7 +1,7 @@
 package org.folio.am.service;
 
-import static org.folio.am.utils.CollectionUtils.toStream;
 import static org.folio.am.utils.ModuleIdUtils.getNameAndVersion;
+import static org.folio.common.utils.CollectionUtils.toStream;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;

@@ -1,8 +1,8 @@
 package org.folio.am.integration.okapi;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.folio.am.utils.CollectionUtils.mapItemsToSet;
 import static org.folio.common.utils.CollectionUtils.mapItems;
+import static org.folio.common.utils.CollectionUtils.mapItemsToSet;
 
 import feign.FeignException;
 import java.util.List;

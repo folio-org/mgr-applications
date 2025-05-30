@@ -15,7 +15,7 @@ import static org.folio.am.support.TestConstants.MODULE_FOO_NAME;
 import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
 import static org.folio.am.support.TestConstants.SERVICE_ID;
 import static org.folio.am.support.TestConstants.SERVICE_VERSION;
-import static org.folio.am.utils.CollectionUtils.mapItemsToSet;
+import static org.folio.common.utils.CollectionUtils.mapItemsToSet;
 import static org.folio.test.TestConstants.TENANT_ID;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -122,6 +122,17 @@ class ApplicationServiceTest {
     when(repository.findByIds(applicationIds)).thenReturn(singletonList(TestValues.applicationDescriptorEntity()));
     var actual = service.findByIds(applicationIds, true);
     assertThat(actual).containsExactly(TestValues.applicationDescriptor());
+  }
+
+  @Test
+  void findByNameWithModules_positive() {
+    var applicationName = "applicationName";
+
+    when(repository.findByNameWithModules(applicationName))
+      .thenReturn(singletonList(TestValues.applicationDescriptorEntity()));
+    service.findByNameWithModules(applicationName);
+
+    verify(repository).findByNameWithModules(applicationName);
   }
 
   @Test

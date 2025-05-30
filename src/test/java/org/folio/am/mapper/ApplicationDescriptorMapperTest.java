@@ -5,7 +5,7 @@ import static org.folio.am.domain.entity.InterfaceReferenceEntity.ReferenceType.
 import static org.folio.am.domain.entity.InterfaceReferenceEntity.ReferenceType.PROVIDES;
 import static org.folio.am.domain.entity.InterfaceReferenceEntity.ReferenceType.REQUIRES;
 import static org.folio.am.support.TestConstants.APPLICATION_ID;
-import static org.folio.am.utils.CollectionUtils.takeOne;
+import static org.folio.common.utils.CollectionUtils.takeOne;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
