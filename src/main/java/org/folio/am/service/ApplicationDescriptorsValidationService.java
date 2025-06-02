@@ -74,7 +74,7 @@ public class ApplicationDescriptorsValidationService {
       .toList();
     var unionDescriptors = union(retrievedSatisfied, existSatisfied);
     return toStream(unionDescriptors)
-      .max(Comparator.comparing(descriptor -> new Semver(descriptor.getVersion())));
+      .max(Comparator.comparing(descriptor -> getSemver(descriptor.getVersion())));
   }
 
   private List<ApplicationDescriptor> findApplicationDescriptorsByName(String name) {
