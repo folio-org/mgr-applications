@@ -18,6 +18,10 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
   @Query(value = "SELECT entity FROM ApplicationEntity entity WHERE entity.id IN :ids")
   List<ApplicationEntity> findByIdsWihModules(@Param("ids") List<String> applicationIds);
 
+  @EntityGraph(attributePaths = {"modules", "uiModules"})
+  @Query(value = "SELECT entity FROM ApplicationEntity entity WHERE entity.name = :name")
+  List<ApplicationEntity> findByNameWithModules(String name);
+
   @Query(value = """
     SELECT DISTINCT entity FROM ApplicationEntity entity
       INNER JOIN entity.modules module
