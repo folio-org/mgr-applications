@@ -225,4 +225,72 @@ class ApplicationInterfaceValidatorServiceTest {
           .containsExactly(new Parameter().key("app1-1.0.0").value("configuration 1.0.0;ui-settings 1.0.0"),
             new Parameter().key("app2-2.0.1").value("configuration 1.0.0")));
   }
+
+  @Test
+  void validate_positive_withOptionalDependency() {
+    var applicationEntity1 = new ApplicationEntity();
+    applicationEntity1.setId("app1-1.0.0");
+    applicationEntity1.setName("app1");
+    applicationEntity1.setVersion("1.0.0");
+
+    // Create a dependency marked as optional
+    var optionalDependency = new Dependency().name("app3").version("1.0.0").optional(true);
+    var requiredDependency = new Dependency().name("app2").version("^2.0.1");
+    var applicationDescriptor1 =
+      new ApplicationDescriptor().dependencies(List.of(optionalDependency, requiredDependency));
+    applicationEntity1.setApplicationDescriptor(applicationDescriptor1);
+    applicationEntity1.setModules(Set.of());
+    applicationEntity1.setUiModules(List.of());
+
+    var applicationEntity2 = new ApplicationEntity();
+    applicationEntity2.setId("app2-2.0.1");
+    applicationEntity2.setName("app2");
+    applicationEntity2.setVersion("2.0.1");
+    applicationEntity2.setApplicationDescriptor(new ApplicationDescriptor());
+    applicationEntity2.setModules(Set.of());
+    applicationEntity2.setUiModules(List.of());
+
+    var apps = List.of("app1-1.0.0", "app2-2.0.1");
+    var applicationReferences = new ApplicationReferences().applicationIds(new LinkedHashSet<>(apps));
+
+    when(applicationService.findByIdsWithModules(apps)).thenReturn(List.of(applicationEntity1, applicationEntity2));
+
+    // Should not throw exception because app3 dependency is optional
+    assertThatNoException().isThrownBy(() -> applicationInterfaceValidatorService.validate(applicationReferences));
+  }
+
+  @Test
+  void validate_negative_withMixedDependencies() {
+    var applicationEntity1 = new ApplicationEntity();
+    applicationEntity1.setId("app1-1.0.0");
+    applicationEntity1.setName("app1");
+    applicationEntity1.setVersion("1.0.0");
+
+    // Create mixed dependencies - one optional that's missing and one required that's missing
+    var optionalDependency = new Dependency().name("app3").version("1.0.0").optional(true);
+    var requiredDependency = new Dependency().name("app4").version("^2.0.1");
+    var applicationDescriptor1 =
+      new ApplicationDescriptor().dependencies(List.of(optionalDependency, requiredDependency));
+    applicationEntity1.setApplicationDescriptor(applicationDescriptor1);
+    applicationEntity1.setModules(Set.of());
+    applicationEntity1.setUiModules(List.of());
+
+    var applicationEntity2 = new ApplicationEntity();
+    applicationEntity2.setId("app2-2.0.1");
+    applicationEntity2.setName("app2");
+    applicationEntity2.setVersion("2.0.1");
+    applicationEntity2.setApplicationDescriptor(new ApplicationDescriptor());
+    applicationEntity2.setModules(Set.of());
+    applicationEntity2.setUiModules(List.of());
+
+    var apps = List.of("app1-1.0.0", "app2-2.0.1");
+    var applicationReferences = new ApplicationReferences().applicationIds(new LinkedHashSet<>(apps));
+
+    when(applicationService.findByIdsWithModules(apps)).thenReturn(List.of(applicationEntity1, applicationEntity2));
+
+    // Should throw exception because app4 dependency is required but missing
+    assertThatThrownBy(() -> applicationInterfaceValidatorService.validate(applicationReferences))
+      .isInstanceOf(RequestValidationException.class)
+      .hasMessage("Application dependency by name app4 not exist");
+  }
 }

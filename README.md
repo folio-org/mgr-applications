@@ -123,7 +123,7 @@ docker run \
 | MAX_HTTP_REQUEST_HEADER_SIZE             | 200KB                        |   true   | Maximum size of the HTTP request header.                                                                                                                                                                   |
 | REGISTER_MODULE_IN_KONG                  | true                         |  false   | Defines if module must be registered in Kong (it will create for itself service and list of routes from module descriptor)                                                                                 |
 | ROUTER_PATH_PREFIX                       |                              |  false   | Defines routes prefix to be added to the generated endpoints by OpenAPI generator (`/foo/entites` -> `{{prefix}}/foo/entities`). Required if load balancing group has format like `{{host}}/{{moduleId}}`  |
-| ROUTEMANAGEMENT_ENABLE                   | false                        |  false   | Enable Kong routes management for modules discovery information (e.g. creation of routes on module discovery creation/update, removal of routes on deletion of module discovery information)               |
+| ROUTEMANAGEMENT_ENABLE                   | true                         |  false   | Enable Kong routes management for modules discovery information (e.g. creation of routes on module discovery creation/update, removal of routes on deletion of module discovery information)               |
 
 ### SSL Configuration environment variables
 

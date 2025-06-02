@@ -1,5 +1,6 @@
-## Version `v3.x.x` (TBD)
+## Version `v4.x.x` (TBD)
 * Provide "System User required" attribute as part of module bootstrap data (MGRAPPS-54)
+* Introduce optional application dependencies (MGRAPPS-57)
 
 ---
 
