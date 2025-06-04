@@ -69,6 +69,26 @@ class ApplicationDescriptorsValidationServiceTest {
   }
 
   @Test
+  void validate_positive_providedApplicationDescriptorsWithSameId() {
+    var applicationDescriptor1 = new ApplicationDescriptor();
+    applicationDescriptor1.setName("app1");
+    applicationDescriptor1.setVersion("1.0.0");
+    applicationDescriptor1.setId("app1-1.0.0");
+
+    var applicationDescriptor2 = new ApplicationDescriptor();
+    applicationDescriptor2.setName("app1");
+    applicationDescriptor2.setVersion("1.0.0");
+    applicationDescriptor2.setId("app1-1.0.0");
+
+    var actual = applicationDescriptorsValidationService
+      .validateDescriptors(List.of(applicationDescriptor1, applicationDescriptor2));
+    var expected = List.of("app1-1.0.0");
+
+    assertThat(actual).isEqualTo(expected);
+    verify(dependenciesValidator).validate(anyList());
+  }
+
+  @Test
   void validate_negative_providedSameApplicationsWithDifferentVersions() {
     var applicationDescriptor1 = new ApplicationDescriptor();
     applicationDescriptor1.setName("app1");
