@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.0</version>
+    <version>3.5.3</version>
     <relativePath />
   </parent>
 
@@ -31,7 +31,7 @@
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.10.1</hypersistence-utils-hibernate-63.version>
-    <swagger-annotations.version>2.2.33</swagger-annotations.version>
+    <swagger-annotations.version>2.2.34</swagger-annotations.version>
     <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.5.0</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.6</openapi-tools.jackson-databind-nullable.version>
@@ -46,12 +46,12 @@
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
 
     <!-- Test dependencies versions -->
-    <testcontainer.version>1.21.1</testcontainer.version>
+    <testcontainer.version>1.21.2</testcontainer.version>
     <awaitility.version>4.3.0</awaitility.version>
     <instancio.version>5.4.1</instancio.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>10.25.0</maven-checkstyle.version>
+    <maven-checkstyle.version>10.25.1</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <openapi-generator.version>7.13.0</openapi-generator.version>
