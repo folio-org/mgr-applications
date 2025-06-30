@@ -1,0 +1,5 @@
+application:
+  security:
+    enabled: false
+  keycloak:
+    enabled: false
