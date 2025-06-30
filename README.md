@@ -11,11 +11,24 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 * [Compiling](#compiling)
 * [Running It](#running-it)
 * [Environment Variables](#environment-variables)
+  * [SSL Configuration environment variables](#ssl-configuration-environment-variables)
+  * [Secure storage environment variables](#secure-storage-environment-variables)
+    * [AWS-SSM](#aws-ssm)
+    * [Vault](#vault)
+    * [Folio Secure Store Proxy (FSSP)](#folio-secure-store-proxy-fssp)
 * [Keycloak Integration](#keycloak-integration)
+  * [Import Keycloak data on startup](#import-keycloak-data-on-startup)
+  * [Keycloak Security](#keycloak-security)
+  * [Keycloak specific environment variables](#keycloak-specific-environment-variables)
 * [Kong Gateway Integration](#kong-gateway-integration)
+  * [Kong Service Registration](#kong-service-registration)
+  * [Kong Route Registration](#kong-route-registration)
 * [Kafka Integration](#kafka-integration)
-* [Manager Tenant Entitlements Integration](#mgr-tenant-entitlement-integration)
-* [Folio Application Registry Mode](#folio-application-registry-mode)
+  * [Events upon discovery changes](#events-upon-discovery-changes)
+  * [Naming convention](#naming-convention)
+  * [Event structure](#event-structure)
+* [Manager Tenant Entitlements Integration](#manager-tenant-entitlements-integration)
+* [Folio Application Registry mode](#folio-application-registry-mode)
 
 ## Introduction
 
@@ -118,7 +131,7 @@ docker run \
 | SECURITY_ENABLED                         | true                         |  false   | Allows to enable/disable security. If true and KC_INTEGRATION_ENABLED is also true - the Keycloak will be used as a security provider.                                                               |
 | FAR_MODE                                 | false                        |  false   | Allows to enable Folio Application Registry mode, if FAR mode is enabled, kong integration must disabled using environment variable `KONG_INTEGRATION_ENABLED`.                                            |
 | MOD_AUTHTOKEN_URL                        | -                            |   true   | Mod-authtoken URL. Required if OKAPI_INTEGRATION_ENABLED is true and SECURITY_ENABLED is true and KC_INTEGRATION_ENABLED is false.                                                                         |
-| SECRET_STORE_TYPE                        | -                            |   true   | Secure storage type. Supported values: `EPHEMERAL`, `AWS_SSM`, `VAULT`                                                                                                                                     |
+| SECRET_STORE_TYPE                        | -                            |   true   | Secure storage type. Supported values: `EPHEMERAL`, `AWS_SSM`, `VAULT`, `FSSP`                                                                                                                             |
 | VALIDATION_MODE                          | basic                        |  false   | Validation mode applied during Application Descriptors checking (see POST `/applications/validate` endpoint). Possible values: `none`, `basic`, `onCreate`                                                 |
 | MAX_HTTP_REQUEST_HEADER_SIZE             | 200KB                        |   true   | Maximum size of the HTTP request header.                                                                                                                                                                   |
 | REGISTER_MODULE_IN_KONG                  | true                         |  false   | Defines if module must be registered in Kong (it will create for itself service and list of routes from module descriptor)                                                                                 |
@@ -164,7 +177,20 @@ Required when `SECRET_STORE_TYPE=VAULT`
 | SECRET_STORE_VAULT_KEYSTORE_FILE_PATH   | -             | the path to a JKS keystore file containing a client cert and private key            |
 | SECRET_STORE_VAULT_TRUSTSTORE_FILE_PATH | -             | the path to a JKS truststore file containing Vault server certs that can be trusted |
 
-### Keycloak Integration
+#### Folio Secure Store Proxy (FSSP)
+
+Required when `SECRET_STORE_TYPE=FSSP`
+
+| Name                                   | Default value         | Description                                          |
+|:---------------------------------------|:----------------------|:-----------------------------------------------------|
+| SECRET_STORE_FSSP_ADDRESS              | -                     | The address (URL) of the FSSP service.               |
+| SECRET_STORE_FSSP_SECRET_PATH          | secure-store/entries  | The path in FSSP where secrets are stored/retrieved. |
+| SECRET_STORE_FSSP_ENABLE_SSL           | false                 | Whether to use SSL when connecting to FSSP.          |
+| SECRET_STORE_FSSP_TRUSTSTORE_PATH      | -                     | Path to the truststore file for SSL connections.     |
+| SECRET_STORE_FSSP_TRUSTSTORE_FILE_TYPE | -                     | The type of the truststore file (e.g., JKS, PKCS12). |
+| SECRET_STORE_FSSP_TRUSTSTORE_PASSWORD  | -                     | The password for the truststore file.                |
+
+## Keycloak Integration
 
 #### Import Keycloak data on startup
 

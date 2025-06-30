@@ -8,8 +8,8 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.folio.am.service.validator.ValidationMode.ON_CREATE;
-import static org.folio.am.utils.CollectionUtils.toStream;
 import static org.folio.common.utils.CollectionUtils.mapItems;
+import static org.folio.common.utils.CollectionUtils.toStream;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -97,6 +97,17 @@ public class ApplicationService {
   @Transactional(readOnly = true)
   public List<ApplicationEntity> findByIdsWithModules(List<String> ids) {
     return appRepository.findByIdsWihModules(ids);
+  }
+
+  /**
+   * Returns list of applications entities with modules by their name.
+   *
+   * @param applicationName - application name
+   * @return {@link List} with {@link ApplicationEntity} objects
+   */
+  @Transactional(readOnly = true)
+  public List<ApplicationEntity> findByNameWithModules(String applicationName) {
+    return appRepository.findByNameWithModules(applicationName);
   }
 
   /**

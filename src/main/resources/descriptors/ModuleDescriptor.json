@@ -4,7 +4,7 @@
   "provides": [
     {
       "id": "applications",
-      "version": "1.2",
+      "version": "1.3",
       "handlers": [
         {
           "type": "internal",
@@ -42,6 +42,12 @@
           "methods": [ "POST" ],
           "pathPattern": "/applications/validate-interfaces",
           "permissionsRequired": [ "mgr-applications.applications.collection.validate-interfaces" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "POST" ],
+          "pathPattern": "/applications/validate-descriptors",
+          "permissionsRequired": [ "mgr-applications.applications.collection.validate-descriptors" ]
         },
         {
           "type": "internal",
@@ -131,6 +137,11 @@
       "description": "Validate a modules interfaces for applications",
       "displayName": "Manager Applications - validate modules interfaces",
       "permissionName": "mgr-applications.applications.collection.validate-interfaces"
+    },
+    {
+      "description": "Validate descriptors integrity at application and interface levels",
+      "displayName": "Manager Applications - validate descriptors integrity",
+      "permissionName": "mgr-applications.applications.collection.validate-descriptors"
     },
     {
       "description": "Validate dependencies of applications",
@@ -230,6 +241,7 @@
         "mgr-applications.applications.item.post",
         "mgr-applications.applications.item.validate",
         "mgr-applications.applications.collection.validate-interfaces",
+        "mgr-applications.applications.collection.validate-descriptors",
         "mgr-applications.applications.collection.validate-dependencies",
         "mgr-applications.applications.item.get",
         "mgr-applications.applications.item.delete",

@@ -5,9 +5,9 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.folio.am.domain.entity.InterfaceReferenceEntity.ReferenceType.OPTIONAL;
 import static org.folio.am.domain.entity.InterfaceReferenceEntity.ReferenceType.PROVIDES;
 import static org.folio.am.domain.entity.InterfaceReferenceEntity.ReferenceType.REQUIRES;
-import static org.folio.am.utils.CollectionUtils.mapItemsToSet;
-import static org.folio.am.utils.CollectionUtils.toStream;
 import static org.folio.common.utils.CollectionUtils.mapItems;
+import static org.folio.common.utils.CollectionUtils.mapItemsToSet;
+import static org.folio.common.utils.CollectionUtils.toStream;
 
 import java.util.Collection;
 import java.util.Collections;
