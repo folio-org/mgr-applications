@@ -1,6 +1,8 @@
 ## Version `v3.0.1` (07.07.2025)
 * Enable security by default (MGRAPPS-52)
 
+---
+
 ## Version `v3.0.0` (12.03.2025)
 * Add module permissions to bootstrap API (MGRAPPS-48)
 * Upgrade to Java 21. (MGRAPPS-46)
