@@ -117,7 +117,7 @@ public class DependenciesValidator {
     ApplicationDescriptor applicationDescriptor)  {
     var missedInterfaces = getRequiredInterfaces(applicationDescriptor);
     missedInterfaces.removeIf(requiredInterface -> toStream(providedInterfaces)
-      .anyMatch(provided -> provided.isCompatible(requiredInterface)));
+      .anyMatch(providedInterface -> providedInterface.isCompatible(requiredInterface)));
     return missedInterfaces;
   }
 
