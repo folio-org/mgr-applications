@@ -3,6 +3,7 @@
 * Introduce optional application dependencies (MGRAPPS-57)
 * Adjust APIs in support of generator plugin application descriptor verification (MGRAPPS-58)
 * Introduce configuration for FSSP (APPPOCTOOL-59)
+* Update interface integrity validation logic for interfaces (MGRAPPS-59)
 
 ---
 
