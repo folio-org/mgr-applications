@@ -1,3 +1,8 @@
+## Version `v3.0.2` (11.07.2025)
+* Update applications-poc-tools version to 3.0.2 to resolve issue with patch part comparison in semver4j
+
+---
+
 ## Version `v3.0.1` (07.07.2025)
 * Enable security by default (MGRAPPS-52)
 
