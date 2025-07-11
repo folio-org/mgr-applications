@@ -3,11 +3,13 @@ package org.folio.am.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.List;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.exception.RequestValidationException;
+import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.common.domain.model.error.Parameter;
@@ -85,15 +87,38 @@ class DependenciesValidatorTest {
   }
 
   @Test
+  void validateInterfaces_positive_minorVersionProvidedIsGreaterOfRequiredInterface() {
+    var applicationDescriptor1 = new ApplicationDescriptor();
+    applicationDescriptor1.setName("app1");
+    applicationDescriptor1.setVersion("1.0.0");
+    applicationDescriptor1.setId("app1-1.0.0");
+    var beModuleDescriptor = new ModuleDescriptor()
+      .requires(List.of(new InterfaceReference().id("configuration").version("1.0 2.0")));
+    applicationDescriptor1.setModuleDescriptors(List.of(beModuleDescriptor));
+
+    var applicationDescriptor2 = new ApplicationDescriptor();
+    applicationDescriptor2.setName("app2");
+    applicationDescriptor2.setVersion("2.0.1");
+    applicationDescriptor2.setId("app2-2.0.1");
+    var beModuleDescriptor2 = new ModuleDescriptor()
+      .provides(List.of(new InterfaceDescriptor().id("configuration").version("1.1")));
+    applicationDescriptor2.setModuleDescriptors(List.of(beModuleDescriptor2));
+
+    var applicationDescriptors = List.of(applicationDescriptor1, applicationDescriptor2);
+
+    assertDoesNotThrow(() -> dependenciesValidator.validateInterfaces(applicationDescriptors));
+  }
+
+  @Test
   void validateInterfaces_negative_interfaceIsMissed() {
     var applicationDescriptor1 = new ApplicationDescriptor();
     applicationDescriptor1.setName("app1");
     applicationDescriptor1.setVersion("1.0.0");
     applicationDescriptor1.setId("app1-1.0.0");
     var beModuleDescriptor = new ModuleDescriptor()
-      .requires(List.of(new InterfaceReference().id("configuration").version("1.0.0")));
+      .requires(List.of(new InterfaceReference().id("configuration").version("1.0")));
     var uiModuleDescriptor = new ModuleDescriptor()
-      .requires(List.of(new InterfaceReference().id("ui-settings").version("1.0.0")));
+      .requires(List.of(new InterfaceReference().id("ui-settings").version("1.0")));
     var dependency = new Dependency().name("app2").version("^2.0.1");
     applicationDescriptor1.setModuleDescriptors(List.of(beModuleDescriptor, uiModuleDescriptor));
     applicationDescriptor1.setDependencies(List.of(dependency));
@@ -103,7 +128,7 @@ class DependenciesValidatorTest {
     applicationDescriptor2.setVersion("2.0.1");
     applicationDescriptor2.setId("app2-2.0.1");
     var beModuleDescriptor2 = new ModuleDescriptor()
-      .requires(List.of(new InterfaceReference().id("configuration").version("1.0.0")));
+      .requires(List.of(new InterfaceReference().id("configuration").version("1.0")));
     applicationDescriptor2.setModuleDescriptors(List.of(beModuleDescriptor2));
 
     var applicationDescriptors = List.of(applicationDescriptor1, applicationDescriptor2);
@@ -114,8 +139,8 @@ class DependenciesValidatorTest {
       .satisfies(error ->
         assertThat(((RequestValidationException) error).getErrorParameters())
           .hasSize(2)
-          .containsExactly(new Parameter().key("app1-1.0.0").value("configuration 1.0.0;ui-settings 1.0.0"),
-            new Parameter().key("app2-2.0.1").value("configuration 1.0.0")));
+          .containsExactly(new Parameter().key("app1-1.0.0").value("configuration 1.0;ui-settings 1.0"),
+            new Parameter().key("app2-2.0.1").value("configuration 1.0")));
   }
 
   @Test

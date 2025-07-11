@@ -41,10 +41,10 @@ class ApplicationDescriptorsValidationServiceTest {
     applicationDescriptor1.setVersion("1.0.0");
     applicationDescriptor1.setId("app1-1.0.0");
     var beModuleDescriptor = new ModuleDescriptor()
-      .requires(List.of(new InterfaceReference().id("configuration").version("1.0.0 2.0.0")));
+      .requires(List.of(new InterfaceReference().id("configuration").version("1.0 2.0")));
     applicationDescriptor1.setModuleDescriptors(List.of(beModuleDescriptor));
     var uiModuleDescriptor = new ModuleDescriptor()
-      .requires(List.of(new InterfaceReference().id("ui-settings").version("1.0.0")));
+      .requires(List.of(new InterfaceReference().id("ui-settings").version("1.0")));
     applicationDescriptor1.setUiModuleDescriptors(List.of(uiModuleDescriptor));
     var dependency = new Dependency().name("app2").version("^2.0.1");
     applicationDescriptor1.setDependencies(List.of(dependency));
@@ -54,10 +54,10 @@ class ApplicationDescriptorsValidationServiceTest {
     applicationDescriptor2.setVersion("2.0.1");
     applicationDescriptor2.setId("app2-2.0.1");
     var beModuleDescriptor2 = new ModuleDescriptor()
-      .provides(List.of(new InterfaceDescriptor().id("configuration").version("1.0.0")));
+      .provides(List.of(new InterfaceDescriptor().id("configuration").version("1.0")));
     applicationDescriptor2.setModuleDescriptors(List.of(beModuleDescriptor2));
     var uiModuleDescriptor2 = new ModuleDescriptor()
-      .provides(List.of(new InterfaceDescriptor().id("ui-settings").version("1.0.0")));
+      .provides(List.of(new InterfaceDescriptor().id("ui-settings").version("1.0")));
     applicationDescriptor2.setUiModuleDescriptors(List.of(uiModuleDescriptor2));
 
     var actual = applicationDescriptorsValidationService
