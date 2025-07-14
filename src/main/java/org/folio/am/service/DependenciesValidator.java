@@ -7,7 +7,6 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.folio.am.utils.CollectionUtils.union;
 import static org.folio.common.utils.CollectionUtils.toStream;
@@ -20,7 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.exception.RequestValidationException;
@@ -118,9 +116,8 @@ public class DependenciesValidator {
   private Set<InterfaceReference> getMissedInterfaces(Set<InterfaceReference> providedInterfaces,
     ApplicationDescriptor applicationDescriptor)  {
     var missedInterfaces = getRequiredInterfaces(applicationDescriptor);
-    missedInterfaces.removeIf(interfaceToCheck -> toStream(providedInterfaces)
-      .anyMatch(pr -> StringUtils.equals(pr.getId(), interfaceToCheck.getId())
-        && contains(interfaceToCheck.getVersion(), pr.getVersion())));
+    missedInterfaces.removeIf(requiredInterface -> toStream(providedInterfaces)
+      .anyMatch(providedInterface -> providedInterface.isCompatible(requiredInterface)));
     return missedInterfaces;
   }
 
