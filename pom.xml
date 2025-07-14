@@ -30,7 +30,7 @@
     <lombok.version>1.18.38</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <hypersistence-utils-hibernate-63.version>3.10.2</hypersistence-utils-hibernate-63.version>
+    <hypersistence-utils-hibernate-63.version>3.10.3</hypersistence-utils-hibernate-63.version>
     <swagger-annotations.version>2.2.34</swagger-annotations.version>
     <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.5.0</apache-commons-collections4.version>
