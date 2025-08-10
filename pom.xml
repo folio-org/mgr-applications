@@ -51,7 +51,7 @@
     <instancio.version>5.5.0</instancio.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>10.26.1</maven-checkstyle.version>
+    <maven-checkstyle.version>11.0.0</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
     <openapi-generator.version>7.14.0</openapi-generator.version>
