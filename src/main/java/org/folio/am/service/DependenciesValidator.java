@@ -82,15 +82,16 @@ public class DependenciesValidator {
     Map<String, String> mapApplicationNameToVersions) {
     for (var dependency : dependencies) {
       if (Boolean.TRUE.equals(dependency.getOptional())) {
-        log.debug("Skipping validation for optional dependency: name = {}",
-          dependency.getName());
+        log.debug("Skipping validation for optional dependency: name = {}", dependency.getName());
         continue;
       }
+
       if (!mapApplicationNameToVersions.containsKey(dependency.getName())) {
         var validationMessage = format("Application dependency not exist: name = %s", dependency.getName());
         log.info(validationMessage);
         throw new RequestValidationException(validationMessage);
       }
+
       var existVersion = mapApplicationNameToVersions.get(dependency.getName());
       var requiredVersionRanges = RangesListFactory.create(dependency.getVersion());
       if (!requiredVersionRanges.isSatisfiedBy(new Semver(existVersion))) {
