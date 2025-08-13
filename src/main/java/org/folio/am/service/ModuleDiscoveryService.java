@@ -5,12 +5,14 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.folio.am.utils.CollectionUtils.filterAndMap;
 import static org.folio.common.utils.CollectionUtils.mapItems;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.ListUtils;
@@ -162,11 +164,8 @@ public class ModuleDiscoveryService {
 
   private List<ModuleEntity> getValidatedModuleEntities(ModuleDiscoveries discoveries) {
     var discoveryDescriptors = discoveries.getDiscovery();
-    var invalidIds = discoveryDescriptors.stream()
-      .filter(md -> isNotBlank(md.getId()) && !StringUtils.equals(md.getArtifactId(), md.getId()))
-      .map(Artifact::getArtifactId)
-      .collect(toList());
 
+    var invalidIds = filterAndMap(discoveryDescriptors, notEqualIdAndArtifactId(), Artifact::getArtifactId);
     if (isNotEmpty(invalidIds)) {
       throw new RequestValidationException("Discovery id must match name-version pattern", "id", invalidIds.toString());
     }
@@ -180,11 +179,7 @@ public class ModuleDiscoveryService {
       throw new EntityNotFoundException("Modules are not found for ids: " + notFoundModuleIds);
     }
 
-    var moduleIdsWithDiscoveryUrl = moduleEntities.stream()
-      .filter(moduleEntity -> moduleEntity.getDiscoveryUrl() != null)
-      .map(ArtifactEntity::getId)
-      .collect(toList());
-
+    var moduleIdsWithDiscoveryUrl = filterAndMap(moduleEntities, notNullDiscovery(), ArtifactEntity::getId);
     if (isNotEmpty(moduleIdsWithDiscoveryUrl)) {
       throw new EntityExistsException("Module Discovery already exists for ids: " + moduleIdsWithDiscoveryUrl);
     }
@@ -227,5 +222,13 @@ public class ModuleDiscoveryService {
   private ModuleEntity findModuleWithDiscovery(String moduleId) {
     return repository.findByHasDiscoveryAndId(moduleId)
       .orElseThrow(() -> new EntityNotFoundException("Unable to find discovery of the module with id: " + moduleId));
+  }
+
+  private static Predicate<ModuleDiscovery> notEqualIdAndArtifactId() {
+    return md -> isNotBlank(md.getId()) && !StringUtils.equals(md.getArtifactId(), md.getId());
+  }
+
+  private static Predicate<ModuleEntity> notNullDiscovery() {
+    return moduleEntity -> moduleEntity.getDiscoveryUrl() != null;
   }
 }

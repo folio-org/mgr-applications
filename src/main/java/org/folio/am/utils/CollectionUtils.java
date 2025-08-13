@@ -4,6 +4,8 @@ import static org.folio.common.utils.CollectionUtils.toStream;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -23,5 +25,19 @@ public class CollectionUtils {
     return Stream.concat(toStream(collection1), toStream(collection2))
       .distinct()
       .toList();
+  }
+
+  /**
+   * Filters a collection based on a predicate and maps the elements to another type using a mapper function.
+   *
+   * @param source - collection to filter and map
+   * @param predicate - predicate to apply for filtering
+   * @param mapper - function to map filtered elements to another type
+   * @param <T> - type of elements in the source collection
+   * @param <R> - type of elements in the resulting list
+   * @return - list of mapped elements that match the predicate
+   */
+  public static <T, R> List<R> filterAndMap(Collection<T> source, Predicate<T> predicate, Function<T, R> mapper) {
+    return toStream(source).filter(predicate).map(mapper).toList();
   }
 }

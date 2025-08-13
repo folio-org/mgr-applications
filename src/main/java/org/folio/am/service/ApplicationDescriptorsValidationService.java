@@ -36,6 +36,7 @@ public class ApplicationDescriptorsValidationService {
   private final ApplicationEntityMapper applicationEntityMapper;
   private final DependenciesValidator dependenciesValidator;
 
+  @SuppressWarnings("checkstyle:MethodLength")
   public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors) {
     log.info("Validate descriptors: ids = {}", getDescriptorIdsAsStr(descriptors));
     var applicationDescriptorsMap = toStream(descriptors)
