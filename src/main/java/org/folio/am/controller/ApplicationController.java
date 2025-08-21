@@ -6,6 +6,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.dto.ApplicationDescriptorsValidation;
@@ -17,6 +18,7 @@ import org.folio.am.service.ApplicationDescriptorsValidationService;
 import org.folio.am.service.ApplicationReferencesValidationService;
 import org.folio.am.service.ApplicationService;
 import org.folio.am.service.ApplicationValidatorService;
+import org.folio.common.domain.model.SearchResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,11 +38,20 @@ public class ApplicationController extends BaseController implements Application
 
   @Override
   public ResponseEntity<ApplicationDescriptors> getApplicationsByQuery(String query, Integer offset, Integer limit,
-    Boolean includeModuleDescriptors) {
-    var result = applicationService.findByQuery(query, offset, limit, includeModuleDescriptors);
+                                                                       Boolean includeModuleDescriptors, String appName,
+                                                                       Integer latest, Boolean preRelease, String order,
+                                                                       String orderBy) {
+    SearchResult<ApplicationDescriptor> result = shouldUseVersionsFiltering(appName, latest, preRelease)
+      ? applicationService.filterByAppVersions(appName, includeModuleDescriptors, latest, preRelease, order, orderBy)
+      : applicationService.findByQuery(query, offset, limit, includeModuleDescriptors);
+
     return ResponseEntity.ok(new ApplicationDescriptors()
       .totalRecords(result.getTotalRecords())
       .applicationDescriptors(result.getRecords()));
+  }
+
+  private boolean shouldUseVersionsFiltering(String appName, Integer latest, Boolean preRelease) {
+    return appName != null || latest != null || BooleanUtils.isFalse(preRelease);
   }
 
   @Override

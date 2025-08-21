@@ -46,4 +46,6 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
         AND app.id <> :id
     """)
   boolean existsByNotIdAndModuleId(@Param("id") String id, @Param("moduleId") String moduleId);
+
+  List<ApplicationEntity> findByName(String name);
 }
