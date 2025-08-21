@@ -34,7 +34,13 @@ paths:
 
     get:
       operationId: getApplicationsByQuery
-      description: Retrieve registered application by query.
+      description: |
+        Retrieve applications using two different modes:
+
+        **Basic Mode** - Use `query`, `offset`, `limit` for simple database searches
+        **Advanced Mode** - Use `appName`, `latest`, `preRelease`, `order`, `orderBy` for version-specific filtering
+
+        Advanced mode automatically activates when you use any of the advanced parameters and provides semantic version handling.
       tags:
         - applications
       parameters:
@@ -42,6 +48,11 @@ paths:
         - $ref: '#/components/parameters/query-offset'
         - $ref: '#/components/parameters/query-limit'
         - $ref: '#/components/parameters/full'
+        - $ref: '#/components/parameters/appName'
+        - $ref: '#/components/parameters/latest'
+        - $ref: '#/components/parameters/preRelease'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/orderBy'
       responses:
         '200':
           description: An application descriptors list
@@ -433,4 +444,48 @@ components:
       description: Validation mode to be applied
       schema:
         $ref: '#/components/schemas/validationMode'
+    appName:
+      in: query
+      name: appName
+      required: false
+      description: Filter results by application name.
+      schema:
+        type: string
+      example: my-app
+    latest:
+      in: query
+      name: latest
+      required: false
+      description: Limit results to the latest N releases per application name using SemVer comparison. Common use case - latest=1 for the most recent release.
+      schema:
+        type: integer
+        minimum: 1
+    preRelease:
+      in: query
+      name: preRelease
+      required: false
+      description: Whether to include pre-release versions. true (default) - include pre-releases; false - releases only (no pre-releases).
+      schema:
+        type: boolean
+        default: true
+    order:
+      in: query
+      name: order
+      required: false
+      description: Sort order of the results.
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+      example: desc
+    orderBy:
+      in: query
+      name: orderBy
+      required: false
+      description: Field name to order results by.
+      schema:
+        type: string
+        enum: [ id, version ]
+        default: version
+      example: releaseDate
 

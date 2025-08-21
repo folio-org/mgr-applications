@@ -43,6 +43,8 @@ import org.springframework.test.context.jdbc.Sql;
 @EnableKeycloakTlsMode
 @EnableKeycloakDataImport
 @Sql(scripts = "classpath:/sql/application-descriptor.sql", executionPhase = BEFORE_TEST_METHOD)
+@Sql(scripts = "classpath:/sql/application-descriptor-with-versions.sql", executionPhase = BEFORE_TEST_METHOD)
+
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 class ApplicationIT extends BaseIntegrationTest {
 
@@ -72,7 +74,7 @@ class ApplicationIT extends BaseIntegrationTest {
   void getByQuery_positive_allValues() throws Exception {
     mockMvc.perform(get("/applications")
         .queryParam("limit", "1"))
-      .andExpect(jsonPath("$.totalRecords", is(3)));
+      .andExpect(jsonPath("$.totalRecords", is(9)));
   }
 
   @Test
@@ -301,5 +303,143 @@ class ApplicationIT extends BaseIntegrationTest {
       .andExpect(jsonPath("$.errors[0].code", is("validation_error")))
       .andExpect(jsonPath("$.errors[0].parameters[0].key", is("moduleDescriptors")))
       .andExpect(jsonPath("$.errors[0].parameters[0].value", is("[test-module-1.0.1, test-module2-1.0.0]")));
+  }
+
+  @Test
+  void getByAppName_latest_parameter_positive() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("latest", "1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(1)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].name", is("my-app")))
+      .andExpect(jsonPath("$.applicationDescriptors[0].version", is("9.0.1")));
+  }
+
+  @Test
+  void getByAppName_latest_parameter_multiple_with_desc_version_sorting() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("latest", "2")
+        .queryParam("order", "desc")
+        .queryParam("orderBy", "version"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(2)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].name", is("my-app")))
+      .andExpect(jsonPath("$.applicationDescriptors[0].version", is("9.0.1")))
+      .andExpect(jsonPath("$.applicationDescriptors[1].name", is("my-app")))
+      .andExpect(jsonPath("$.applicationDescriptors[1].version", is("9.0.0-SNAPSHOT.4012")));
+  }
+
+  @Test
+  void getByAppName_latest_parameter_multiple_with_asc_version_sorting() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("latest", "2")
+        .queryParam("order", "asc")
+        .queryParam("orderBy", "version"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(2)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].name", is("my-app")))
+      .andExpect(jsonPath("$.applicationDescriptors[0].version", is("9.0.0-SNAPSHOT.4012")))
+      .andExpect(jsonPath("$.applicationDescriptors[1].name", is("my-app")))
+      .andExpect(jsonPath("$.applicationDescriptors[1].version", is("9.0.1")));
+  }
+
+  @Test
+  void getByAppName_versions_sort_desc() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("order", "desc")
+        .queryParam("orderBy", "version"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(6)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].version", is("9.0.1")))
+      .andExpect(jsonPath("$.applicationDescriptors[1].version", is("9.0.0-SNAPSHOT.4012")))
+      .andExpect(jsonPath("$.applicationDescriptors[2].version", is("9.0.0-SNAPSHOT.3456")))
+      .andExpect(jsonPath("$.applicationDescriptors[3].version", is("8.1.0")))
+      .andExpect(jsonPath("$.applicationDescriptors[4].version", is("8.1.0-SNAPSHOT.2245")))
+      .andExpect(jsonPath("$.applicationDescriptors[5].version", is("8.0.1")));
+  }
+
+  @Test
+  void getByAppName_versions_sort_asc() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("order", "asc")
+        .queryParam("orderBy", "version"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(6)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].version", is("8.0.1")))
+      .andExpect(jsonPath("$.applicationDescriptors[1].version", is("8.1.0-SNAPSHOT.2245")))
+      .andExpect(jsonPath("$.applicationDescriptors[2].version", is("8.1.0")))
+      .andExpect(jsonPath("$.applicationDescriptors[3].version", is("9.0.0-SNAPSHOT.3456")))
+      .andExpect(jsonPath("$.applicationDescriptors[4].version", is("9.0.0-SNAPSHOT.4012")))
+      .andExpect(jsonPath("$.applicationDescriptors[5].version", is("9.0.1")));
+  }
+
+  @Test
+  void getByAppName_application_not_found() throws Exception {
+    // Test filter parameter to find applications containing specific ID pattern
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "other"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(0)));
+  }
+
+  @Test
+  void getByAppName_invalid_latest_parameter() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("latest", "0"))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].message",
+        is("getApplicationsByQuery.latest must be greater than or equal to 1")))
+      .andExpect(jsonPath("$.errors[0].type", is("ConstraintViolationException")))
+      .andExpect(jsonPath("$.errors[0].code", is("validation_error")));
+  }
+
+  @Test
+  void getByAdvancedFiltering_missing_appName_parameter() throws Exception {
+    // Test error when using advanced filtering parameters without appName
+    mockMvc.perform(get("/applications")
+        .queryParam("latest", "1"))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].message", is("Filter parameter `appName` is required when"
+        + " using `latest`, `preRelease`, `order`, `orderBy` for version-specific filtering")))
+      .andExpect(jsonPath("$.errors[0].type", is("IllegalArgumentException")))
+      .andExpect(jsonPath("$.errors[0].code", is("validation_error")));
+  }
+
+  @Test
+  void getByAppName_orderBy_id_ascending() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("orderBy", "id")
+        .queryParam("order", "asc"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(6)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].id", is("my-app-8.0.1")))
+      .andExpect(jsonPath("$.applicationDescriptors[1].id", is("my-app-8.1.0")))
+      .andExpect(jsonPath("$.applicationDescriptors[2].id", is("my-app-8.1.0-SNAPSHOT.2245")))
+      .andExpect(jsonPath("$.applicationDescriptors[3].id", is("my-app-9.0.0-SNAPSHOT.3456")))
+      .andExpect(jsonPath("$.applicationDescriptors[4].id", is("my-app-9.0.0-SNAPSHOT.4012")))
+      .andExpect(jsonPath("$.applicationDescriptors[5].id", is("my-app-9.0.1")));
+  }
+
+  @Test
+  void getByAppName_orderBy_id_descending() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("orderBy", "id")
+        .queryParam("order", "desc"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(6)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].id", is("my-app-9.0.1")))
+      .andExpect(jsonPath("$.applicationDescriptors[1].id", is("my-app-9.0.0-SNAPSHOT.4012")))
+      .andExpect(jsonPath("$.applicationDescriptors[2].id", is("my-app-9.0.0-SNAPSHOT.3456")))
+      .andExpect(jsonPath("$.applicationDescriptors[3].id", is("my-app-8.1.0-SNAPSHOT.2245")))
+      .andExpect(jsonPath("$.applicationDescriptors[4].id", is("my-app-8.1.0")))
+      .andExpect(jsonPath("$.applicationDescriptors[5].id", is("my-app-8.0.1")));
   }
 }
