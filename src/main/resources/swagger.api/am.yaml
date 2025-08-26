@@ -487,5 +487,5 @@ components:
         type: string
         enum: [ id, version ]
         default: version
-      example: releaseDate
+      example: version
 
