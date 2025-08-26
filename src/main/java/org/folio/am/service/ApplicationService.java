@@ -175,7 +175,7 @@ public class ApplicationService {
   private List<ApplicationDescriptor> getApplicationDescriptors(String appName, boolean includeModuleDescriptors) {
     if (includeModuleDescriptors) {
       var entities = appRepository.findByNameWithModules(appName);
-      return entities.stream().map(this::getAppDescriptorWithModDescriptors).collect(toList());
+      return entities.stream().map(this::getAppDescriptorWithModDescriptors).toList();
     } else {
       var basicEntities = appRepository.findByNameBasicFields(appName);
       return basicEntities.stream()
@@ -183,14 +183,15 @@ public class ApplicationService {
           .id(entity.getId())
           .name(entity.getName())
           .version(entity.getVersion()))
-        .collect(toList());
+        .toList();
     }
   }
 
   private List<ApplicationDescriptor> filterLatestVersions(List<ApplicationDescriptor> descriptors, int latest) {
     return descriptors.stream()
       .sorted(Comparator.comparing((ApplicationDescriptor desc) -> getSemver(desc.getVersion())).reversed())
-      .limit(latest).collect(toList());
+      .limit(latest)
+      .toList();
   }
 
   private List<ApplicationDescriptor> filterByReleaseStatus(List<ApplicationDescriptor> descriptors) {
@@ -199,7 +200,7 @@ public class ApplicationService {
         var preRelease = getSemver(desc.getVersion()).getPreRelease();
         return preRelease.isEmpty();
       })
-      .collect(toList());
+      .toList();
   }
 
   private List<ApplicationDescriptor> applySorting(List<ApplicationDescriptor> descriptors, String orderBy,
@@ -212,7 +213,7 @@ public class ApplicationService {
 
     return descriptors.stream()
       .sorted(isAscending ? comparator : comparator.reversed())
-      .collect(toList());
+      .toList();
   }
 
   private Semver getSemver(String version) {
