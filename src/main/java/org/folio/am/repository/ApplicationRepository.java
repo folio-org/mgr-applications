@@ -47,5 +47,7 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
     """)
   boolean existsByNotIdAndModuleId(@Param("id") String id, @Param("moduleId") String moduleId);
 
-  List<ApplicationEntity> findByName(String name);
+  @Query(value = "SELECT NEW org.folio.am.domain.entity.ApplicationEntity(entity.id, entity.name, entity.version)"
+    + " FROM ApplicationEntity entity WHERE entity.name = :name")
+  List<ApplicationEntity> findByNameBasicFields(@Param("name") String name);
 }

@@ -52,6 +52,14 @@ public class ApplicationEntity extends ArtifactEntity {
   @EqualsAndHashCode.Exclude
   private Set<UiModuleEntity> uiModules = new TreeSet<>(idComparator());
 
+  public ApplicationEntity() {}
+
+  public ApplicationEntity(String id, String name, String version) {
+    this.id = id;
+    this.name = name;
+    this.version = version;
+  }
+
   public static ApplicationEntity of(String id) {
     var entity = new ApplicationEntity();
     entity.id = id;

@@ -2,7 +2,6 @@ package org.folio.am.service;
 
 import static java.util.Objects.isNull;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -150,23 +149,15 @@ public class ApplicationService {
    * @return {@link SearchResult} of {@link ApplicationDescriptor} objects
    */
   @Transactional(readOnly = true)
-  public SearchResult<ApplicationDescriptor> filterByAppVersions(String appName,
-                                                                 boolean includeModuleDescriptors,
-                                                                 Integer latest,
-                                                                 boolean includePreRelease,
-                                                                 String order,
-                                                                 String orderBy) {
+  public SearchResult<ApplicationDescriptor> filterByAppVersions(String appName, boolean includeModuleDescriptors,
+    Integer latest, boolean includePreRelease, String order, String orderBy) {
     if (StringUtils.isBlank(appName)) {
       throw new IllegalArgumentException(
         "Filter parameter `appName` is required when using `latest`, `preRelease`, `order`, `orderBy`"
           + " for version-specific filtering");
     }
 
-    var entities = appRepository.findByName(appName);
-
-    var descriptors = entities.stream()
-      .map(descriptorWithModules(includeModuleDescriptors))
-      .collect(toList());
+    List<ApplicationDescriptor> descriptors = getApplicationDescriptors(appName, includeModuleDescriptors);
 
     if (!includePreRelease) {
       descriptors = filterByReleaseStatus(descriptors);
@@ -181,15 +172,25 @@ public class ApplicationService {
     return SearchResult.of(descriptors.size(), descriptors);
   }
 
+  private List<ApplicationDescriptor> getApplicationDescriptors(String appName, boolean includeModuleDescriptors) {
+    if (includeModuleDescriptors) {
+      var entities = appRepository.findByNameWithModules(appName);
+      return entities.stream().map(this::getAppDescriptorWithModDescriptors).collect(toList());
+    } else {
+      var basicEntities = appRepository.findByNameBasicFields(appName);
+      return basicEntities.stream()
+        .map(entity -> new ApplicationDescriptor()
+          .id(entity.getId())
+          .name(entity.getName())
+          .version(entity.getVersion()))
+        .collect(toList());
+    }
+  }
+
   private List<ApplicationDescriptor> filterLatestVersions(List<ApplicationDescriptor> descriptors, int latest) {
     return descriptors.stream()
-      .collect(groupingBy(ApplicationDescriptor::getName))
-      .values()
-      .stream()
-      .flatMap(appsByName -> appsByName.stream()
-        .sorted(Comparator.comparing((ApplicationDescriptor desc) -> getSemver(desc.getVersion())).reversed())
-        .limit(latest))
-      .collect(toList());
+      .sorted(Comparator.comparing((ApplicationDescriptor desc) -> getSemver(desc.getVersion())).reversed())
+      .limit(latest).collect(toList());
   }
 
   private List<ApplicationDescriptor> filterByReleaseStatus(List<ApplicationDescriptor> descriptors) {
@@ -201,13 +202,8 @@ public class ApplicationService {
       .collect(toList());
   }
 
-  private Semver getSemver(String version) {
-    return new Semver(version);
-  }
-
-  private List<ApplicationDescriptor> applySorting(List<ApplicationDescriptor> descriptors,
-                                                   String orderBy, String order) {
-
+  private List<ApplicationDescriptor> applySorting(List<ApplicationDescriptor> descriptors, String orderBy,
+    String order) {
     Comparator<ApplicationDescriptor> comparator = "id".equalsIgnoreCase(orderBy)
       ? Comparator.comparing(ApplicationDescriptor::getId)
       : Comparator.comparing(desc -> getSemver(desc.getVersion()));
@@ -217,6 +213,10 @@ public class ApplicationService {
     return descriptors.stream()
       .sorted(isAscending ? comparator : comparator.reversed())
       .collect(toList());
+  }
+
+  private Semver getSemver(String version) {
+    return new Semver(version);
   }
 
   /**

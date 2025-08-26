@@ -38,9 +38,8 @@ public class ApplicationController extends BaseController implements Application
 
   @Override
   public ResponseEntity<ApplicationDescriptors> getApplicationsByQuery(String query, Integer offset, Integer limit,
-                                                                       Boolean includeModuleDescriptors, String appName,
-                                                                       Integer latest, Boolean preRelease, String order,
-                                                                       String orderBy) {
+    Boolean includeModuleDescriptors, String appName, Integer latest, Boolean preRelease, String order,
+    String orderBy) {
     SearchResult<ApplicationDescriptor> result = shouldUseVersionsFiltering(appName, latest, preRelease)
       ? applicationService.filterByAppVersions(appName, includeModuleDescriptors, latest, preRelease, order, orderBy)
       : applicationService.findByQuery(query, offset, limit, includeModuleDescriptors);

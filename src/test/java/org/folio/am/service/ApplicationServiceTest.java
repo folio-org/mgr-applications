@@ -387,9 +387,8 @@ class ApplicationServiceTest {
 
   @Test
   void filterByApplicationName_WithVersions_positive_basic() {
-    var entity1 = createApplicationEntity("app1", "1.0.0");
-
-    when(repository.findByName("app1")).thenReturn(List.of(entity1));
+    when(repository.findByNameBasicFields("app1")).thenReturn(List.of(
+      new ApplicationEntity("app1-1.0.0", "app1", "1.0.0")));
 
     var result = service.filterByAppVersions("app1", false, null, true, null, null);
 
@@ -400,10 +399,10 @@ class ApplicationServiceTest {
 
   @Test
   void filterByQueryWithJavaFiltering_positive_withLatestFiltering() {
-    var entity1 = createApplicationEntity("my-app", "1.0.0");
-    var entity2 = createApplicationEntity("my-app", "2.0.0");
-
-    when(repository.findByName("my-app")).thenReturn(List.of(entity1, entity2));
+    when(repository.findByNameBasicFields("my-app")).thenReturn(List.of(
+      new ApplicationEntity("my-app-1.0.0", "my-app", "1.0.0"),
+      new ApplicationEntity("my-app-2.0.0", "my-app", "2.0.0")
+    ));
 
     var result = service.filterByAppVersions("my-app", false, 1, true, null, null);
 
@@ -414,10 +413,10 @@ class ApplicationServiceTest {
 
   @Test
   void filterByQueryWithJavaFiltering_positive_withPreReleaseFiltering() {
-    var entity1 = createApplicationEntity("app1", "1.0.0"); // Release
-    var entity2 = createApplicationEntity("app1", "2.0.0-SNAPSHOT.123"); // Pre-release
-
-    when(repository.findByName("app1")).thenReturn(List.of(entity1, entity2));
+    when(repository.findByNameBasicFields("app1")).thenReturn(List.of(
+      new ApplicationEntity("app1-1.0.0", "app1", "1.0.0"),
+      new ApplicationEntity("app1-2.0.0-SNAPSHOT.123", "app1", "2.0.0-SNAPSHOT.123")
+    ));
 
     var result = service.filterByAppVersions("app1", false, null, false, null, null);
 
@@ -428,9 +427,8 @@ class ApplicationServiceTest {
 
   @Test
   void filterByQueryWithJavaFiltering_positive_withValidation() {
-    var entity1 = createApplicationEntity("test-app", "1.0.0");
-
-    when(repository.findByName("test-app")).thenReturn(List.of(entity1));
+    when(repository.findByNameBasicFields("test-app")).thenReturn(List.of(
+      new ApplicationEntity("test-app-1.0.0", "test-app", "1.0.0")));
 
     var result = service.filterByAppVersions("test-app", false, null, true, null, null);
 
@@ -446,18 +444,5 @@ class ApplicationServiceTest {
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Filter parameter `appName` is required when using `latest`, `preRelease`,"
         + " `order`, `orderBy` for version-specific filtering");
-  }
-
-  private ApplicationEntity createApplicationEntity(String name, String version) {
-    var descriptor = new ApplicationDescriptor()
-      .id(name + "-" + version)
-      .name(name)
-      .version(version);
-
-    var entity = new ApplicationEntity();
-    entity.setId(descriptor.getId());
-    entity.setApplicationDescriptor(descriptor);
-
-    return entity;
   }
 }

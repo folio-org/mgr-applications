@@ -442,4 +442,42 @@ class ApplicationIT extends BaseIntegrationTest {
       .andExpect(jsonPath("$.applicationDescriptors[4].id", is("my-app-8.1.0")))
       .andExpect(jsonPath("$.applicationDescriptors[5].id", is("my-app-8.0.1")));
   }
+
+  @Test
+  void getByAppName_with_full_true() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("full", "true")
+        .queryParam("latest", "1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(1)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].name", is("my-app")))
+      .andExpect(jsonPath("$.applicationDescriptors[0].version", is("9.0.1")))
+      .andExpect(jsonPath("$.applicationDescriptors[0].moduleDescriptors").isArray())
+      .andExpect(jsonPath("$.applicationDescriptors[0].moduleDescriptors").isNotEmpty());
+  }
+
+  @Test
+  void getByAppName_with_full_false() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("full", "false")
+        .queryParam("latest", "1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(1)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].name", is("my-app")))
+      .andExpect(jsonPath("$.applicationDescriptors[0].version", is("9.0.1")))
+      .andExpect(jsonPath("$.applicationDescriptors[0].moduleDescriptors").isEmpty());
+  }
+
+  @Test
+  void getByAppName_nonExistent_with_full_false() throws Exception {
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "non-existent-app")
+        .queryParam("full", "false"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(0)))
+      .andExpect(jsonPath("$.applicationDescriptors").isArray())
+      .andExpect(jsonPath("$.applicationDescriptors").isEmpty());
+  }
 }
