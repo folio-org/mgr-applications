@@ -5,6 +5,7 @@
 * Introduce configuration for FSSP (APPPOCTOOL-59)
 * Update interface integrity validation logic for interfaces (MGRAPPS-59)
 * Use SECURE\_STORE\_ENV, not ENV, for secure store key (MGRAPPS-72)
+* mgr-applications FAR mode semver dependency validation fails with SNAPSHOT version ranges(MGRAPPS-68)
 
 ---
 
