@@ -142,22 +142,6 @@ class ApplicationDescriptorsValidationServiceTest {
   }
 
   @Test
-  void validate_positive_includePrereleaseInDependencyCheckRange() {
-    var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
-    var dependency = new Dependency().name("app2").version("^1.2.0-SNAPSHOT");
-    applicationDescriptor1.setDependencies(List.of(dependency));
-    // use prerelease version
-    var applicationDescriptor2 = getApplicationDescriptor("app2", "1.3.0-SNAPSHOT.100000000000001");
-
-    var actual = applicationDescriptorsValidationService
-      .validateDescriptors(List.of(applicationDescriptor1, applicationDescriptor2));
-    var expected = List.of("app1-1.0.0", "app2-1.3.0-SNAPSHOT.100000000000001");
-
-    assertThat(actual).isEqualTo(expected);
-    verify(dependenciesValidator).validate(anyList());
-  }
-
-  @Test
   void validate_negative_byLatestRetrievedOrProvidedDependencyVersionIfRetrievedIsLast() {
     var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
     var dependency1 = new Dependency().name("app2").version("^2.0.1");
@@ -179,6 +163,27 @@ class ApplicationDescriptorsValidationServiceTest {
         assertThat(params).isEqualTo(List.of(new Parameter().key("applicationNames").value("app2")));
       });
     verify(dependenciesValidator).validate(anyList());
+  }
+
+  @Test
+  void validate_positive_includePrereleaseInDependencyCheckRange() {
+    var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
+    var dependency = new Dependency().name("app2").version("^1.2.0-SNAPSHOT");
+    applicationDescriptor1.setDependencies(List.of(dependency));
+    // use prerelease version
+    var applicationEntity1 = getApplicationEntity("app2", "1.3.0-SNAPSHOT.100000000000001");
+    var applicationEntity2 = getApplicationEntity("app2", "1.3.0-SNAPSHOT.100000000000002");
+    var applicationDescriptor2 = getApplicationDescriptor("app2", "1.3.0-SNAPSHOT.100000000000002");
+
+    when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1,
+      applicationEntity2));
+
+    var actual = applicationDescriptorsValidationService
+      .validateDescriptors(List.of(applicationDescriptor1));
+    var expected = List.of("app1-1.0.0", "app2-1.3.0-SNAPSHOT.100000000000002");
+
+    assertThat(actual).isEqualTo(expected);
+    verify(dependenciesValidator).validate(List.of(applicationDescriptor1, applicationDescriptor2));
   }
 
   private ApplicationDescriptor getApplicationDescriptor(String name, String version) {
