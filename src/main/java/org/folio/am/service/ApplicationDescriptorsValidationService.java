@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -36,17 +37,10 @@ public class ApplicationDescriptorsValidationService {
   private final ApplicationEntityMapper applicationEntityMapper;
   private final DependenciesValidator dependenciesValidator;
 
-  @SuppressWarnings("checkstyle:MethodLength")
   public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors) {
     log.info("Validate descriptors: ids = {}", getDescriptorIdsAsStr(descriptors));
-    var applicationDescriptorsMap = toStream(descriptors)
-      .collect(toMap(ApplicationDescriptor::getId, Function.identity(),
-        (existing, replacement) -> existing, LinkedHashMap::new));
-    var dependencyQueue = toStream(applicationDescriptorsMap.values())
-      .map(ApplicationDescriptor::getDependencies)
-      .flatMap(Collection::stream)
-      .filter(Objects::nonNull)
-      .collect(toCollection(LinkedList::new));
+    var applicationDescriptorsMap = getApplicationDescriptorsMap(descriptors);
+    var dependencyQueue = getDependencyQueue(applicationDescriptorsMap);
     var visited = new HashSet<>();
     while (!dependencyQueue.isEmpty()) {
       var dependency = dependencyQueue.poll();
@@ -65,9 +59,23 @@ public class ApplicationDescriptorsValidationService {
     return mapItems(applicationDescriptorsMap.values(), ApplicationDescriptor::getId);
   }
 
+  private Map<String, ApplicationDescriptor> getApplicationDescriptorsMap(List<ApplicationDescriptor> descriptors) {
+    return toStream(descriptors)
+      .collect(toMap(ApplicationDescriptor::getId, Function.identity(),
+        (existing, replacement) -> existing, LinkedHashMap::new));
+  }
+
+  private LinkedList<Dependency> getDependencyQueue(Map<String, ApplicationDescriptor> applicationDescriptorsMap) {
+    return toStream(applicationDescriptorsMap.values())
+      .map(ApplicationDescriptor::getDependencies)
+      .flatMap(Collection::stream)
+      .filter(Objects::nonNull)
+      .collect(toCollection(LinkedList::new));
+  }
+
   private Optional<ApplicationDescriptor> getByLatestDependencyVersion(Dependency dependency,
     Collection<ApplicationDescriptor> existDescriptors) {
-    var requiredVersionRanges = RangesListFactory.create(dependency.getVersion());
+    var requiredVersionRanges = RangesListFactory.create(dependency.getVersion(), true);
     var descriptors = findApplicationDescriptorsByName(dependency.getName());
     var retrievedSatisfied = toStream(descriptors)
       .filter(descriptor -> requiredVersionRanges.isSatisfiedBy(getSemver(descriptor.getVersion())))
