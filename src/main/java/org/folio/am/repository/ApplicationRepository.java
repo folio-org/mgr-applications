@@ -29,12 +29,12 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
   List<ApplicationEntity> findByNameWithModules(String name);
 
   @EntityGraph(attributePaths = {"modules", "uiModules"})
-  @Query(value = "SELECT entity FROM ApplicationEntity entity WHERE entity.name = :name")
+  @Query(value = "SELECT entity FROM ApplicationEntity entity WHERE entity.name = :name ORDER BY entity.id")
   @QueryHints(@QueryHint(name = HINT_FETCH_SIZE, value = "50"))
   Stream<ApplicationEntity> streamByNameWithModules(@Param("name") String name);
 
   @Query(value = "SELECT a.id, a.name, a.version"
-    + " FROM application a WHERE a.name = :name", nativeQuery = true)
+    + " FROM application a WHERE a.name = :name ORDER BY a.id", nativeQuery = true)
   @QueryHints(@QueryHint(name = HINT_FETCH_SIZE, value = "100"))
   Stream<ApplicationSlice> streamByNameBasicFields(@Param("name") String name);
 
