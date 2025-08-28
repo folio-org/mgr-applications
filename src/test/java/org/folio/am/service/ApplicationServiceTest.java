@@ -406,8 +406,8 @@ class ApplicationServiceTest {
 
   @Test
   void filterByApplicationName_WithVersions_positive_basic() {
-    when(repository.findByNameBasicFields("app1")).thenReturn(List.of(
-      createApplicationSlice("app1-1.0.0", "app1", "1.0.0")));
+    when(repository.streamByNameBasicFields("app1"))
+      .thenReturn(java.util.stream.Stream.of(createApplicationSlice("app1-1.0.0", "app1", "1.0.0")));
 
     var result = service.filterByAppVersions("app1", false, null, true, null, null);
 
@@ -418,10 +418,11 @@ class ApplicationServiceTest {
 
   @Test
   void filterByQueryWithJavaFiltering_positive_withLatestFiltering() {
-    when(repository.findByNameBasicFields("my-app")).thenReturn(List.of(
-      createApplicationSlice("my-app-1.0.0", "my-app", "1.0.0"),
-      createApplicationSlice("my-app-2.0.0", "my-app", "2.0.0")
-    ));
+    when(repository.streamByNameBasicFields("my-app"))
+      .thenReturn(java.util.stream.Stream.of(
+        createApplicationSlice("my-app-1.0.0", "my-app", "1.0.0"),
+        createApplicationSlice("my-app-2.0.0", "my-app", "2.0.0")
+      ));
 
     var result = service.filterByAppVersions("my-app", false, 1, true, null, null);
 
@@ -432,10 +433,11 @@ class ApplicationServiceTest {
 
   @Test
   void filterByQueryWithJavaFiltering_positive_withPreReleaseFiltering() {
-    when(repository.findByNameBasicFields("app1")).thenReturn(List.of(
-      createApplicationSlice("app1-1.0.0", "app1", "1.0.0"),
-      createApplicationSlice("app1-2.0.0-SNAPSHOT.123", "app1", "2.0.0-SNAPSHOT.123")
-    ));
+    when(repository.streamByNameBasicFields("app1"))
+      .thenReturn(java.util.stream.Stream.of(
+        createApplicationSlice("app1-1.0.0", "app1", "1.0.0"),
+        createApplicationSlice("app1-2.0.0-SNAPSHOT.123", "app1", "2.0.0-SNAPSHOT.123")
+      ));
 
     var result = service.filterByAppVersions("app1", false, null, false, null, null);
 
@@ -446,8 +448,9 @@ class ApplicationServiceTest {
 
   @Test
   void filterByQueryWithJavaFiltering_positive_withValidation() {
-    when(repository.findByNameBasicFields("test-app")).thenReturn(List.of(
-      createApplicationSlice("test-app-1.0.0", "test-app", "1.0.0")));
+    when(repository.streamByNameBasicFields("test-app"))
+      .thenReturn(java.util.stream.Stream.of(
+        createApplicationSlice("test-app-1.0.0", "test-app", "1.0.0")));
 
     var result = service.filterByAppVersions("test-app", false, null, true, null, null);
 
@@ -463,5 +466,38 @@ class ApplicationServiceTest {
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Filter parameter `appName` is required when using `latest`, `preRelease`,"
         + " `order`, `orderBy` for version-specific filtering");
+  }
+
+  @Test
+  void filterByAppVersions_positive_streamingAlwaysUsed() {
+    // Test that streaming is always used now
+    var streamMock = createApplicationSlice("test-app-1.0.0", "test-app", "1.0.0");
+    when(repository.streamByNameBasicFields("test-app"))
+      .thenReturn(java.util.stream.Stream.of(streamMock));
+
+    var result = service.filterByAppVersions("test-app", false, 5, true, null, null);
+
+    assertThat(result.getTotalRecords()).isEqualTo(1);
+    assertThat(result.getRecords()).hasSize(1);
+    assertThat(result.getRecords().getFirst().getName()).isEqualTo("test-app");
+
+    // Verify that streaming method is always called
+    verify(repository).streamByNameBasicFields("test-app");
+  }
+
+  @Test
+  void filterByAppVersions_positive_streamingWithLargeLimit() {
+    // Test that streaming is used even for large limits
+    var streamMock = createApplicationSlice("test-app-1.0.0", "test-app", "1.0.0");
+    when(repository.streamByNameBasicFields("test-app"))
+      .thenReturn(java.util.stream.Stream.of(streamMock));
+
+    var result = service.filterByAppVersions("test-app", false, 150, true, null, null);
+
+    assertThat(result.getTotalRecords()).isEqualTo(1);
+    assertThat(result.getRecords()).hasSize(1);
+
+    // Verify that streaming method is always called now
+    verify(repository).streamByNameBasicFields("test-app");
   }
 }

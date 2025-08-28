@@ -6,7 +6,6 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.BooleanUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.dto.ApplicationDescriptorsValidation;
@@ -40,7 +39,7 @@ public class ApplicationController extends BaseController implements Application
   public ResponseEntity<ApplicationDescriptors> getApplicationsByQuery(String query, Integer offset, Integer limit,
     Boolean includeModuleDescriptors, String appName, Integer latest, Boolean preRelease, String order,
     String orderBy) {
-    SearchResult<ApplicationDescriptor> result = shouldUseVersionsFiltering(appName, latest, preRelease)
+    SearchResult<ApplicationDescriptor> result = shouldUseVersionsFiltering(appName, latest)
       ? applicationService.filterByAppVersions(appName, includeModuleDescriptors, latest, preRelease, order, orderBy)
       : applicationService.findByQuery(query, offset, limit, includeModuleDescriptors);
 
@@ -49,8 +48,8 @@ public class ApplicationController extends BaseController implements Application
       .applicationDescriptors(result.getRecords()));
   }
 
-  private boolean shouldUseVersionsFiltering(String appName, Integer latest, Boolean preRelease) {
-    return appName != null || latest != null || BooleanUtils.isFalse(preRelease);
+  private boolean shouldUseVersionsFiltering(String appName, Integer latest) {
+    return appName != null || latest != null;
   }
 
   @Override
