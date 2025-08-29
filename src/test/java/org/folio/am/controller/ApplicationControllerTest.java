@@ -3,6 +3,8 @@ package org.folio.am.controller;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.am.support.TestConstants.APPLICATION_ID;
+import static org.folio.am.support.TestConstants.APPLICATION_NAME;
+import static org.folio.am.support.TestConstants.APPLICATION_VERSION;
 import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
 import static org.folio.am.support.TestValues.applicationDescriptor;
 import static org.folio.am.support.TestValues.applicationReferences;
@@ -455,5 +457,90 @@ class ApplicationControllerTest {
       .andExpect(status().isAccepted());
 
     verify(applicationDescriptorsValidationService).validateDescriptors(any());
+  }
+
+  @Test
+  void getByQuery_positive_with_latest_parameter() throws Exception {
+    var descriptor = new ApplicationDescriptor().id(APPLICATION_ID).name(APPLICATION_NAME).version(APPLICATION_VERSION);
+
+    // Mock the service method with new signature (offset, limit first, validation handled internally)
+    when(applicationService.filterByAppVersions(APPLICATION_NAME, false, 1, true,
+      "desc", "version"))
+      .thenReturn(SearchResult.of(1, singletonList(descriptor)));
+
+    var mvcResult = mockMvc.perform(get("/applications")
+        .param("latest", "1")
+        .param("appName", APPLICATION_NAME)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andReturn();
+
+    var actual = parseResponse(mvcResult, ApplicationDescriptors.class);
+    assertThat(actual).isEqualTo(new ApplicationDescriptors()
+      .applicationDescriptors(singletonList(descriptor))
+      .totalRecords(1));
+  }
+
+  @Test
+  void getByQuery_positive_with_both_latest_and_preRelease() throws Exception {
+    var descriptor = new ApplicationDescriptor().id(APPLICATION_ID).name(APPLICATION_NAME).version(APPLICATION_VERSION);
+
+    // Mock the service method with new signature
+    when(applicationService.filterByAppVersions(APPLICATION_NAME, false, 2, false,
+      "desc", "version"))
+      .thenReturn(SearchResult.of(1, singletonList(descriptor)));
+
+    var mvcResult = mockMvc.perform(get("/applications")
+        .param("latest", "2")
+        .param("preRelease", "false")
+        .param("appName", APPLICATION_NAME)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andReturn();
+
+    var actual = parseResponse(mvcResult, ApplicationDescriptors.class);
+    assertThat(actual).isEqualTo(new ApplicationDescriptors()
+      .applicationDescriptors(singletonList(descriptor))
+      .totalRecords(1));
+  }
+
+  @Test
+  void getByQuery_positive_with_orderBy_parameter() throws Exception {
+    var descriptor = new ApplicationDescriptor().id(APPLICATION_ID).name(APPLICATION_NAME).version(APPLICATION_VERSION);
+
+    when(applicationService.filterByAppVersions(APPLICATION_NAME, false, null, true,
+      "desc", "name"))
+      .thenReturn(SearchResult.of(1, singletonList(descriptor)));
+
+    var mvcResult = mockMvc.perform(get("/applications")
+        .param("orderBy", "name")
+        .param("order", "desc")
+        .param("appName", APPLICATION_NAME)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andReturn();
+
+    var actual = parseResponse(mvcResult, ApplicationDescriptors.class);
+    assertThat(actual).isEqualTo(new ApplicationDescriptors()
+      .applicationDescriptors(singletonList(descriptor))
+      .totalRecords(1));
+  }
+
+  @Test
+  void getByQuery_negative_missing_filter_with_advanced_params() throws Exception {
+    // Mock service to throw validation exception
+    when(applicationService.filterByAppVersions(null, false, 1, true,
+      "desc", "version"))
+      .thenThrow(new IllegalArgumentException("Filter parameter `appName` is required when using "
+        + "`latest`, `preRelease`, `order`, `orderBy` for version-specific filtering"));
+
+    mockMvc.perform(get("/applications")
+        .param("latest", "1")
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
   }
 }
