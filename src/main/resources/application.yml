@@ -96,7 +96,6 @@ application:
       jwks-refresh-interval: ${KC_JWKS_REFRESH_INTERVAL:60}
       forced-jwks-refresh-interval: ${KC_FORCED_JWKS_REFRESH_INTERVAL:60}
   secret-store:
-    environment: ${SECURE_STORE_ENV:folio}
     type: ${SECRET_STORE_TYPE:}
     aws-ssm:
       region: ${SECRET_STORE_AWS_SSM_REGION:}
