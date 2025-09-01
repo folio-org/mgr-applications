@@ -17,6 +17,7 @@ import org.folio.am.service.ApplicationDescriptorsValidationService;
 import org.folio.am.service.ApplicationReferencesValidationService;
 import org.folio.am.service.ApplicationService;
 import org.folio.am.service.ApplicationValidatorService;
+import org.folio.common.domain.model.SearchResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,11 +37,19 @@ public class ApplicationController extends BaseController implements Application
 
   @Override
   public ResponseEntity<ApplicationDescriptors> getApplicationsByQuery(String query, Integer offset, Integer limit,
-    Boolean includeModuleDescriptors) {
-    var result = applicationService.findByQuery(query, offset, limit, includeModuleDescriptors);
+    Boolean includeModuleDescriptors, String appName, Integer latest, Boolean preRelease, String order,
+    String orderBy) {
+    SearchResult<ApplicationDescriptor> result = shouldUseVersionsFiltering(appName, latest)
+      ? applicationService.filterByAppVersions(appName, includeModuleDescriptors, latest, preRelease, order, orderBy)
+      : applicationService.findByQuery(query, offset, limit, includeModuleDescriptors);
+
     return ResponseEntity.ok(new ApplicationDescriptors()
       .totalRecords(result.getTotalRecords())
       .applicationDescriptors(result.getRecords()));
+  }
+
+  private boolean shouldUseVersionsFiltering(String appName, Integer latest) {
+    return appName != null || latest != null;
   }
 
   @Override

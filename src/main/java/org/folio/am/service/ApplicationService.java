@@ -13,14 +13,17 @@ import static org.folio.common.utils.CollectionUtils.toStream;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.entity.ApplicationEntity;
@@ -36,6 +39,7 @@ import org.folio.am.repository.UiModuleRepository;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.common.domain.model.OffsetRequest;
 import org.folio.common.domain.model.SearchResult;
+import org.semver4j.Semver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -131,6 +135,92 @@ public class ApplicationService {
       .getContent();
 
     return SearchResult.of((int) page.getTotalElements(), applicationDescriptors);
+  }
+
+  /**
+   * Retrieves application descriptors with Java-side filtering and sorting.
+   * Used when advanced filtering (latest, preRelease, appName, orderBy) is needed.
+   *
+   * @param appName                  - specific application name to filter by
+   * @param includeModuleDescriptors - if true, module descriptors will be included in the response
+   * @param latest                   - if specified, limits results to the latest N versions per application name
+   * @param includePreRelease        - if true (default), includes pre-release versions; if false, releases only
+   * @param order                    - sort order (asc/desc)
+   * @param orderBy                  - field name to order results by
+   * @return {@link SearchResult} of {@link ApplicationDescriptor} objects
+   */
+  @Transactional(readOnly = true)
+  public SearchResult<ApplicationDescriptor> filterByAppVersions(String appName, boolean includeModuleDescriptors,
+    Integer latest, boolean includePreRelease, String order, String orderBy) {
+    if (StringUtils.isBlank(appName)) {
+      throw new IllegalArgumentException(
+        "Filter parameter `appName` is required when using `latest`, `preRelease`, `order`, `orderBy`"
+          + " for version-specific filtering");
+    }
+
+    List<ApplicationDescriptor> descriptors;
+    if (includeModuleDescriptors) {
+      descriptors = streamByNameWithModules(appName, latest, includePreRelease, order, orderBy);
+    } else {
+      descriptors = streamByNameBasicFields(appName, latest, includePreRelease, order, orderBy);
+    }
+
+    return SearchResult.of(descriptors.size(), descriptors);
+  }
+
+  private List<ApplicationDescriptor> streamByNameWithModules(String appName,
+    Integer latest, boolean includePreRelease, String order, String orderBy) {
+    try (var stream = appRepository.streamByNameWithModules(appName)) {
+      var descriptorStream = stream.map(this::getAppDescriptorWithModDescriptors);
+      var filteredStream = includePreRelease ? descriptorStream : descriptorStream.filter(this::isReleaseVersion);
+      return processVersionsWithLatestAndSorting(filteredStream, latest, orderBy, order);
+    }
+  }
+
+  private List<ApplicationDescriptor> streamByNameBasicFields(String appName,
+    Integer latest, boolean includePreRelease, String order, String orderBy) {
+    try (var stream = appRepository.streamByNameBasicFields(appName)) {
+      var descriptorStream = stream.map(entity -> new ApplicationDescriptor()
+        .id(entity.getId())
+        .name(entity.getName())
+        .version(entity.getVersion()));
+      var filteredStream = includePreRelease ? descriptorStream : descriptorStream.filter(this::isReleaseVersion);
+      return processVersionsWithLatestAndSorting(filteredStream, latest, orderBy, order);
+    }
+  }
+
+  private boolean isReleaseVersion(ApplicationDescriptor desc) {
+    var preRelease = getSemver(desc.getVersion()).getPreRelease();
+    return preRelease.isEmpty();
+  }
+
+  private List<ApplicationDescriptor> processVersionsWithLatestAndSorting(
+    Stream<ApplicationDescriptor> stream, Integer latest, String orderBy, String order) {
+    if (latest != null) {
+      var latestVersions = stream
+        .sorted(Comparator.comparing((ApplicationDescriptor desc) -> getSemver(desc.getVersion())).reversed())
+        .limit(latest)
+        .toList();
+      return latestVersions.stream()
+        .sorted(createComparator(orderBy, order))
+        .toList();
+    } else {
+      return stream.sorted(createComparator(orderBy, order)).toList();
+    }
+  }
+
+  private Comparator<ApplicationDescriptor> createComparator(String orderBy, String order) {
+    Comparator<ApplicationDescriptor> comparator = "id".equalsIgnoreCase(orderBy)
+      ? Comparator.comparing(ApplicationDescriptor::getId)
+      : Comparator.comparing(desc -> getSemver(desc.getVersion()));
+
+    boolean isAscending = StringUtils.equals(order, "asc");
+
+    return isAscending ? comparator : comparator.reversed();
+  }
+
+  private Semver getSemver(String version) {
+    return new Semver(version);
   }
 
   /**
