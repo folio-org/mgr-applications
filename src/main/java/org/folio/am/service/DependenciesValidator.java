@@ -93,7 +93,7 @@ public class DependenciesValidator {
       }
 
       var existVersion = mapApplicationNameToVersions.get(dependency.getName());
-      var requiredVersionRanges = RangesListFactory.create(dependency.getVersion());
+      var requiredVersionRanges = RangesListFactory.create(dependency.getVersion(), true);
       if (!requiredVersionRanges.isSatisfiedBy(new Semver(existVersion))) {
         var validationMessage = format("Application dependency not exist: name = %s, version = %s",
           dependency.getName(), dependency.getVersion());
