@@ -6,6 +6,7 @@
     "applicationDescriptors": {
       "description": "List of application descriptors",
       "type": "array",
+      "minItems": 1,
       "items": {
         "$ref": "applicationDescriptor.json"
       }

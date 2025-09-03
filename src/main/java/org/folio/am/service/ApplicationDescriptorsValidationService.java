@@ -1,29 +1,26 @@
 package org.folio.am.service;
 
 import static java.lang.String.join;
-import static java.util.stream.Collectors.toCollection;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.folio.am.utils.CollectionUtils.union;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.folio.common.utils.CollectionUtils.mapItems;
 import static org.folio.common.utils.CollectionUtils.toStream;
+import static org.folio.common.utils.SemverUtils.getVersion;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
-import org.folio.am.mapper.ApplicationEntityMapper;
+import org.semver4j.RangesList;
 import org.semver4j.RangesListFactory;
 import org.semver4j.Semver;
 import org.springframework.stereotype.Service;
@@ -34,67 +31,73 @@ import org.springframework.stereotype.Service;
 public class ApplicationDescriptorsValidationService {
 
   private final ApplicationService applicationService;
-  private final ApplicationEntityMapper applicationEntityMapper;
   private final DependenciesValidator dependenciesValidator;
 
   public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors) {
-    log.info("Validate descriptors: ids = {}", getDescriptorIdsAsStr(descriptors));
-    var applicationDescriptorsMap = getApplicationDescriptorsMap(descriptors);
-    var dependencyQueue = getDependencyQueue(applicationDescriptorsMap);
-    var visited = new HashSet<>();
-    while (!dependencyQueue.isEmpty()) {
-      var dependency = dependencyQueue.poll();
-      if (!visited.contains(dependency)) {
-        var descriptorOpt = getByLatestDependencyVersion(dependency, applicationDescriptorsMap.values());
-        descriptorOpt.ifPresent(descriptor -> {
-          applicationDescriptorsMap.putIfAbsent(descriptor.getId(), descriptor);
-          dependencyQueue.addAll(descriptor.getDependencies());
-          visited.add(dependency);
-        });
-      }
-    }
+    var applicationDescriptorsById = getApplicationDescriptorsById(descriptors);
+
+    log.info("Validate descriptors: ids = {}", () -> join(", ", applicationDescriptorsById.keySet()));
+
+    var resolvedDependencies = toStream(descriptors).collect(toMap(ApplicationDescriptor::getName, identity()));
+
+    applicationDescriptorsById.values().stream()
+      .flatMap(ad -> toStream(ad.getDependencies())).distinct()
+      // app-i.dependency -> [app-dep-descriptor-1, ... , app-dep-descriptor-n]
+      .flatMap(dependency -> resolveDependencyToAppDescriptors(dependency, resolvedDependencies))
+      .forEach(dep -> applicationDescriptorsById.putIfAbsent(dep.getId(), dep));
+
     log.info("Validate applications including dependencies: ids = {}",
-      getDescriptorIdsAsStr(applicationDescriptorsMap.values()));
-    dependenciesValidator.validate(new ArrayList<>(applicationDescriptorsMap.values()));
-    return mapItems(applicationDescriptorsMap.values(), ApplicationDescriptor::getId);
+      getDescriptorIdsAsStr(applicationDescriptorsById.values()));
+    dependenciesValidator.validate(new ArrayList<>(applicationDescriptorsById.values()));
+    return mapItems(applicationDescriptorsById.values(), ApplicationDescriptor::getId);
   }
 
-  private Map<String, ApplicationDescriptor> getApplicationDescriptorsMap(List<ApplicationDescriptor> descriptors) {
-    return toStream(descriptors)
-      .collect(toMap(ApplicationDescriptor::getId, Function.identity(),
-        (existing, replacement) -> existing, LinkedHashMap::new));
+  private Stream<ApplicationDescriptor> resolveDependencyToAppDescriptors(Dependency dependency,
+    Map<String, ApplicationDescriptor> resolvedDescriptorsByName) {
+    if (resolvedDescriptorsByName.containsKey(dependency.getName())) {
+      // ?? validate version range? -> if doesn't match, throw exception
+
+      return Stream.of(resolvedDescriptorsByName.get(dependency.getName()));
+    }
+
+    var dependencyVersionRange = RangesListFactory.create(dependency.getVersion(), true);
+    var latestAppId = applicationService.findAllApplicationIdsByName(dependency.getName())
+      .filter(appVersionIsInRange(dependencyVersionRange))
+      .max(Comparator.comparing(appId -> new Semver(getVersion(appId))));
+    
+    if (latestAppId.isPresent()) {
+      var resolvedId = latestAppId.get();
+      var resolvedDescriptor = applicationService.get(resolvedId, true);
+
+      resolvedDescriptorsByName.put(resolvedDescriptor.getName(), resolvedDescriptor);
+
+      var result = toStream(resolvedDescriptor.getDependencies())
+        .flatMap(dep -> resolveDependencyToAppDescriptors(dep, resolvedDescriptorsByName));
+
+      return Stream.concat(Stream.of(resolvedDescriptor), result);
+    } else {
+      // ?? throw exception?
+      log.warn("Cannot resolve dependency: name = {}, version = {}", dependency.getName(), dependency.getVersion());
+      return Stream.empty();
+    }
   }
 
-  private LinkedList<Dependency> getDependencyQueue(Map<String, ApplicationDescriptor> applicationDescriptorsMap) {
-    return toStream(applicationDescriptorsMap.values())
-      .map(ApplicationDescriptor::getDependencies)
-      .flatMap(Collection::stream)
-      .filter(Objects::nonNull)
-      .collect(toCollection(LinkedList::new));
+  private static Predicate<String> appVersionIsInRange(RangesList requiredVersionRanges) {
+    return appId -> requiredVersionRanges.isSatisfiedBy(new Semver(getVersion(appId)));
   }
 
-  private Optional<ApplicationDescriptor> getByLatestDependencyVersion(Dependency dependency,
-    Collection<ApplicationDescriptor> existDescriptors) {
-    var requiredVersionRanges = RangesListFactory.create(dependency.getVersion(), true);
-    var descriptors = findApplicationDescriptorsByName(dependency.getName());
-    var retrievedSatisfied = toStream(descriptors)
-      .filter(descriptor -> requiredVersionRanges.isSatisfiedBy(getSemver(descriptor.getVersion())))
-      .toList();
-    var existSatisfied = toStream(existDescriptors)
-      .filter(descriptor -> StringUtils.equals(descriptor.getName(), dependency.getName())
-        && requiredVersionRanges.isSatisfiedBy(getSemver(descriptor.getVersion())))
-      .toList();
-    var unionDescriptors = union(retrievedSatisfied, existSatisfied);
-    return toStream(unionDescriptors)
-      .max(Comparator.comparing(descriptor -> getSemver(descriptor.getVersion())));
-  }
+  private Map<String, ApplicationDescriptor> getApplicationDescriptorsById(List<ApplicationDescriptor> descriptors) {
+    var result = new HashMap<String, ApplicationDescriptor>();
 
-  private List<ApplicationDescriptor> findApplicationDescriptorsByName(String name) {
-    return mapItems(applicationService.findByNameWithModules(name), applicationEntityMapper::convert);
-  }
+    for (var descriptor : emptyIfNull(descriptors)) {
+      if (result.containsKey(descriptor.getId())) {
+        throw new IllegalArgumentException(
+          String.format("Duplicate application descriptor with id '%s' in the request", descriptor.getId()));
+      }
 
-  private Semver getSemver(String version) {
-    return new Semver(version);
+      result.put(descriptor.getId(), descriptor);
+    }
+    return result;
   }
 
   private String getDescriptorIdsAsStr(Collection<ApplicationDescriptor> descriptors) {

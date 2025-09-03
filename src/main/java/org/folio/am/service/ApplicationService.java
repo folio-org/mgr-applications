@@ -168,60 +168,7 @@ public class ApplicationService {
     return SearchResult.of(descriptors.size(), descriptors);
   }
 
-  private List<ApplicationDescriptor> streamByNameWithModules(String appName,
-    Integer latest, boolean includePreRelease, String order, String orderBy) {
-    try (var stream = appRepository.streamByNameWithModules(appName)) {
-      var descriptorStream = stream.map(this::getAppDescriptorWithModDescriptors);
-      var filteredStream = includePreRelease ? descriptorStream : descriptorStream.filter(this::isReleaseVersion);
-      return processVersionsWithLatestAndSorting(filteredStream, latest, orderBy, order);
-    }
-  }
 
-  private List<ApplicationDescriptor> streamByNameBasicFields(String appName,
-    Integer latest, boolean includePreRelease, String order, String orderBy) {
-    try (var stream = appRepository.streamByNameBasicFields(appName)) {
-      var descriptorStream = stream.map(entity -> new ApplicationDescriptor()
-        .id(entity.getId())
-        .name(entity.getName())
-        .version(entity.getVersion()));
-      var filteredStream = includePreRelease ? descriptorStream : descriptorStream.filter(this::isReleaseVersion);
-      return processVersionsWithLatestAndSorting(filteredStream, latest, orderBy, order);
-    }
-  }
-
-  private boolean isReleaseVersion(ApplicationDescriptor desc) {
-    var preRelease = getSemver(desc.getVersion()).getPreRelease();
-    return preRelease.isEmpty();
-  }
-
-  private List<ApplicationDescriptor> processVersionsWithLatestAndSorting(
-    Stream<ApplicationDescriptor> stream, Integer latest, String orderBy, String order) {
-    if (latest != null) {
-      var latestVersions = stream
-        .sorted(Comparator.comparing((ApplicationDescriptor desc) -> getSemver(desc.getVersion())).reversed())
-        .limit(latest)
-        .toList();
-      return latestVersions.stream()
-        .sorted(createComparator(orderBy, order))
-        .toList();
-    } else {
-      return stream.sorted(createComparator(orderBy, order)).toList();
-    }
-  }
-
-  private Comparator<ApplicationDescriptor> createComparator(String orderBy, String order) {
-    Comparator<ApplicationDescriptor> comparator = "id".equalsIgnoreCase(orderBy)
-      ? Comparator.comparing(ApplicationDescriptor::getId)
-      : Comparator.comparing(desc -> getSemver(desc.getVersion()));
-
-    boolean isAscending = StringUtils.equals(order, "asc");
-
-    return isAscending ? comparator : comparator.reversed();
-  }
-
-  private Semver getSemver(String version) {
-    return new Semver(version);
-  }
 
   /**
    * Saves application descriptor to the database and register Module Descriptors in Okapi.
@@ -251,16 +198,6 @@ public class ApplicationService {
     addModuleDescriptors(descriptor::setModuleDescriptors, descriptor::getModuleDescriptors, moduleDescriptors);
     addModuleDescriptors(descriptor::setUiModuleDescriptors, descriptor::getUiModuleDescriptors, uiModuleDescriptors);
     return createApplication(descriptor, token);
-  }
-
-  private static ValidationContext buildValidationContext(ApplicationDescriptor descriptor,
-    List<ModuleDescriptor> moduleDescriptors, List<ModuleDescriptor> uiModuleDescriptors) {
-    return ValidationContext.builder()
-      .applicationDescriptor(descriptor)
-      .loadedModuleDescriptors(moduleDescriptors)
-      .loadedUiModuleDescriptors(uiModuleDescriptors)
-      .additionalModes(List.of(ON_CREATE))
-      .build();
   }
 
   /**
@@ -295,6 +232,11 @@ public class ApplicationService {
     return appRepository.findApplicationsByModuleIds(moduleIds).stream()
       .map(ApplicationEntity::getApplicationDescriptor)
       .collect(toList());
+  }
+
+  public Stream<String> findAllApplicationIdsByName(String applicationName) {
+    // TODO: create implementation
+    return null;
   }
 
   private Function<ApplicationEntity, ApplicationDescriptor> descriptorWithModules(
@@ -381,6 +323,71 @@ public class ApplicationService {
 
   private boolean isAnotherAppRelatedToUiModule(ApplicationEntity application, UiModuleEntity uiModule) {
     return appRepository.existsByNotIdAndUiModuleId(application.getId(), uiModule.getId());
+  }
+
+  private List<ApplicationDescriptor> streamByNameWithModules(String appName,
+    Integer latest, boolean includePreRelease, String order, String orderBy) {
+    try (var stream = appRepository.streamByNameWithModules(appName)) {
+      var descriptorStream = stream.map(this::getAppDescriptorWithModDescriptors);
+      var filteredStream = includePreRelease ? descriptorStream : descriptorStream.filter(this::isReleaseVersion);
+      return processVersionsWithLatestAndSorting(filteredStream, latest, orderBy, order);
+    }
+  }
+
+  private List<ApplicationDescriptor> streamByNameBasicFields(String appName,
+    Integer latest, boolean includePreRelease, String order, String orderBy) {
+    try (var stream = appRepository.streamByNameBasicFields(appName)) {
+      var descriptorStream = stream.map(entity -> new ApplicationDescriptor()
+        .id(entity.getId())
+        .name(entity.getName())
+        .version(entity.getVersion()));
+      var filteredStream = includePreRelease ? descriptorStream : descriptorStream.filter(this::isReleaseVersion);
+      return processVersionsWithLatestAndSorting(filteredStream, latest, orderBy, order);
+    }
+  }
+
+  private boolean isReleaseVersion(ApplicationDescriptor desc) {
+    var preRelease = getSemver(desc.getVersion()).getPreRelease();
+    return preRelease.isEmpty();
+  }
+
+  private List<ApplicationDescriptor> processVersionsWithLatestAndSorting(
+    Stream<ApplicationDescriptor> stream, Integer latest, String orderBy, String order) {
+    if (latest != null) {
+      var latestVersions = stream
+        .sorted(Comparator.comparing((ApplicationDescriptor desc) -> getSemver(desc.getVersion())).reversed())
+        .limit(latest)
+        .toList();
+      return latestVersions.stream()
+        .sorted(createComparator(orderBy, order))
+        .toList();
+    } else {
+      return stream.sorted(createComparator(orderBy, order)).toList();
+    }
+  }
+
+  private Comparator<ApplicationDescriptor> createComparator(String orderBy, String order) {
+    Comparator<ApplicationDescriptor> comparator = "id".equalsIgnoreCase(orderBy)
+      ? Comparator.comparing(ApplicationDescriptor::getId)
+      : Comparator.comparing(desc -> getSemver(desc.getVersion()));
+
+    boolean isAscending = StringUtils.equals(order, "asc");
+
+    return isAscending ? comparator : comparator.reversed();
+  }
+
+  private Semver getSemver(String version) {
+    return new Semver(version);
+  }
+
+  private static ValidationContext buildValidationContext(ApplicationDescriptor descriptor,
+    List<ModuleDescriptor> moduleDescriptors, List<ModuleDescriptor> uiModuleDescriptors) {
+    return ValidationContext.builder()
+      .applicationDescriptor(descriptor)
+      .loadedModuleDescriptors(moduleDescriptors)
+      .loadedUiModuleDescriptors(uiModuleDescriptors)
+      .additionalModes(List.of(ON_CREATE))
+      .build();
   }
 
   private static void fillIdForArtifacts(ApplicationDescriptor descriptor) {
