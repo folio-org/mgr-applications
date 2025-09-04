@@ -6,6 +6,7 @@ import jakarta.persistence.QueryHint;
 import java.util.List;
 import java.util.stream.Stream;
 import org.folio.am.domain.entity.ApplicationEntity;
+import org.folio.am.domain.entity.ArtifactEntity;
 import org.folio.am.domain.model.ApplicationSlice;
 import org.folio.spring.cql.JpaCqlRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -62,4 +63,6 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
         AND app.id <> :id
     """)
   boolean existsByNotIdAndModuleId(@Param("id") String id, @Param("moduleId") String moduleId);
+
+  Stream<ArtifactEntity> findAllByName(String name);
 }

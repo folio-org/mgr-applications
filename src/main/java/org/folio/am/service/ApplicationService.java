@@ -27,12 +27,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.entity.ApplicationEntity;
+import org.folio.am.domain.entity.ArtifactEntity;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.entity.UiModuleEntity;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.integration.mte.EntitlementService;
 import org.folio.am.mapper.ApplicationDescriptorMapper;
-import org.folio.am.mapper.ModuleDiscoveryMapper;
 import org.folio.am.repository.ApplicationRepository;
 import org.folio.am.repository.ModuleRepository;
 import org.folio.am.repository.UiModuleRepository;
@@ -47,10 +47,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ApplicationService {
-  private final ModuleDiscoveryMapper moduleDiscoveryMapper;
 
   private final ApplicationRepository appRepository;
   private final ModuleRepository moduleRepository;
@@ -72,8 +71,9 @@ public class ApplicationService {
    * @return {@link ApplicationDescriptor} object
    * @throws EntityNotFoundException if records is not found by id.
    */
-  @Transactional(readOnly = true)
   public ApplicationDescriptor get(String id, boolean includeModuleDescriptors) {
+    log.debug("Get application descriptor by id: id = {}, includeModuleDescriptors = {}", id, includeModuleDescriptors);
+
     var entity = appRepository.getReferenceById(id);
 
     return descriptorWithModules(includeModuleDescriptors).apply(entity);
@@ -85,7 +85,6 @@ public class ApplicationService {
    * @param ids - application descriptor ids
    * @return {@link List} with {@link ApplicationDescriptor} objects
    */
-  @Transactional(readOnly = true)
   public List<ApplicationDescriptor> findByIds(List<String> ids, boolean includeModuleDescriptors) {
     return appRepository.findByIds(ids).stream()
       .map(descriptorWithModules(includeModuleDescriptors))
@@ -98,7 +97,6 @@ public class ApplicationService {
    * @param ids - application ids
    * @return {@link List} with {@link ApplicationEntity} objects
    */
-  @Transactional(readOnly = true)
   public List<ApplicationEntity> findByIdsWithModules(List<String> ids) {
     return appRepository.findByIdsWihModules(ids);
   }
@@ -109,7 +107,6 @@ public class ApplicationService {
    * @param applicationName - application name
    * @return {@link List} with {@link ApplicationEntity} objects
    */
-  @Transactional(readOnly = true)
   public List<ApplicationEntity> findByNameWithModules(String applicationName) {
     return appRepository.findByNameWithModules(applicationName);
   }
@@ -123,7 +120,6 @@ public class ApplicationService {
    * @param includeModuleDescriptors - if true, module descriptors will be included in the response.
    * @return {@link ApplicationDescriptors}
    */
-  @Transactional(readOnly = true)
   public SearchResult<ApplicationDescriptor> findByQuery(String query, int offset, int limit,
     boolean includeModuleDescriptors) {
     var offsetReq = OffsetRequest.of(offset, limit);
@@ -149,7 +145,6 @@ public class ApplicationService {
    * @param orderBy                  - field name to order results by
    * @return {@link SearchResult} of {@link ApplicationDescriptor} objects
    */
-  @Transactional(readOnly = true)
   public SearchResult<ApplicationDescriptor> filterByAppVersions(String appName, boolean includeModuleDescriptors,
     Integer latest, boolean includePreRelease, String order, String orderBy) {
     if (StringUtils.isBlank(appName)) {
@@ -168,8 +163,6 @@ public class ApplicationService {
     return SearchResult.of(descriptors.size(), descriptors);
   }
 
-
-
   /**
    * Saves application descriptor to the database and register Module Descriptors in Okapi.
    *
@@ -177,6 +170,7 @@ public class ApplicationService {
    * @param token - okapi token.
    * @return saved {@link ApplicationDescriptor} object
    */
+  @Transactional
   public ApplicationDescriptor create(ApplicationDescriptor descriptor, String token, boolean check) {
     log.debug("Creating Application Descriptor: {}", descriptor);
 
@@ -207,6 +201,7 @@ public class ApplicationService {
    * @param token - okapi token.
    * @throws EntityNotFoundException if application descriptor is not found by id.
    */
+  @Transactional
   public void delete(String id, String token) {
     var application = appRepository.findById(id)
       .orElseThrow(() -> new EntityNotFoundException("Unable to find application descriptor with id " + id));
@@ -235,8 +230,7 @@ public class ApplicationService {
   }
 
   public Stream<String> findAllApplicationIdsByName(String applicationName) {
-    // TODO: create implementation
-    return null;
+    return appRepository.findAllByName(applicationName).map(ArtifactEntity::getId);
   }
 
   private Function<ApplicationEntity, ApplicationDescriptor> descriptorWithModules(
