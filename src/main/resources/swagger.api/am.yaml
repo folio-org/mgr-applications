@@ -151,7 +151,7 @@ paths:
             schema:
               $ref: '#/components/schemas/applicationDescriptorsValidation'
       responses:
-        '202':
+        '200':
           description: A list of application ids
           content:
             application/json:

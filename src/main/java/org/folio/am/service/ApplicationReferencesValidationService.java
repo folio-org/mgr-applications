@@ -24,13 +24,13 @@ import org.springframework.stereotype.Service;
 public class ApplicationReferencesValidationService {
 
   private final ApplicationService applicationService;
-  private final ApplicationEntityMapper applicationEntityMapperr;
+  private final ApplicationEntityMapper applicationEntityMapper;
   private final DependenciesValidator dependenciesValidator;
 
   public void validateReferences(ApplicationReferences applicationReferences) {
     var applicationEntities = applicationService
       .findByIdsWithModules(new ArrayList<>(applicationReferences.getApplicationIds()));
-    var applicationDescriptors = mapItems(applicationEntities, applicationEntityMapperr::convert);
+    var applicationDescriptors = mapItems(applicationEntities, applicationEntityMapper::convert);
     var foundIds = mapItemsToSet(applicationDescriptors, ApplicationDescriptor::getId);
     var notFoundIds = toStream(applicationReferences.getApplicationIds())
       .filter(not(foundIds::contains))

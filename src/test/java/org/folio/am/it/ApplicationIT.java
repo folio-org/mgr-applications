@@ -42,9 +42,9 @@ import org.springframework.test.context.jdbc.Sql;
 @EnableKeycloakSecurity
 @EnableKeycloakTlsMode
 @EnableKeycloakDataImport
-@Sql(scripts = "classpath:/sql/application-descriptor.sql", executionPhase = BEFORE_TEST_METHOD)
-@Sql(scripts = "classpath:/sql/application-descriptor-with-versions.sql", executionPhase = BEFORE_TEST_METHOD)
-
+@Sql(scripts = {
+  "classpath:/sql/application-descriptor.sql",
+  "classpath:/sql/application-descriptor-with-versions.sql"}, executionPhase = BEFORE_TEST_METHOD)
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 class ApplicationIT extends BaseIntegrationTest {
 
@@ -200,7 +200,7 @@ class ApplicationIT extends BaseIntegrationTest {
 
     var result2 = parseResponse(mvcResult2, ApplicationDescriptor.class);
     assertThat(result2.getDependencies()).hasSize(1);
-    assertThat(result2.getDependencies().get(0)).isEqualTo(dependency);
+    assertThat(result2.getDependencies().getFirst()).isEqualTo(dependency);
   }
 
   @Test
