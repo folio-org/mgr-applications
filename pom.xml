@@ -36,9 +36,10 @@
     <spring-cloud-bom.version>2023.0.4</spring-cloud-bom.version>
     <cql2pgjson.version>35.3.0</cql2pgjson.version>
     <folio-spring-cql.version>8.2.1</folio-spring-cql.version>
-    <applications-poc-tools.version>2.1.1</applications-poc-tools.version>
+    <applications-poc-tools.version>2.1.2</applications-poc-tools.version>
     <folio-java-checkstyle.version>1.0.1</folio-java-checkstyle.version>
     <semver4j.version>5.4.1</semver4j.version>
+    <commons-io.version>2.20.0</commons-io.version>
 
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
 
@@ -342,6 +343,11 @@
         <version>${testcontainer.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

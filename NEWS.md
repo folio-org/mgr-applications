@@ -1,3 +1,6 @@
+## Version `2.1.1` (08.09.2025)
+* Update applications-poc-tools version to 2.1.2
+
 ## Version `2.1.0` (06.03.2025)
 * Added module permissions to bootstrap API
 
