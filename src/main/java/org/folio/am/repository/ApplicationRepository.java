@@ -5,9 +5,8 @@ import static org.hibernate.jpa.HibernateHints.HINT_FETCH_SIZE;
 import jakarta.persistence.QueryHint;
 import java.util.List;
 import java.util.stream.Stream;
+import org.folio.am.domain.entity.ApplicationArtifact;
 import org.folio.am.domain.entity.ApplicationEntity;
-import org.folio.am.domain.entity.ArtifactEntity;
-import org.folio.am.domain.model.ApplicationSlice;
 import org.folio.spring.cql.JpaCqlRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
@@ -37,7 +36,7 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
   @Query(value = "SELECT a.id, a.name, a.version"
     + " FROM application a WHERE a.name = :name ORDER BY a.id", nativeQuery = true)
   @QueryHints(@QueryHint(name = HINT_FETCH_SIZE, value = "100"))
-  Stream<ApplicationSlice> streamByNameBasicFields(@Param("name") String name);
+  Stream<ApplicationArtifact> streamByNameBasicFields(@Param("name") String name);
 
   @Query(value = """
     SELECT DISTINCT entity FROM ApplicationEntity entity
@@ -64,5 +63,6 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
     """)
   boolean existsByNotIdAndModuleId(@Param("id") String id, @Param("moduleId") String moduleId);
 
-  Stream<ArtifactEntity> findAllByName(String name);
+  @Query(value = "SELECT a.id, a.name, a.version FROM application a WHERE a.name = :name", nativeQuery = true)
+  List<ApplicationArtifact> findAllAppArtifactsByName(String name);
 }

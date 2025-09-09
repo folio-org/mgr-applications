@@ -26,8 +26,8 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
+import org.folio.am.domain.entity.ApplicationArtifact;
 import org.folio.am.domain.entity.ApplicationEntity;
-import org.folio.am.domain.entity.ArtifactEntity;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.entity.UiModuleEntity;
 import org.folio.am.domain.model.ValidationContext;
@@ -229,8 +229,8 @@ public class ApplicationService {
       .collect(toList());
   }
 
-  public Stream<String> findAllApplicationIdsByName(String applicationName) {
-    return appRepository.findAllByName(applicationName).map(ArtifactEntity::getId);
+  public List<String> findAllApplicationIdsByName(String applicationName) {
+    return mapItems(appRepository.findAllAppArtifactsByName(applicationName), ApplicationArtifact::getId);
   }
 
   private Function<ApplicationEntity, ApplicationDescriptor> descriptorWithModules(

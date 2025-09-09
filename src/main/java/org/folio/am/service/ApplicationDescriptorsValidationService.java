@@ -3,7 +3,6 @@ package org.folio.am.service;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
-import static org.folio.common.utils.CollectionUtils.mapItems;
 import static org.folio.common.utils.CollectionUtils.toStream;
 import static org.folio.common.utils.SemverUtils.getVersion;
 
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.util.Supplier;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.exception.RequestValidationException;
@@ -38,17 +36,20 @@ public class ApplicationDescriptorsValidationService {
   public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors) {
     var allResolvedAppDescriptorsByName = getApplicationDescriptorsByName(descriptors);
 
-    log.info("Validate descriptors: ids = {}", toAppIds(descriptors));
+    log.info("Validate descriptors: ids = {}", () -> toAppIdsString(descriptors));
 
     toStream(descriptors)
       .flatMap(ad -> toStream(ad.getDependencies())).distinct()
       .forEach(dependency -> resolveDependencyToAppDescriptors(dependency, allResolvedAppDescriptorsByName));
 
     var allDescriptors = new ArrayList<>(allResolvedAppDescriptorsByName.values());
-    log.info("Validate applications including dependencies: ids = {}", toAppIds(allDescriptors));
+    log.info("Validate applications including dependencies: ids = {}", () -> toAppIdsString(allDescriptors));
 
     dependenciesValidator.validate(allDescriptors);
-    return mapItems(allDescriptors, ApplicationDescriptor::getId);
+
+    return toStream(allDescriptors)
+      .map(ApplicationDescriptor::getId)
+      .sorted().toList();
   }
 
   /**
@@ -96,7 +97,7 @@ public class ApplicationDescriptorsValidationService {
   private @Nullable ApplicationDescriptor getLatestApplicationMatchingDependency(Dependency dependency) {
     var dependencyVersionRange = semverRangeFrom(dependency);
 
-    return applicationService.findAllApplicationIdsByName(dependency.getName())
+    return applicationService.findAllApplicationIdsByName(dependency.getName()).stream()
       .filter(appVersionIsInRange(dependencyVersionRange))
       .max(bySemver())
       .map(latestAppId -> applicationService.get(latestAppId, true))
@@ -153,8 +154,8 @@ public class ApplicationDescriptorsValidationService {
     return result;
   }
 
-  private static Supplier<?> toAppIds(Collection<ApplicationDescriptor> descriptors) {
-    return () -> toStream(descriptors).map(ApplicationDescriptor::getId).collect(joining(","));
+  private static String toAppIdsString(Collection<ApplicationDescriptor> descriptors) {
+    return toStream(descriptors).map(ApplicationDescriptor::getId).collect(joining(","));
   }
 
   private static Comparator<String> bySemver() {
