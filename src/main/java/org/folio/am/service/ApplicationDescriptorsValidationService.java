@@ -155,7 +155,7 @@ public class ApplicationDescriptorsValidationService {
   }
 
   private static String toAppIdsString(Collection<ApplicationDescriptor> descriptors) {
-    return toStream(descriptors).map(ApplicationDescriptor::getId).collect(joining(","));
+    return toStream(descriptors).map(ApplicationDescriptor::getId).collect(joining(", "));
   }
 
   private static Comparator<String> bySemver() {

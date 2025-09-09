@@ -37,40 +37,61 @@ import org.springframework.test.context.jdbc.Sql;
 })
 class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
 
-  private static final String APP_PLATFORM_MINIMAL =
-    readString("json/application-descriptor/app-platform-minimal.json");
-  private static final String APP_PLATFORM_COMPLETE =
-    readString("json/application-descriptor/app-platform-complete.json");
+  private static final ApplicationDescriptor APP_PLATFORM_MINIMAL =
+    parse(readString("json/application-descriptor/app-platform-minimal.json"), ApplicationDescriptor.class);
+  private static final ApplicationDescriptor APP_PLATFORM_COMPLETE =
+    parse(readString("json/application-descriptor/app-platform-complete.json"), ApplicationDescriptor.class);
+  private static final ApplicationDescriptor APP_EHOLDINGS =
+    parse(readString("json/application-descriptor/app-eholdings.json"), ApplicationDescriptor.class);
+  private static final ApplicationDescriptor APP_INN_REACH =
+    parse(readString("json/application-descriptor/app-inn-reach.json"), ApplicationDescriptor.class);
 
   @Test
   void validateDescriptors_positive_allInRequest() throws Exception {
-    var appMinimal = parse(APP_PLATFORM_MINIMAL, ApplicationDescriptor.class);
-    var appComplete = parse(APP_PLATFORM_COMPLETE, ApplicationDescriptor.class);
-
-    var req = new ApplicationDescriptorsValidation(List.of(appMinimal, appComplete));
+    var req = new ApplicationDescriptorsValidation(List.of(
+      APP_PLATFORM_MINIMAL, APP_PLATFORM_COMPLETE, APP_EHOLDINGS, APP_INN_REACH));
 
     attemptPost("/applications/validate-descriptors", req)
       .andDo(logResponseBody())
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.length()", is(2)))
-      .andExpect(jsonPath("$.[0]", is(appComplete.getId())))
-      .andExpect(jsonPath("$.[1]", is(appMinimal.getId())));
+      .andExpect(jsonPath("$.length()", is(4)))
+      .andExpect(jsonPath("$.[0]", is(APP_EHOLDINGS.getId())))
+      .andExpect(jsonPath("$.[1]", is(APP_INN_REACH.getId())))
+      .andExpect(jsonPath("$.[2]", is(APP_PLATFORM_COMPLETE.getId())))
+      .andExpect(jsonPath("$.[3]", is(APP_PLATFORM_MINIMAL.getId())));
   }
 
   @Test
   void validateDescriptors_positive_oneStoredAnotherInRequest() throws Exception {
-    var appMinimal = parse(APP_PLATFORM_MINIMAL, ApplicationDescriptor.class);
+    doPost("/applications", APP_PLATFORM_MINIMAL);
 
-    doPost("/applications", appMinimal);
-
-    var appComplete = parse(APP_PLATFORM_COMPLETE, ApplicationDescriptor.class);
-    var req = new ApplicationDescriptorsValidation(List.of(appComplete));
+    var req = new ApplicationDescriptorsValidation(List.of(
+      APP_PLATFORM_COMPLETE, APP_EHOLDINGS, APP_INN_REACH));
 
     attemptPost("/applications/validate-descriptors", req)
       .andDo(logResponseBody())
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.length()", is(2)))
-      .andExpect(jsonPath("$.[0]", is(appComplete.getId())))
-      .andExpect(jsonPath("$.[1]", is(appMinimal.getId())));
+      .andExpect(jsonPath("$.length()", is(4)))
+      .andExpect(jsonPath("$.[0]", is(APP_EHOLDINGS.getId())))
+      .andExpect(jsonPath("$.[1]", is(APP_INN_REACH.getId())))
+      .andExpect(jsonPath("$.[2]", is(APP_PLATFORM_COMPLETE.getId())))
+      .andExpect(jsonPath("$.[3]", is(APP_PLATFORM_MINIMAL.getId())));
+  }
+
+  @Test
+  void validateDescriptors_positive_twoStoredAnotherInRequest() throws Exception {
+    doPost("/applications", APP_PLATFORM_MINIMAL);
+    doPost("/applications", APP_PLATFORM_COMPLETE);
+
+    var req = new ApplicationDescriptorsValidation(List.of(APP_EHOLDINGS, APP_INN_REACH));
+
+    attemptPost("/applications/validate-descriptors", req)
+      .andDo(logResponseBody())
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()", is(4)))
+      .andExpect(jsonPath("$.[0]", is(APP_EHOLDINGS.getId())))
+      .andExpect(jsonPath("$.[1]", is(APP_INN_REACH.getId())))
+      .andExpect(jsonPath("$.[2]", is(APP_PLATFORM_COMPLETE.getId())))
+      .andExpect(jsonPath("$.[3]", is(APP_PLATFORM_MINIMAL.getId())));
   }
 }
