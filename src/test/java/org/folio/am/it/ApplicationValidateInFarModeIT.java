@@ -137,8 +137,8 @@ class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
     attemptPost("/applications/validate-descriptors", req)
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.errors[0].message",
-        containsString(format("Dependency version range '%s' " +
-          "is not satisfied by already resolved application '%s' with version '%s'",
+        containsString(format("Dependency version range '%s' "
+          + "is not satisfied by already resolved application '%s' with version '%s'",
           dependencyVersion, APP_PLATFORM_MINIMAL.getName(), APP_PLATFORM_MINIMAL.getVersion()))))
       .andExpect(jsonPath("$.errors[0].code", is("validation_error")))
       .andExpect(jsonPath("$.errors[0].type", is(RequestValidationException.class.getSimpleName())))
