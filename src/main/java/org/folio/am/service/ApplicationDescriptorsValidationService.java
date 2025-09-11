@@ -102,7 +102,7 @@ public class ApplicationDescriptorsValidationService {
       .max(bySemver())
       .map(latestAppId -> applicationService.get(latestAppId, true))
       .orElseGet(() -> {
-        if (dependency.getOptional()) {
+        if (Boolean.TRUE.equals(dependency.getOptional())) {
           log.info("Cannot find optional dependency application which satisfies the dependency: "
             + "name = {}, version = {}", dependency.getName(), dependency.getVersion());
           return null;

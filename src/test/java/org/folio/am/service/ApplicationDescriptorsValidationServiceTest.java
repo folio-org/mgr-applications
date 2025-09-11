@@ -1,5 +1,6 @@
 package org.folio.am.service;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -107,6 +108,21 @@ class ApplicationDescriptorsValidationServiceTest {
       assertThat(applicationDescriptors).containsExactlyInAnyOrder(
         applicationDescriptor1, applicationDescriptor2, applicationDescriptor3))
     );
+  }
+
+  @Test
+  void validate_positive_optionalDependencyNotFound() {
+    var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
+    var dependency1 = new Dependency().name("app2").version("^2.0.1").optional(true);
+    applicationDescriptor1.setDependencies(List.of(dependency1));
+
+    when(applicationService.findAllApplicationIdsByName("app2")).thenReturn(emptyList());
+
+    var actual = applicationDescriptorsValidationService.validateDescriptors(List.of(applicationDescriptor1));
+    var expected = List.of("app1-1.0.0");
+
+    assertThat(actual).isEqualTo(expected);
+    verify(dependenciesValidator).validate(List.of(applicationDescriptor1));
   }
 
   @Test
