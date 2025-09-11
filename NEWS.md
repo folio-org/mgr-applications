@@ -6,6 +6,7 @@
 * Update interface integrity validation logic for interfaces (MGRAPPS-59)
 * mgr-applications FAR mode semver dependency validation fails with SNAPSHOT version ranges(MGRAPPS-68)
 * Fix test for tenant header Kong route expression updated in application-poc-tools (APPPOCTOOL-64)
+* FAR mode OOM crash due to excessive memory consumption during validation (MGRAPPS-67)
 ---
 
 ## Version `v3.0.0` (12.03.2025)
