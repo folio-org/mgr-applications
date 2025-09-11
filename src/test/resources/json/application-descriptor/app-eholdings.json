@@ -1,0 +1,2041 @@
+{
+  "description": "eHoldings Application",
+  "modules": [
+    {
+      "id": "mod-kb-ebsco-java-6.1.0-SNAPSHOT.476",
+      "name": "mod-kb-ebsco-java",
+      "version": "6.1.0-SNAPSHOT.476"
+    }
+  ],
+  "uiModules": [
+    {
+      "id": "folio_eholdings-11.1.109900000000263",
+      "name": "folio_eholdings",
+      "version": "11.1.109900000000263"
+    }
+  ],
+  "moduleDescriptors": [
+    {
+      "id": "mod-kb-ebsco-java-6.1.0-SNAPSHOT.476",
+      "replaces": [],
+      "tags": [],
+      "requires": [
+        {
+          "id": "users",
+          "version": "15.0 16.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "eholdings",
+          "version": "4.0",
+          "handlers": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/kb-credentials",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.collection.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/key",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.key.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PATCH"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.item.patch"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/user-kb-credential",
+              "permissionsRequired": [
+                "kb-ebsco.user-kb-credential.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/users",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.users.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "users.collection.get",
+                "usergroups.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/users",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.users.collection.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "users.item.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/users/{userId}",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.users.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/custom-labels",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.custom-labels.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/custom-labels",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.custom-labels.collection.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/packages",
+              "permissionsRequired": [
+                "kb-ebsco.packages.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/packages/bulk/fetch",
+              "permissionsRequired": [
+                "kb-ebsco.packages-bulk.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/packages",
+              "permissionsRequired": [
+                "kb-ebsco.packages.collection.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/packages/{packageId}",
+              "permissionsRequired": [
+                "kb-ebsco.packages.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/packages/{packageId}",
+              "permissionsRequired": [
+                "kb-ebsco.packages.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/eholdings/packages/{packageId}",
+              "permissionsRequired": [
+                "kb-ebsco.packages.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/packages/{packageId}/resources",
+              "permissionsRequired": [
+                "kb-ebsco.package-resources.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/packages/{packageId}/resources/costperuse/export",
+              "permissionsRequired": [
+                "kb-ebsco.package-resources.export.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/packages/{packageId}/tags",
+              "permissionsRequired": [
+                "kb-ebsco.package-tags.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/providers",
+              "permissionsRequired": [
+                "kb-ebsco.providers.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/providers/{providerId}",
+              "permissionsRequired": [
+                "kb-ebsco.providers.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/providers/{providerId}",
+              "permissionsRequired": [
+                "kb-ebsco.providers.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/providers/{providerId}/packages",
+              "permissionsRequired": [
+                "kb-ebsco.provider-packages.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/providers/{providerId}/tags",
+              "permissionsRequired": [
+                "kb-ebsco.provider-tags.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/resources",
+              "permissionsRequired": [
+                "kb-ebsco.resources.collection.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/resources/bulk/fetch",
+              "permissionsRequired": [
+                "kb-ebsco.resources-bulk.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/resources/{resourceId}",
+              "permissionsRequired": [
+                "kb-ebsco.resources.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/resources/{resourceId}/costperuse",
+              "permissionsRequired": [
+                "kb-ebsco.resources-costperuse.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/titles/{titleId}/costperuse",
+              "permissionsRequired": [
+                "kb-ebsco.titles-costperuse.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/packages/{packageId}/costperuse",
+              "permissionsRequired": [
+                "kb-ebsco.packages-costperuse.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/packages/{packageId}/resources/costperuse",
+              "permissionsRequired": [
+                "kb-ebsco.package-resources-costperuse.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/resources/{resourceId}",
+              "permissionsRequired": [
+                "kb-ebsco.resources.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/resources/{resourceId}/tags",
+              "permissionsRequired": [
+                "kb-ebsco.resource-tags.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/eholdings/resources/{resourceId}",
+              "permissionsRequired": [
+                "kb-ebsco.resources.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/titles",
+              "permissionsRequired": [
+                "kb-ebsco.titles.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/titles",
+              "permissionsRequired": [
+                "kb-ebsco.titles.collection.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/titles/{titleId}",
+              "permissionsRequired": [
+                "kb-ebsco.titles.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/titles/{titleId}",
+              "permissionsRequired": [
+                "kb-ebsco.titles.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{id}/proxy-types",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.proxy-types.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/proxy-types",
+              "permissionsRequired": [
+                "kb-ebsco.proxy-types.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/root-proxy",
+              "permissionsRequired": [
+                "kb-ebsco.root-proxy.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{id}/root-proxy",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.root-proxy.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{id}/root-proxy",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.root-proxy.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/configuration",
+              "permissionsRequired": [
+                "kb-ebsco.configuration.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/configuration",
+              "permissionsRequired": [
+                "kb-ebsco.configuration.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/status",
+              "permissionsRequired": [
+                "kb-ebsco.status.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/eholdings/cache",
+              "permissionsRequired": [
+                "kb-ebsco.cache.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/tags",
+              "permissionsRequired": [
+                "kb-ebsco.tags.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/tags/summary",
+              "permissionsRequired": [
+                "kb-ebsco.unique.tags.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/loading/kb-credentials",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.holdings-load-all.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/loading/kb-credentials/{id}",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.holdings-load.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/loading/kb-credentials/{credentialsId}/status",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.holdings-load.status.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/custom-labels",
+              "permissionsRequired": [
+                "kb-ebsco.custom-labels.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/access-types",
+              "permissionsRequired": [
+                "kb-ebsco.access-types.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "users.item.get",
+                "users.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/access-types/{accessTypeId}",
+              "permissionsRequired": [
+                "kb-ebsco.access-types.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "users.item.get",
+                "users.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/access-types",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.access-types.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "users.item.get",
+                "users.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/access-types",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.access-types.collection.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "users.item.get",
+                "users.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/access-types/{accessTypeId}",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.access-types.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "users.item.get",
+                "users.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/access-types/{accessTypeId}",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.access-types.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "users.item.get",
+                "users.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{credentialsId}/access-types/{accessTypeId}",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.access-types.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/currencies",
+              "permissionsRequired": [
+                "kb-ebsco.currencies.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/uc-credentials",
+              "permissionsRequired": [
+                "kb-ebsco.uc-credentials.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/eholdings/uc-credentials",
+              "permissionsRequired": [
+                "kb-ebsco.uc-credentials.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/uc-credentials/clientId",
+              "permissionsRequired": [
+                "kb-ebsco.uc-credentials.client-id.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/uc-credentials/clientSecret",
+              "permissionsRequired": [
+                "kb-ebsco.uc-credentials.client-secret.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/uc",
+              "permissionsRequired": [
+                "kb-ebsco.uc.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{id}/uc",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.uc.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{id}/uc/key",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.uc.key.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{id}/uc",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.uc.collection.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PATCH"
+              ],
+              "pathPattern": "/eholdings/kb-credentials/{id}/uc",
+              "permissionsRequired": [
+                "kb-ebsco.kb-credentials.uc.item.patch"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            }
+          ],
+          "permissionSets": []
+        },
+        {
+          "id": "_jsonSchemas",
+          "version": "1.0",
+          "interfaceType": "multiple",
+          "handlers": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/_/jsonSchemas",
+              "permissionsRequired": [],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            }
+          ],
+          "permissionSets": []
+        },
+        {
+          "id": "_ramls",
+          "version": "1.0",
+          "interfaceType": "multiple",
+          "handlers": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/_/ramls",
+              "permissionsRequired": [],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            }
+          ],
+          "permissionSets": []
+        },
+        {
+          "id": "_tenant",
+          "version": "2.0",
+          "interfaceType": "system",
+          "handlers": [
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/_/tenant",
+              "permissionsRequired": [],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET",
+                "DELETE"
+              ],
+              "pathPattern": "/_/tenant/{id}",
+              "permissionsRequired": [],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            }
+          ],
+          "permissionSets": []
+        },
+        {
+          "id": "_timer",
+          "version": "1.0",
+          "interfaceType": "system",
+          "handlers": [
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/eholdings/loading/kb-credentials",
+              "unit": "day",
+              "delay": "5",
+              "permissionsRequired": [],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            }
+          ],
+          "permissionSets": []
+        }
+      ],
+      "optional": [],
+      "filters": [],
+      "permissionSets": [
+        {
+          "permissionName": "kb-ebsco.configuration.get",
+          "replaces": [],
+          "displayName": "get RM API configuration",
+          "description": "Get RM API configuration",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.configuration.put",
+          "replaces": [],
+          "displayName": "put RM API configuration",
+          "description": "Put RM API configuration",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.status.get",
+          "replaces": [],
+          "displayName": "get RM API configuration status",
+          "description": "Get RM API configuration status",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.cache.delete",
+          "replaces": [],
+          "displayName": "delete RM API configuration cache",
+          "description": "Delete RM API configuration cache",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.providers.collection.get",
+          "replaces": [],
+          "displayName": "get providers",
+          "description": "Get providers",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.providers.item.get",
+          "replaces": [],
+          "displayName": "get single provider",
+          "description": "Get single provider",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.providers.item.put",
+          "replaces": [],
+          "displayName": "put single provider",
+          "description": "Put single provider",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.provider-tags.put",
+          "replaces": [],
+          "displayName": "update tags for a single provider",
+          "description": "Update tags for a single provider",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.provider-packages.collection.get",
+          "replaces": [],
+          "displayName": "get packages for a single provider",
+          "description": "get packages for a single provider",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.titles.item.get",
+          "replaces": [],
+          "displayName": "get single title",
+          "description": "Get single title",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.titles.collection.get",
+          "replaces": [],
+          "displayName": "get titles",
+          "description": "Get titles",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.titles.collection.post",
+          "replaces": [],
+          "displayName": "post title",
+          "description": "Post title",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.titles.item.put",
+          "replaces": [],
+          "displayName": "put single title",
+          "description": "Put single title",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.resources.item.get",
+          "replaces": [],
+          "displayName": "get single resource",
+          "description": "Get single resource",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.resources.collection.post",
+          "replaces": [],
+          "displayName": "post resource",
+          "description": "Post resource",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.resources.item.put",
+          "replaces": [],
+          "displayName": "put single resource",
+          "description": "Put single resource",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.resources.item.delete",
+          "replaces": [],
+          "displayName": "delete single resource",
+          "description": "Delete single resource",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.resource-tags.put",
+          "replaces": [],
+          "displayName": "put tags to a single resource",
+          "description": "Put tags to a single resource",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.resources-bulk.collection.get",
+          "replaces": [],
+          "displayName": "get resources collection with limited fields set",
+          "description": "Get resources collection with limited fields set",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.packages.collection.get",
+          "replaces": [],
+          "displayName": "get packages",
+          "description": "Get packages",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.packages-bulk.collection.get",
+          "replaces": [],
+          "displayName": "get packages collection with limited fields set",
+          "description": "Get packages collection with limited fields set",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.packages.item.get",
+          "replaces": [],
+          "displayName": "get package",
+          "description": "Get package",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.packages.collection.post",
+          "replaces": [],
+          "displayName": "post package",
+          "description": "Post package",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.packages.item.put",
+          "replaces": [],
+          "displayName": "put package",
+          "description": "Put package",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.packages.item.delete",
+          "replaces": [],
+          "displayName": "delete custom package",
+          "description": "Delete custom package",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.package-resources.collection.get",
+          "replaces": [],
+          "displayName": "get resources for a single package",
+          "description": "get resources for a single package",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.package-resources.export.collection.get",
+          "replaces": [],
+          "displayName": "get exported resources for a single package",
+          "description": "get exported resources for a single package",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.package-tags.put",
+          "replaces": [],
+          "displayName": "update tags for a single package",
+          "description": "Update tags for a single package",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.proxy-types.collection.get",
+          "replaces": [],
+          "displayName": "get proxy types collection by KB credentials",
+          "description": "Get proxy types collection by KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.proxy-types.collection.get",
+          "replaces": [],
+          "displayName": "get proxy types",
+          "description": "Get proxy types",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.root-proxy.get",
+          "replaces": [],
+          "displayName": "get root proxy by KB credentials",
+          "description": "Get root proxy by KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.root-proxy.get",
+          "replaces": [],
+          "displayName": "get root proxy",
+          "description": "Get root proxy",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.root-proxy.put",
+          "replaces": [],
+          "displayName": "put root proxy by KB credentials",
+          "description": "Put root proxy by KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.tags.collection.get",
+          "replaces": [],
+          "displayName": "get record tags",
+          "description": "Get record tags",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.unique.tags.collection.get",
+          "replaces": [],
+          "displayName": "get record unique tags",
+          "description": "Get record unique tags",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.holdings-load-all.post",
+          "replaces": [],
+          "displayName": "permission to run load of holdings",
+          "description": "One-time load of holdings",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.holdings-load.post",
+          "replaces": [],
+          "displayName": "permission to run load of holdings for certain credentials",
+          "description": "One-time load of holdings based on credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.holdings-load.status.item.get",
+          "replaces": [],
+          "displayName": "get current status of holdings loading by credentials id",
+          "description": "Get current status of holdings loading by credentials id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.custom-labels.collection.get",
+          "replaces": [],
+          "displayName": "get Custom Labels collection",
+          "description": "Get Custom Labels collection",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.custom-labels.collection.get",
+          "replaces": [],
+          "displayName": "get Custom Labels collection related to kb credentials",
+          "description": "Get Custom Labels collection related to KB Credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.custom-labels.collection.put",
+          "replaces": [],
+          "displayName": "put Custom Labels collection related to kb credentials",
+          "description": "Put Custom Labels collection related to KB Credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.access-types.collection.get",
+          "replaces": [],
+          "displayName": "get Access Types collection",
+          "description": "Get Access Types collection",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.access-types.item.get",
+          "replaces": [],
+          "displayName": "get Access Type collection item",
+          "description": "Get Access Type collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.access-types.collection.get",
+          "replaces": [],
+          "displayName": "get Access Types collection by kb credentials",
+          "description": "Get Access Types collection KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.access-types.collection.post",
+          "replaces": [],
+          "displayName": "post Access Type collection item",
+          "description": "Post Access Type collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.access-types.item.get",
+          "replaces": [],
+          "displayName": "get Access Type collection item",
+          "description": "Get Access Type collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.access-types.item.put",
+          "replaces": [],
+          "displayName": "put Access Type collection item",
+          "description": "Put Access Type collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.access-types.item.delete",
+          "replaces": [],
+          "displayName": "delete Access Type collection item",
+          "description": "Delete Access Type collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.collection.get",
+          "replaces": [],
+          "displayName": "get KB credentials collection",
+          "description": "Get KB credentials collection",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.collection.post",
+          "replaces": [],
+          "displayName": "post KB credentials",
+          "description": "Post KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.user-kb-credential.get",
+          "replaces": [],
+          "displayName": "get KB credentials related to user",
+          "description": "Get KB credentials related to user",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.item.get",
+          "replaces": [],
+          "displayName": "get KB credentials collection item",
+          "description": "Get KB credentials collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.key.item.get",
+          "replaces": [],
+          "displayName": "get KB credentials collection item",
+          "description": "Get KB credentials collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.item.patch",
+          "replaces": [],
+          "displayName": "patch KB credentials collection item",
+          "description": "Patch KB credentials collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.item.put",
+          "replaces": [],
+          "displayName": "put KB credentials collection item",
+          "description": "Put KB credentials collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.item.delete",
+          "replaces": [],
+          "displayName": "delete KB credentials collection item",
+          "description": "Delete KB credentials collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.all",
+          "replaces": [],
+          "displayName": "EBSCO KB Broker Credentials - all permissions",
+          "description": "All permissions for managing EBSCO KB Credentials",
+          "subPermissions": [
+            "kb-ebsco.kb-credentials.collection.get",
+            "kb-ebsco.kb-credentials.collection.post",
+            "kb-ebsco.kb-credentials.item.get",
+            "kb-ebsco.kb-credentials.item.patch",
+            "kb-ebsco.kb-credentials.item.put",
+            "kb-ebsco.kb-credentials.item.delete",
+            "kb-ebsco.kb-credentials.custom-labels.collection.get",
+            "kb-ebsco.kb-credentials.custom-labels.collection.put",
+            "kb-ebsco.kb-credentials.proxy-types.collection.get",
+            "kb-ebsco.kb-credentials.root-proxy.get",
+            "kb-ebsco.kb-credentials.root-proxy.put",
+            "kb-ebsco.kb-credentials.access-types.collection.get",
+            "kb-ebsco.kb-credentials.access-types.collection.post",
+            "kb-ebsco.kb-credentials.access-types.item.get",
+            "kb-ebsco.kb-credentials.access-types.item.put",
+            "kb-ebsco.kb-credentials.access-types.item.delete"
+          ]
+        },
+        {
+          "permissionName": "kb-ebsco.uc-credentials.item.get",
+          "replaces": [],
+          "displayName": "get usage consolidation credentials",
+          "description": "Get usage consolidation credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.uc-credentials.item.put",
+          "replaces": [],
+          "displayName": "put usage consolidation credentials",
+          "description": "Put usage consolidation credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.uc-credentials.client-id.get",
+          "replaces": [],
+          "displayName": "get usage consolidation credentials client id",
+          "description": "Get usage consolidation credentials client id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.uc-credentials.client-secret.get",
+          "replaces": [],
+          "displayName": "get usage consolidation credentials client secret",
+          "description": "Get usage consolidation credentials client secret",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.uc.item.get",
+          "replaces": [],
+          "displayName": "get usage consolidation settings",
+          "description": "Get usage consolidation settings",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.uc.item.get",
+          "replaces": [],
+          "displayName": "get usage consolidation settings related to KB credentials",
+          "description": "Get usage consolidation settings related to KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.uc.key.item.get",
+          "replaces": [],
+          "displayName": "get usage consolidation settings key related to KB credentials",
+          "description": "Get usage consolidation settings key related to KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.uc.collection.post",
+          "replaces": [],
+          "displayName": "post usage consolidation settings related to KB credentials",
+          "description": "Post usage consolidation settings related to KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.uc.item.patch",
+          "replaces": [],
+          "displayName": "patch usage consolidation settings related to KB credentials",
+          "description": "Patch usage consolidation settings related to KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.resources-costperuse.item.get",
+          "replaces": [],
+          "displayName": "get cost-per-use information for a resource",
+          "description": "Get cost-per-use information for a resource",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.titles-costperuse.item.get",
+          "replaces": [],
+          "displayName": "get cost-per-use information for a title",
+          "description": "Get cost-per-use information for a title",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.packages-costperuse.item.get",
+          "replaces": [],
+          "displayName": "get cost-per-use information for a package",
+          "description": "Get cost-per-use information for a package",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.package-resources-costperuse.collection.get",
+          "replaces": [],
+          "displayName": "get cost-per-use information for a package resources",
+          "description": "Get cost-per-use information for a package resources",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.uc-credentials.all",
+          "replaces": [],
+          "displayName": "EBSCO KB Broker Usage Consolidation credentials - all permissions",
+          "description": "All permissions for managing Usage Consolidation credentials",
+          "subPermissions": [
+            "kb-ebsco.uc-credentials.item.get",
+            "kb-ebsco.uc-credentials.item.put",
+            "kb-ebsco.uc-credentials.client-id.get",
+            "kb-ebsco.uc-credentials.client-secret.get"
+          ]
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.uc.all",
+          "replaces": [],
+          "displayName": "EBSCO KB Broker Usage Consolidation settings - all permissions",
+          "description": "All permissions for managing Usage Consolidation settings",
+          "subPermissions": [
+            "kb-ebsco.uc.item.get",
+            "kb-ebsco.kb-credentials.uc.item.get",
+            "kb-ebsco.kb-credentials.uc.collection.post",
+            "kb-ebsco.kb-credentials.uc.item.patch",
+            "kb-ebsco.resources-costperuse.item.get",
+            "kb-ebsco.packages-costperuse.item.get",
+            "kb-ebsco.package-resources-costperuse.collection.get",
+            "kb-ebsco.titles-costperuse.item.get"
+          ]
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.users.collection.get",
+          "replaces": [],
+          "displayName": "get assigned users to KB credentials",
+          "description": "Get assigned users to KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.users.collection.post",
+          "replaces": [],
+          "displayName": "post assigned users to KB credentials",
+          "description": "Post assigned users to KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.users.item.delete",
+          "replaces": [],
+          "displayName": "delete association between user and KB credentials",
+          "description": "delete association between user and KB credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.users.item.put",
+          "replaces": [],
+          "displayName": "put assigned users collection item",
+          "description": "Put assigned users collection item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.currencies.collection.get",
+          "replaces": [],
+          "displayName": "get currencies collection",
+          "description": "Get currencies collection",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "kb-ebsco.kb-credentials.users.all",
+          "replaces": [],
+          "displayName": "EBSCO KB Broker users assigned to credentials - all permissions",
+          "description": "All permissions for manging users assigned to EBSCO KB Credentials",
+          "subPermissions": [
+            "kb-ebsco.kb-credentials.users.collection.get",
+            "kb-ebsco.kb-credentials.users.collection.post",
+            "kb-ebsco.kb-credentials.users.item.put",
+            "kb-ebsco.kb-credentials.users.item.delete"
+          ]
+        },
+        {
+          "permissionName": "kb-ebsco.all",
+          "replaces": [],
+          "displayName": "EBSCO KB Broker - all permissions",
+          "description": "All permissions for EBSCO KB module",
+          "subPermissions": [
+            "kb-ebsco.kb-credentials.all",
+            "kb-ebsco.kb-credentials.users.all",
+            "kb-ebsco.kb-credentials.uc.all",
+            "kb-ebsco.uc-credentials.all",
+            "kb-ebsco.configuration.get",
+            "kb-ebsco.configuration.put",
+            "kb-ebsco.status.get",
+            "kb-ebsco.cache.delete",
+            "kb-ebsco.providers.collection.get",
+            "kb-ebsco.providers.item.get",
+            "kb-ebsco.providers.item.put",
+            "kb-ebsco.provider-packages.collection.get",
+            "kb-ebsco.provider-tags.put",
+            "kb-ebsco.titles.collection.get",
+            "kb-ebsco.titles.collection.post",
+            "kb-ebsco.titles.item.put",
+            "kb-ebsco.packages.collection.get",
+            "kb-ebsco.packages-bulk.collection.get",
+            "kb-ebsco.packages.collection.post",
+            "kb-ebsco.packages.item.delete",
+            "kb-ebsco.package-resources.collection.get",
+            "kb-ebsco.package-resources.export.collection.get",
+            "kb-ebsco.package-tags.put",
+            "kb-ebsco.titles.item.get",
+            "kb-ebsco.packages.item.get",
+            "kb-ebsco.packages.item.put",
+            "kb-ebsco.resources.item.get",
+            "kb-ebsco.resources.collection.post",
+            "kb-ebsco.resources-bulk.collection.get",
+            "kb-ebsco.resources.item.put",
+            "kb-ebsco.resources.item.delete",
+            "kb-ebsco.resource-tags.put",
+            "kb-ebsco.proxy-types.collection.get",
+            "kb-ebsco.root-proxy.get",
+            "kb-ebsco.tags.collection.get",
+            "kb-ebsco.unique.tags.collection.get",
+            "kb-ebsco.kb-credentials.holdings-load.status.item.get",
+            "kb-ebsco.custom-labels.collection.get",
+            "kb-ebsco.access-types.collection.get",
+            "kb-ebsco.access-types.item.get",
+            "kb-ebsco.currencies.collection.get"
+          ]
+        }
+      ],
+      "env": [],
+      "launchDescriptor": {
+        "dockerImage": "folioci/mod-kb-ebsco-java:6.1.0-SNAPSHOT.476",
+        "dockerPull": true,
+        "dockerArgs": {
+          "HostConfig": {
+            "Memory": 536870912,
+            "PortBindings": {
+              "8081/tcp": [
+                {
+                  "HostPort": "%p"
+                }
+              ]
+            }
+          }
+        },
+        "env": [
+          {
+            "name": "JAVA_OPTIONS",
+            "value": "-XX:MaxRAMPercentage=85.0"
+          },
+          {
+            "name": "DB_HOST",
+            "value": "postgres"
+          },
+          {
+            "name": "DB_PORT",
+            "value": "5432"
+          },
+          {
+            "name": "DB_USERNAME",
+            "value": "folio_admin"
+          },
+          {
+            "name": "DB_PASSWORD",
+            "value": "folio_admin"
+          },
+          {
+            "name": "DB_DATABASE",
+            "value": "okapi_modules"
+          },
+          {
+            "name": "DB_QUERYTIMEOUT",
+            "value": "60000"
+          },
+          {
+            "name": "DB_CHARSET",
+            "value": "UTF-8"
+          },
+          {
+            "name": "DB_MAXPOOLSIZE",
+            "value": "5"
+          }
+        ],
+        "dockerCMD": []
+      },
+      "name": "kb-ebsco"
+    }
+  ],
+  "uiModuleDescriptors": [
+    {
+      "id": "folio_eholdings-11.1.109900000000263",
+      "replaces": [],
+      "tags": [],
+      "requires": [
+        {
+          "id": "eholdings",
+          "version": "4.0"
+        },
+        {
+          "id": "tags",
+          "version": "1.0"
+        }
+      ],
+      "provides": [],
+      "optional": [
+        {
+          "id": "erm",
+          "version": "1.0 2.0 3.0 4.0 5.0 6.0 7.0"
+        }
+      ],
+      "filters": [],
+      "permissionSets": [
+        {
+          "permissionName": "module.eholdings.enabled",
+          "replaces": [],
+          "displayName": "eHoldings: Can view providers, packages, titles detail records",
+          "subPermissions": [
+            "kb-ebsco.status.get",
+            "kb-ebsco.kb-credentials.collection.get",
+            "kb-ebsco.user-kb-credential.get",
+            "kb-ebsco.access-types.collection.get",
+            "kb-ebsco.access-types.item.get",
+            "kb-ebsco.kb-credentials.custom-labels.collection.get",
+            "kb-ebsco.custom-labels.collection.get",
+            "kb-ebsco.configuration.get",
+            "kb-ebsco.configuration.put",
+            "kb-ebsco.cache.delete",
+            "kb-ebsco.package-resources.export.collection.get",
+            "kb-ebsco.package-resources.collection.get",
+            "kb-ebsco.packages.collection.get",
+            "kb-ebsco.packages-bulk.collection.get",
+            "kb-ebsco.packages.item.get",
+            "kb-ebsco.provider-packages.collection.get",
+            "kb-ebsco.providers.collection.get",
+            "kb-ebsco.providers.item.get",
+            "kb-ebsco.resources.item.get",
+            "kb-ebsco.resources-bulk.collection.get",
+            "kb-ebsco.root-proxy.get",
+            "kb-ebsco.proxy-types.collection.get",
+            "kb-ebsco.titles.collection.get",
+            "kb-ebsco.titles.item.get",
+            "tags.collection.get",
+            "tags.item.get",
+            "kb-ebsco.package-tags.put",
+            "kb-ebsco.provider-tags.put",
+            "kb-ebsco.resource-tags.put",
+            "kb-ebsco.tags.collection.get",
+            "kb-ebsco.unique.tags.collection.get",
+            "kb-ebsco.kb-credentials.holdings-load-all.post",
+            "kb-ebsco.kb-credentials.holdings-load.post",
+            "kb-ebsco.kb-credentials.holdings-load.status.item.get",
+            "kb-ebsco.kb-credentials.proxy-types.collection.get",
+            "data-export.job.item.post"
+          ],
+          "visible": false
+        },
+        {
+          "permissionName": "ui-eholdings.app.view",
+          "replaces": [
+            "ui-eholdings.app.enabled"
+          ],
+          "subPermissions": [
+            "module.eholdings.enabled"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "settings.eholdings.enabled",
+          "replaces": [],
+          "subPermissions": [
+            "settings.enabled"
+          ],
+          "visible": false
+        },
+        {
+          "permissionName": "ui-eholdings.settings.enabled",
+          "replaces": [],
+          "displayName": "Settings (eHoldings): View settings",
+          "subPermissions": [
+            "module.eholdings.enabled",
+            "settings.eholdings.enabled",
+            "ui-eholdings.settings.kb.view",
+            "ui-eholdings.settings.root-proxy.view",
+            "ui-eholdings.settings.custom-labels.view",
+            "ui-eholdings.settings.access-types.view",
+            "ui-eholdings.settings.assignedUser.view",
+            "ui-eholdings.settings.usage-consolidation.view"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.kb.view",
+          "replaces": [],
+          "subPermissions": [
+            "settings.eholdings.enabled",
+            "module.eholdings.enabled",
+            "kb-ebsco.kb-credentials.collection.get",
+            "kb-ebsco.kb-credentials.item.get",
+            "kb-ebsco.kb-credentials.key.item.get"
+          ]
+        },
+        {
+          "permissionName": "ui-eholdings.settings.kb.edit",
+          "replaces": [],
+          "displayName": "Settings (eHoldings): Can create, edit, and view knowledge base credentials",
+          "subPermissions": [
+            "ui-eholdings.settings.kb.view",
+            "kb-ebsco.kb-credentials.collection.post",
+            "kb-ebsco.kb-credentials.item.patch",
+            "kb-ebsco.kb-credentials.item.put"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.kb.delete",
+          "replaces": [],
+          "displayName": "Settings (eHoldings): Can delete knowledge base credentials",
+          "subPermissions": [
+            "ui-eholdings.settings.kb.edit",
+            "kb-ebsco.kb-credentials.item.delete"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.root-proxy.view",
+          "replaces": [],
+          "subPermissions": [
+            "ui-eholdings.settings.kb.view",
+            "kb-ebsco.kb-credentials.root-proxy.get"
+          ]
+        },
+        {
+          "permissionName": "ui-eholdings.settings.root-proxy.edit",
+          "replaces": [],
+          "displayName": "Settings (eHoldings): configure root proxy setting",
+          "subPermissions": [
+            "ui-eholdings.settings.root-proxy.view",
+            "kb-ebsco.kb-credentials.root-proxy.put"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.package-title.select-unselect.execute",
+          "replaces": [
+            "ui-eholdings.package-title.select-unselect"
+          ],
+          "displayName": "eHoldings: Can select/unselect packages and titles to/from your holdings",
+          "subPermissions": [
+            "module.eholdings.enabled",
+            "kb-ebsco.packages.item.put",
+            "kb-ebsco.resources.item.put"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.records.edit",
+          "replaces": [],
+          "displayName": "eHoldings: Can edit providers, packages, titles detail records",
+          "subPermissions": [
+            "module.eholdings.enabled",
+            "kb-ebsco.packages.item.put",
+            "kb-ebsco.resources.item.put",
+            "kb-ebsco.providers.item.put",
+            "kb-ebsco.titles.item.put"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.titles-packages.create-delete.manage",
+          "replaces": [
+            "ui-eholdings.titles-packages.create-delete"
+          ],
+          "displayName": "eHoldings: Can create and delete custom packages and titles",
+          "subPermissions": [
+            "module.eholdings.enabled",
+            "kb-ebsco.packages.collection.post",
+            "kb-ebsco.resources.collection.post",
+            "kb-ebsco.titles.collection.post",
+            "kb-ebsco.packages.item.delete",
+            "kb-ebsco.resources.item.delete"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.costperuse.view",
+          "replaces": [],
+          "displayName": "eHoldings: Can view Usage & analysis data for packages, titles and resources",
+          "subPermissions": [
+            "module.eholdings.enabled",
+            "kb-ebsco.uc.item.get",
+            "kb-ebsco.resources-costperuse.item.get",
+            "kb-ebsco.titles-costperuse.item.get",
+            "kb-ebsco.packages-costperuse.item.get",
+            "kb-ebsco.package-resources-costperuse.collection.get"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.access-types.view",
+          "replaces": [],
+          "displayName": "Settings (eholdings): Can view access status types",
+          "subPermissions": [
+            "ui-eholdings.settings.kb.view",
+            "kb-ebsco.kb-credentials.access-types.collection.get",
+            "kb-ebsco.kb-credentials.access-types.item.get"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.access-types.create-edit",
+          "replaces": [],
+          "displayName": "Settings (eholdings): Can create, edit, and view access status types",
+          "subPermissions": [
+            "ui-eholdings.settings.access-types.view",
+            "kb-ebsco.kb-credentials.access-types.collection.post",
+            "kb-ebsco.kb-credentials.access-types.item.put"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.access-types.all",
+          "replaces": [],
+          "displayName": "Settings (eholdings): Can create, edit, view, and delete access status types",
+          "subPermissions": [
+            "ui-eholdings.settings.access-types.create-edit",
+            "kb-ebsco.kb-credentials.access-types.item.delete"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.custom-labels.view",
+          "replaces": [],
+          "displayName": "Settings (eholdings): Can view custom labels",
+          "subPermissions": [
+            "ui-eholdings.settings.kb.view",
+            "kb-ebsco.kb-credentials.custom-labels.collection.get"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.custom-labels.edit",
+          "replaces": [],
+          "displayName": "Settings (eholdings): Can create, edit, view, and delete custom labels",
+          "subPermissions": [
+            "ui-eholdings.settings.custom-labels.view",
+            "kb-ebsco.kb-credentials.custom-labels.collection.put"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.usage-consolidation.view",
+          "replaces": [],
+          "displayName": "Settings (eholdings): View Usage Consolidation API credentials",
+          "subPermissions": [
+            "ui-eholdings.settings.kb.view",
+            "kb-ebsco.kb-credentials.uc.item.get",
+            "kb-ebsco.kb-credentials.uc.key.item.get",
+            "kb-ebsco.currencies.collection.get",
+            "kb-ebsco.uc-credentials.item.get",
+            "kb-ebsco.uc-credentials.client-id.get",
+            "kb-ebsco.uc-credentials.client-secret.get"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.usage-consolidation.create-edit",
+          "replaces": [],
+          "displayName": "Settings (eholdings): Create, edit, and view Usage Consolidation API credentials",
+          "subPermissions": [
+            "ui-eholdings.settings.usage-consolidation.view",
+            "kb-ebsco.kb-credentials.uc.collection.post",
+            "kb-ebsco.kb-credentials.uc.item.patch",
+            "kb-ebsco.uc-credentials.item.put"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-eholdings.settings.assignedUser.view",
+          "replaces": [],
+          "subPermissions": [
+            "ui-eholdings.settings.kb.view",
+            "kb-ebsco.kb-credentials.users.collection.get",
+            "usergroups.collection.get",
+            "users.collection.get"
+          ]
+        },
+        {
+          "permissionName": "ui-eholdings.settings.assignedUser.edit",
+          "replaces": [],
+          "displayName": "Settings (eHoldings): Can assign/unassign a user from a KB",
+          "subPermissions": [
+            "ui-eholdings.settings.assignedUser.view",
+            "kb-ebsco.kb-credentials.users.collection.post",
+            "kb-ebsco.kb-credentials.users.item.put",
+            "kb-ebsco.kb-credentials.users.item.delete"
+          ],
+          "visible": true
+        }
+      ],
+      "env": [],
+      "name": "FOLIO UI module for eHoldings"
+    }
+  ],
+  "platform": "complete",
+  "dependencies": [
+    {
+      "name": "app-platform-minimal",
+      "version": "^2.1.0-SNAPSHOT",
+      "optional": false
+    }
+  ],
+  "id": "app-eholdings-1.0.0-SNAPSHOT.5861",
+  "name": "app-eholdings",
+  "version": "1.0.0-SNAPSHOT.5861"
+}

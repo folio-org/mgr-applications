@@ -1,0 +1,2698 @@
+{
+  "description": "Application for mod-inn-reach project in the folio",
+  "modules": [
+    {
+      "id": "mod-inn-reach-3.5.0-SNAPSHOT.420",
+      "name": "mod-inn-reach",
+      "version": "3.5.0-SNAPSHOT.420"
+    },
+    {
+      "id": "edge-inn-reach-3.6.0-SNAPSHOT.67",
+      "name": "edge-inn-reach",
+      "version": "3.6.0-SNAPSHOT.67"
+    }
+  ],
+  "uiModules": [
+    {
+      "id": "folio_inn-reach-6.1.109900000000128",
+      "name": "folio_inn-reach",
+      "version": "6.1.109900000000128"
+    }
+  ],
+  "moduleDescriptors": [
+    {
+      "id": "edge-inn-reach-3.6.0-SNAPSHOT.67",
+      "replaces": [],
+      "tags": [],
+      "requires": [
+        {
+          "id": "login",
+          "version": "7.3"
+        },
+        {
+          "id": "users",
+          "version": "16.4"
+        },
+        {
+          "id": "permissions",
+          "version": "5.8"
+        }
+      ],
+      "provides": [],
+      "optional": [],
+      "filters": [],
+      "permissionSets": [],
+      "env": [],
+      "launchDescriptor": {
+        "dockerImage": "folioci/edge-inn-reach:3.6.0-SNAPSHOT.67",
+        "dockerPull": true,
+        "dockerArgs": {
+          "HostConfig": {
+            "Memory": 268435456,
+            "PortBindings": {
+              "8081/tcp": [
+                {
+                  "HostPort": "%p"
+                }
+              ]
+            }
+          }
+        },
+        "env": [
+          {
+            "name": "JAVA_OPTIONS",
+            "value": "-XX:MaxRAMPercentage=66.0"
+          }
+        ],
+        "dockerCMD": []
+      },
+      "name": "INN-REACH system Edge API module"
+    },
+    {
+      "id": "mod-inn-reach-3.5.0-SNAPSHOT.420",
+      "replaces": [],
+      "tags": [],
+      "requires": [
+        {
+          "id": "login",
+          "version": "7.3"
+        },
+        {
+          "id": "instance-iteration",
+          "version": "1.0"
+        },
+        {
+          "id": "permissions",
+          "version": "5.8"
+        },
+        {
+          "id": "users",
+          "version": "16.4"
+        },
+        {
+          "id": "inventory",
+          "version": "14.2"
+        },
+        {
+          "id": "service-points-users",
+          "version": "1.0"
+        },
+        {
+          "id": "inventory-view",
+          "version": "3.0"
+        },
+        {
+          "id": "material-types",
+          "version": "2.2"
+        },
+        {
+          "id": "automated-patron-blocks",
+          "version": "0.1"
+        },
+        {
+          "id": "patron",
+          "version": "6.3"
+        },
+        {
+          "id": "circulation",
+          "version": "14.6"
+        },
+        {
+          "id": "source-storage-records",
+          "version": "3.4"
+        },
+        {
+          "id": "feesfines",
+          "version": "19.1"
+        }
+      ],
+      "provides": [
+        {
+          "id": "inn-reach",
+          "version": "1.2",
+          "handlers": [
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/central-servers",
+              "permissionsRequired": [
+                "inn-reach.central-servers.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers",
+              "permissionsRequired": [
+                "inn-reach.central-servers.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}",
+              "permissionsRequired": [
+                "inn-reach.central-servers.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}",
+              "permissionsRequired": [
+                "inn-reach.central-servers.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}",
+              "permissionsRequired": [
+                "inn-reach.central-servers.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/contribution-criteria",
+              "permissionsRequired": [
+                "inn-reach.central-servers.contribution-criteria-configuration.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/contribution-criteria",
+              "permissionsRequired": [
+                "inn-reach.central-servers.contribution-criteria-configuration.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/contribution-criteria",
+              "permissionsRequired": [
+                "inn-reach.central-servers.contribution-criteria-configuration.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/contribution-criteria",
+              "permissionsRequired": [
+                "inn-reach.central-servers.contribution-criteria-configuration.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/locations",
+              "permissionsRequired": [
+                "inn-reach.locations.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/locations",
+              "permissionsRequired": [
+                "inn-reach.locations.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/locations/{locationId}",
+              "permissionsRequired": [
+                "inn-reach.locations.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/locations/{locationId}",
+              "permissionsRequired": [
+                "inn-reach.locations.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/inn-reach/locations/{locationId}",
+              "permissionsRequired": [
+                "inn-reach.locations.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/material-type-mappings",
+              "permissionsRequired": [
+                "inn-reach.material-type-mappings.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/material-type-mappings/{mappingId}",
+              "permissionsRequired": [
+                "inn-reach.material-type-mappings.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/material-type-mappings",
+              "permissionsRequired": [
+                "inn-reach.material-type-mappings.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/material-type-mappings",
+              "permissionsRequired": [
+                "inn-reach.material-type-mappings.collection.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/material-type-mappings/{mappingId}",
+              "permissionsRequired": [
+                "inn-reach.material-type-mappings.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/material-type-mappings/{mappingId}",
+              "permissionsRequired": [
+                "inn-reach.material-type-mappings.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/libraries/location-mappings",
+              "permissionsRequired": [
+                "inn-reach.library-mappings.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/libraries/location-mappings",
+              "permissionsRequired": [
+                "inn-reach.library-mappings.collection.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/libraries/{libraryId}/locations/location-mappings",
+              "permissionsRequired": [
+                "inn-reach.location-mappings.libraries.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/libraries/locations/location-mappings",
+              "permissionsRequired": [
+                "inn-reach.location-mappings.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/libraries/{libraryId}/locations/location-mappings",
+              "permissionsRequired": [
+                "inn-reach.location-mappings.collection.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/d2r/*",
+              "permissionsRequired": [
+                "inn-reach.d2ir.settings.any.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/authentication",
+              "permissionsRequired": [
+                "inn-reach.authentication.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/item-contribution-options",
+              "permissionsRequired": [
+                "inn-reach.central-servers.item-contribution-options-configuration.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/item-contribution-options",
+              "permissionsRequired": [
+                "inn-reach.central-servers.item-contribution-options-configuration.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/item-contribution-options",
+              "permissionsRequired": [
+                "inn-reach.central-servers.item-contribution-options-configuration.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/agency-mappings",
+              "permissionsRequired": [
+                "inn-reach.agency-mappings.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/agency-mappings",
+              "permissionsRequired": [
+                "inn-reach.agency-mappings.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/marc-transformation-options",
+              "permissionsRequired": [
+                "inn-reach.central-servers.marc-transformation-options-settings.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/marc-transformation-options",
+              "permissionsRequired": [
+                "inn-reach.central-servers.marc-transformation-options-settings.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/marc-transformation-options",
+              "permissionsRequired": [
+                "inn-reach.central-servers.marc-transformation-options-settings.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/marc-transformation-options",
+              "permissionsRequired": [
+                "inn-reach.central-servers.marc-transformation-options-settings.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/marc-transformation-options",
+              "permissionsRequired": [
+                "inn-reach.central-servers.marc-transformation-options-settings.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/patron-type-mappings",
+              "permissionsRequired": [
+                "inn-reach.patron-type-mappings.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/patron-type-mappings",
+              "permissionsRequired": [
+                "inn-reach.patron-type-mappings.collection.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/contributions/current",
+              "permissionsRequired": [
+                "inn-reach.contributions.current.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "inventory-storage.material-types.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/contributions/current",
+              "permissionsRequired": [
+                "inn-reach.contributions.current.item.delete"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "inventory-storage.instance.iteration.item.delete"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/contributions/history",
+              "permissionsRequired": [
+                "inn-reach.contributions.history.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/contributions",
+              "permissionsRequired": [
+                "inn-reach.contributions.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.requests.collection.get",
+                "circulation.loans.collection.get",
+                "inventory-storage.instance.iteration.post",
+                "inventory-storage.inventory-view.instances.collection.get",
+                "inventory-storage.material-types.collection.get",
+                "inventory-storage.locations.collection.get",
+                "source-storage.records.formatted.item.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/item-type-mappings",
+              "permissionsRequired": [
+                "inn-reach.item-type-mappings.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/item-type-mappings",
+              "permissionsRequired": [
+                "inn-reach.item-type-mappings.collection.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/user-custom-field-mappings",
+              "permissionsRequired": [
+                "inn-reach.user-custom-field-mappings.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/user-custom-field-mappings",
+              "permissionsRequired": [
+                "inn-reach.user-custom-field-mappings.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/user-custom-field-mappings",
+              "permissionsRequired": [
+                "inn-reach.user-custom-field-mappings.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/central-patron-type-mappings",
+              "permissionsRequired": [
+                "inn-reach.central-patron-type-mappings.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/central-patron-type-mappings",
+              "permissionsRequired": [
+                "inn-reach.central-patron-type-mappings.collection.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/inn-reach-recall-user",
+              "permissionsRequired": [
+                "inn-reach.recall-user.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/inn-reach-recall-user",
+              "permissionsRequired": [
+                "inn-reach.recall-user.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/inn-reach-recall-user",
+              "permissionsRequired": [
+                "inn-reach.recall-user.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/transactions/{transactionId}",
+              "permissionsRequired": [
+                "inn-reach.inn-reach-transaction.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/d2ir/getbibrecord/{bibId}/{centralCode}",
+              "permissionsRequired": [
+                "inn-reach.d2ir.bib-info.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "inventory-storage.inventory-view.instances.collection.get",
+                "source-storage.records.formatted.item.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/d2ir/circ/verifypatron",
+              "permissionsRequired": [
+                "inn-reach.d2ir.patron-info.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "users.collection.get",
+                "patron.account.item.get",
+                "patron-blocks.automated-patron-blocks.collection.get",
+                "manualblocks.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST",
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/d2ir/circ/{circulationOperationName}/{trackingId}/{centralCode}",
+              "permissionsRequired": [
+                "inn-reach.d2ir.circulation.all"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "inventory-storage.instance-types.collection.get",
+                "inventory-storage.contributor-name-types.collection.get",
+                "inventory-storage.holdings.item.post",
+                "inventory-storage.holdings.item.get",
+                "inventory-storage.holdings.item.put",
+                "inventory-storage.holdings-sources.collection.get",
+                "inventory-storage.hrid-settings.item.get",
+                "inventory-storage.service-points.collection.get",
+                "inventory.instances.collection.get",
+                "inventory.instances.item.post",
+                "inventory.items.collection.get",
+                "inventory.items.item.post",
+                "inventory.items.item.get",
+                "inventory.items.item.put",
+                "circulation.requests.collection.get",
+                "circulation.requests.item.get",
+                "circulation.requests.item.put",
+                "circulation.requests.item.post",
+                "circulation.requests.item.move.post",
+                "users.item.get",
+                "inventory-storage.service-points-users.collection.get",
+                "circulation.check-out-by-barcode.post",
+                "circulation-storage.loans.item.get",
+                "circulation.renew-by-id.post",
+                "circulation.loans.item.get",
+                "circulation.loans.item.post",
+                "circulation.loans.item.put",
+                "circulation.loans.claim-item-returned.post",
+                "inventory.instances.item.get",
+                "users.collection.get",
+                "configuration.entries.collection.get",
+                "inventory.items.item.delete",
+                "inventory-storage.holdings.item.delete",
+                "inventory.instances.item.delete",
+                "circulation.loans.item.delete"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/agencies",
+              "permissionsRequired": [
+                "inn-reach.central-server-agencies.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/item-types",
+              "permissionsRequired": [
+                "inn-reach.central-server-item-types.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/patron-types",
+              "permissionsRequired": [
+                "inn-reach.central-server-patron-types.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/transactions",
+              "permissionsRequired": [
+                "inn-reach.inn-reach-transactions.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/receive-item/{servicePointId}",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.item-receive.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.check-in-by-barcode.post"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/receive-unshipped-item/{servicePointId}/{itemBarcode}",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.receive-unshipped-item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.check-in-by-barcode.post",
+                "inventory.items.collection.get",
+                "inventory.items.item.get",
+                "inventory.items.item.put"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{itemBarcode}/check-out-item/{servicePointId}",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.check-out-item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.check-out-by-barcode.post"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/patronhold/check-out-item/{servicePointId}",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.patron.check-out-item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.check-out-by-barcode.post",
+                "circulation.loans.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/localhold/check-out-item/{servicePointId}",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.localhold.check-out-item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.check-out-by-barcode.post",
+                "circulation.loans.collection.get",
+                "inventory.items.item.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/patronhold/cancel",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.patron-hold.cancel.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "inventory.items.item.get",
+                "circulation.requests.item.get",
+                "circulation.requests.item.put",
+                "circulation.requests.item.delete",
+                "circulation.loans.item.delete",
+                "inventory.items.item.delete",
+                "inventory-storage.holdings.item.delete",
+                "inventory.instances.item.delete"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/patronhold/remove",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.patron-hold.remove.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "inventory.items.item.get",
+                "circulation.requests.item.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/itemhold/cancel",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.item-hold.cancel.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.requests.item.get",
+                "circulation.requests.item.put"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/localhold/cancel",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.localhold.cancel.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.requests.item.get",
+                "circulation.requests.item.put",
+                "inventory.instances.item.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/itemhold/recall",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.item-hold.recall.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.requests.item.get",
+                "circulation.requests.item.post",
+                "inventory-storage.service-points-users.collection.get",
+                "circulation.requests.collection.get",
+                "circulation.loans.item.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/patronhold/return-item/{servicePointId}",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.patron-hold.return-item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.requests.item.get",
+                "circulation.loans.item.get",
+                "circulation.check-in-by-barcode.post"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/itemhold/finalcheckin/{servicePointId}",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.item-hold.final-checkin.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.loans.item.get",
+                "circulation.check-in-by-barcode.post"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/itemhold/transfer-item/{itemId}",
+              "permissionsRequired": [
+                "inn-reach.d2ir.inn-reach-transaction.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.requests.collection.get",
+                "circulation.requests.item.get",
+                "circulation.requests.item.move.post",
+                "inventory.items.item.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/marc-record-transformation/{inventoryInstanceId}",
+              "permissionsRequired": [
+                "inn-reach.marc-record-transformation.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "inventory-storage.instances.item.get",
+                "source-storage.records.formatted.item.get"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/transactions/{transactionId}",
+              "permissionsRequired": [
+                "inn-reach.inn-reach-transaction.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/visible-patron-field-configuration",
+              "permissionsRequired": [
+                "inn-reach.central-servers.visible-patron-field-configuration.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/visible-patron-field-configuration",
+              "permissionsRequired": [
+                "inn-reach.central-servers.visible-patron-field-configuration.item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/visible-patron-field-configuration",
+              "permissionsRequired": [
+                "inn-reach.central-servers.visible-patron-field-configuration.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/inn-reach/transactions/{id}/localhold/transfer-item/{itemId}",
+              "permissionsRequired": [
+                "inn-reach.transactions.transfer-item.post"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "inventory.items.item.get",
+                "circulation.requests.item.get",
+                "circulation.requests.item.move.post"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/paging-slip-template",
+              "permissionsRequired": [
+                "inn-reach.central-servers.paging-slip-template.item.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "pathPattern": "/inn-reach/central-servers/{centralServerId}/paging-slip-template",
+              "permissionsRequired": [
+                "inn-reach.central-servers.paging-slip-template.item.put"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "pathPattern": "/inn-reach/paging-slips/{servicePointId}",
+              "permissionsRequired": [
+                "inn-reach.paging-slips.collection.get"
+              ],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "circulation.requests.collection.get",
+                "inventory.instances.collection.get",
+                "inventory.items.collection.get",
+                "inventory-storage.locations.collection.get"
+              ],
+              "permissionsRequiredTenant": []
+            }
+          ],
+          "permissionSets": []
+        },
+        {
+          "id": "_tenant",
+          "version": "2.0",
+          "interfaceType": "system",
+          "handlers": [
+            {
+              "methods": [
+                "POST"
+              ],
+              "pathPattern": "/_/tenant",
+              "permissionsRequired": [],
+              "permissionsDesired": [],
+              "modulePermissions": [
+                "users.collection.get",
+                "users.item.get",
+                "users.item.post",
+                "login.item.post",
+                "login.item.delete",
+                "perms.users.item.post",
+                "perms.users.get",
+                "perms.users.assign.immutable",
+                "inventory-storage.instance-types.collection.get",
+                "inventory-storage.instance-types.item.post",
+                "inventory-storage.contributor-name-types.collection.get",
+                "inventory-storage.contributor-name-types.item.post",
+                "circulation-storage.cancellation-reasons.collection.get",
+                "circulation-storage.cancellation-reasons.item.post"
+              ],
+              "permissionsRequiredTenant": []
+            },
+            {
+              "methods": [
+                "GET",
+                "DELETE"
+              ],
+              "pathPattern": "/_/tenant/{id}",
+              "permissionsRequired": [],
+              "permissionsDesired": [],
+              "modulePermissions": [],
+              "permissionsRequiredTenant": []
+            }
+          ],
+          "permissionSets": []
+        }
+      ],
+      "optional": [],
+      "filters": [],
+      "permissionSets": [
+        {
+          "permissionName": "inn-reach.central-servers.contribution-criteria-configuration.item.post",
+          "replaces": [],
+          "displayName": "create a inn reach central server contribution criteria configuration entry",
+          "description": "Add a inn reach central server contribution criteria configuration entry",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.contribution-criteria-configuration.item.get",
+          "replaces": [],
+          "displayName": "get an inn reach central server contribution criteria configuration entry",
+          "description": "Get a inn reach central server contribution criteria configuration entry by id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.contribution-criteria-configuration.item.put",
+          "replaces": [],
+          "displayName": "modify an inn reach central server contribution criteria configuration entry",
+          "description": "Modify an inn reach central server contribution criteria configuration entry",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.contribution-criteria-configuration.item.delete",
+          "replaces": [],
+          "displayName": "delete an inn reach central server contribution criteria configuration entry",
+          "description": "Delete an inn reach central server contribution criteria configuration entry by id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.item.post",
+          "replaces": [],
+          "displayName": "create a inn reach central server entry",
+          "description": "Add a inn reach central server entry",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of inn reach central servers entries",
+          "description": "Get a collection of inn reach central servers entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.item.get",
+          "replaces": [],
+          "displayName": "get an inn reach central server entry",
+          "description": "Get a inn reach central server entry by id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.item.put",
+          "replaces": [],
+          "displayName": "modify an inn reach central server entry",
+          "description": "Modify an inn reach central server entry",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.item.delete",
+          "replaces": [],
+          "displayName": "delete an inn reach central server entry",
+          "description": "Delete an inn reach central server entry by id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of central servers",
+          "description": "All permissions of inn reach central servers scope",
+          "subPermissions": [
+            "inn-reach.central-servers.item.post",
+            "inn-reach.central-servers.collection.get",
+            "inn-reach.central-servers.item.get",
+            "inn-reach.central-servers.item.put",
+            "inn-reach.central-servers.item.delete"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.central-servers.contribution-criteria-configuration.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of central servers",
+          "description": "All permissions of inn reach central servers scope",
+          "subPermissions": [
+            "inn-reach.central-servers.contribution-criteria-configuration.item.post",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.get",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.put",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.delete"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.locations.item.post",
+          "replaces": [],
+          "displayName": "create an inn reach location entry",
+          "description": "Add an inn reach location entry",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.locations.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of inn reach location entries",
+          "description": "Get a collection of inn reach location entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.locations.item.get",
+          "replaces": [],
+          "displayName": "get an inn reach location entry",
+          "description": "Get an inn reach location entry by id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.locations.item.put",
+          "replaces": [],
+          "displayName": "modify an inn reach location entry",
+          "description": "Modify an inn reach location entry",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.locations.item.delete",
+          "replaces": [],
+          "displayName": "delete an inn reach location entry",
+          "description": "Delete an inn reach location entry by id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.locations.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of inn reach locations",
+          "description": "All permissions of inn reach locations scope",
+          "subPermissions": [
+            "inn-reach.locations.item.post",
+            "inn-reach.locations.collection.get",
+            "inn-reach.locations.item.get",
+            "inn-reach.locations.item.put",
+            "inn-reach.locations.item.delete"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.material-type-mappings.item.post",
+          "replaces": [],
+          "displayName": "create an inn reach material type mapping entry",
+          "description": "Add an inn reach material type mapping entry",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.material-type-mappings.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of inn reach material type mapping entries",
+          "description": "Get a collection of inn reach material type mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.material-type-mappings.item.get",
+          "replaces": [],
+          "displayName": "get an inn reach material type mapping entry",
+          "description": "Get an inn reach material type mapping entry by id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.material-type-mappings.collection.put",
+          "replaces": [],
+          "displayName": "update a collection of inn reach material type mapping entries",
+          "description": "Update a collection of inn reach material type mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.material-type-mappings.item.put",
+          "replaces": [],
+          "displayName": "modify an inn reach material type mapping entry",
+          "description": "Modify an inn reach material type mapping entry",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.material-type-mappings.item.delete",
+          "replaces": [],
+          "displayName": "delete an inn reach material type mapping entry",
+          "description": "Delete an inn reach material type mapping entry by id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.material-type-mappings.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of material type mappings",
+          "description": "All permissions of inn reach material type mappings scope",
+          "subPermissions": [
+            "inn-reach.material-type-mappings.item.post",
+            "inn-reach.material-type-mappings.collection.get",
+            "inn-reach.material-type-mappings.item.get",
+            "inn-reach.material-type-mappings.collection.put",
+            "inn-reach.material-type-mappings.item.put",
+            "inn-reach.material-type-mappings.item.delete"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.library-mappings.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of inn reach library mapping entries",
+          "description": "Get a collection of inn reach library mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.library-mappings.collection.put",
+          "replaces": [],
+          "displayName": "update a collection of inn reach library mapping entries",
+          "description": "Update a collection of inn reach library mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.library-mappings.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of library mappings",
+          "description": "All permissions of inn reach library mappings scope",
+          "subPermissions": [
+            "inn-reach.library-mappings.collection.get",
+            "inn-reach.library-mappings.collection.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.location-mappings.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of inn reach location mapping entries",
+          "description": "Get a collection of inn reach location mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.location-mappings.libraries.collection.get",
+          "replaces": [],
+          "displayName": "GET INN-Reach Location Mappings: Libraries Collection",
+          "description": "GET INN-Reach Location Mappings: Libraries Collection",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.location-mappings.collection.put",
+          "replaces": [],
+          "displayName": "update a collection of inn reach location mapping entries",
+          "description": "Update a collection of inn reach location mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.location-mappings.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of location mappings",
+          "description": "All permissions of inn reach location mappings scope",
+          "subPermissions": [
+            "inn-reach.location-mappings.collection.get",
+            "inn-reach.location-mappings.libraries.collection.get",
+            "inn-reach.location-mappings.collection.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.d2ir.settings.any.get",
+          "replaces": [],
+          "displayName": "get inn reach settings",
+          "description": "Get inn reach settings",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.authentication.item.post",
+          "replaces": [],
+          "displayName": "authenticate local server credentials",
+          "description": "Perform authentication of local server credentials",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.authentication.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of inn reach local server credentials authentication",
+          "description": "All permissions of inn reach local server credentials authentication scope",
+          "subPermissions": [
+            "inn-reach.authentication.item.post"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.central-servers.item-contribution-options-configuration.item.get",
+          "replaces": [],
+          "displayName": "get item contribution options configuration",
+          "description": "Get Item Contribution Options Configuration",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.item-contribution-options-configuration.item.post",
+          "replaces": [],
+          "displayName": "create item contribution options configuration",
+          "description": "Add Item Contribution Options Configuration",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.item-contribution-options-configuration.item.put",
+          "replaces": [],
+          "displayName": "update item contribution options configuration",
+          "description": "update Item Contribution Options Configuration",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.item-contribution-options-configuration.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of item contribution options configuration",
+          "description": "All permissions for Item Contribution Options Configuration",
+          "subPermissions": [
+            "inn-reach.central-servers.item-contribution-options-configuration.item.get",
+            "inn-reach.central-servers.item-contribution-options-configuration.item.post",
+            "inn-reach.central-servers.item-contribution-options-configuration.item.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.agency-mappings.item.get",
+          "replaces": [],
+          "displayName": "get INN-Reach Agency to FOLIO locations mapping",
+          "description": "Get INN-Reach Agency to FOLIO locations mapping",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.agency-mappings.item.put",
+          "replaces": [],
+          "displayName": "update INN-Reach Agency to FOLIO locations mapping",
+          "description": "Update INN-Reach Agency to FOLIO locations mapping",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.agency-mappings.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of agency mappings",
+          "description": "All permissions of inn reach agency mappings scope",
+          "subPermissions": [
+            "inn-reach.agency-mappings.item.get",
+            "inn-reach.agency-mappings.item.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.central-servers.marc-transformation-options-settings.item.get",
+          "replaces": [],
+          "displayName": "get marc transformations options settings",
+          "description": "Get MARC Transformation Options Settings",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.marc-transformation-options-settings.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of marc transformations options settings",
+          "description": "Get a collection of MARC Transformation Options Settings",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.marc-transformation-options-settings.item.post",
+          "replaces": [],
+          "displayName": "create marc transformations options settings",
+          "description": "Add MARC Transformation Options Settings",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.marc-transformation-options-settings.item.put",
+          "replaces": [],
+          "displayName": "update marc transformations options settings",
+          "description": "Update MARC Transformation Options Settings",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.marc-transformation-options-settings.item.delete",
+          "replaces": [],
+          "displayName": "delete marc transformations options settings",
+          "description": "Delete MARC Transformation Options Settings",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.marc-transformation-options-settings.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of marc transformations options settings",
+          "description": "All permissions for MARC Transformation Options Settings",
+          "subPermissions": [
+            "inn-reach.central-servers.marc-transformation-options-settings.item.get",
+            "inn-reach.central-servers.marc-transformation-options-settings.collection.get",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.post",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.put",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.delete"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.patron-type-mappings.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of inn reach patron type mapping entries",
+          "description": "Get a collection of inn reach patron type mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.patron-type-mappings.collection.put",
+          "replaces": [],
+          "displayName": "update a collection of inn reach patron type mapping entries",
+          "description": "Update a collection of inn reach patron type mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.patron-type-mappings.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of patron type mappings",
+          "description": "All permissions of inn reach patron type mappings scope",
+          "subPermissions": [
+            "inn-reach.patron-type-mappings.collection.get",
+            "inn-reach.patron-type-mappings.collection.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.contributions.current.item.get",
+          "replaces": [],
+          "displayName": "Get INN-Reach contribution job execution status tracking and basic statistics",
+          "description": "Get INN-Reach contribution job execution status tracking and basic statistics",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.contributions.current.item.delete",
+          "replaces": [],
+          "displayName": "Cancel INN-Reach contribution job",
+          "description": "Cancel INN-Reach contribution job",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.contributions.history.collection.get",
+          "replaces": [],
+          "displayName": "Get history of INN-Reach contribution job execution status tracking and basic statistics",
+          "description": "Get history of INN-Reach contribution job execution status tracking and basic statistics",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.contributions.item.post",
+          "replaces": [],
+          "displayName": "start initial contribution process",
+          "description": "Start initial contribution process",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.contributions.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of contribution",
+          "description": "All permissions of inn reach contribution scope",
+          "subPermissions": [
+            "inn-reach.contributions.current.item.get",
+            "inn-reach.contributions.current.item.delete",
+            "inn-reach.contributions.history.collection.get",
+            "inn-reach.contributions.item.post"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.item-type-mappings.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of inn reach item type mapping entries",
+          "description": "Get a collection of inn reach item type mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.item-type-mappings.collection.put",
+          "replaces": [],
+          "displayName": "update a collection of inn reach item type mapping entries",
+          "description": "Update a collection of inn reach item type mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.item-type-mappings.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of item type mappings",
+          "description": "All permissions of inn reach item type mappings scope",
+          "subPermissions": [
+            "inn-reach.item-type-mappings.collection.get",
+            "inn-reach.item-type-mappings.collection.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.user-custom-field-mappings.item.get",
+          "replaces": [],
+          "displayName": "get a collection of user custom field mapping entries",
+          "description": "Get a collection of user custom field mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.user-custom-field-mappings.item.post",
+          "replaces": [],
+          "displayName": "get a collection of user custom field mapping entries",
+          "description": "Get a collection of user custom field mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.user-custom-field-mappings.item.put",
+          "replaces": [],
+          "displayName": "update a collection of user custom field mapping entries",
+          "description": "Update a collection of user custom field mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.user-custom-field-mappings.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of user custom field mappings",
+          "description": "All permissions of inn reach user custom field mappings scope",
+          "subPermissions": [
+            "inn-reach.user-custom-field-mappings.item.get",
+            "inn-reach.user-custom-field-mappings.item.post",
+            "inn-reach.user-custom-field-mappings.item.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.central-patron-type-mappings.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of inn reach central patron type mapping entries",
+          "description": "Get a collection of inn reach central patron type mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-patron-type-mappings.collection.put",
+          "replaces": [],
+          "displayName": "update a collection of inn reach central patron mapping entries",
+          "description": "Update a collection of inn reach central patron mapping entries",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-patron-type-mappings.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of central patron mappings",
+          "description": "All permissions of inn reach central patron mappings scope",
+          "subPermissions": [
+            "inn-reach.central-patron-type-mappings.collection.get",
+            "inn-reach.central-patron-type-mappings.collection.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.item.post",
+          "replaces": [],
+          "displayName": "create/update INN-Reach transaction",
+          "description": "Create/update INN-Reach transaction",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.receive-unshipped-item.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Receive Unshipped Item",
+          "description": "POST INN-Reach Transaction: Receive Unshipped Item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.check-out-item.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Check-Out Item",
+          "description": "POST INN-Reach Transaction: Check-Out Item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.patron.check-out-item.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Patron Check-Out Item",
+          "description": "POST INN-Reach Transaction: Patron Check-Out Item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.localhold.check-out-item.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Local Hold Check-Out Item",
+          "description": "POST INN-Reach Transaction: Local Hold Check-Out Item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.patron-hold.cancel.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Cancel Patron Hold",
+          "description": "POST INN-Reach Transaction: Cancel Patron Hold",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.patron-hold.remove.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Remove Patron Hold",
+          "description": "POST INN-Reach Transaction: Remove Patron Hold",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.item-hold.cancel.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Cancel Item Hold",
+          "description": "POST INN-Reach Transaction: Cancel Item Hold",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.localhold.cancel.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Cancel Local Hold",
+          "description": "POST INN-Reach Transaction: Cancel Local Hold",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.item-hold.recall.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Recall Item Hold",
+          "description": "POST INN-Reach Transaction: Recall Item Hold",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.patron-hold.return-item.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Return Patron Hold Item",
+          "description": "POST INN-Reach Transaction: Return Patron Hold Item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.item-hold.final-checkin.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Final Check-In for Item Hold",
+          "description": "POST INN-Reach Transaction: Final Check-In for Item Hold",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.inn-reach-transaction.item.get",
+          "replaces": [],
+          "displayName": "get INN-Reach Transaction with transaction hold by id",
+          "description": "Get INN-Reach Transaction with transaction hold by id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.inn-reach-transaction.item.get",
+          "replaces": [],
+          "displayName": "get INN-Reach Transaction with transaction hold by id",
+          "description": "Get INN-Reach Transaction with transaction hold by id",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.inn-reach-transaction.item.put",
+          "replaces": [],
+          "displayName": "update INN-Reach Transaction",
+          "description": "Update INN-Reach Transaction",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.item-receive.post",
+          "replaces": [],
+          "displayName": "POST INN-Reach Transaction: Receive Item",
+          "description": "POST INN-Reach Transaction: Receive Item",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.paging-slip-template.item.get",
+          "replaces": [],
+          "displayName": "GET INN-Reach Central Servers: Item Paging Slip Template",
+          "description": "GET INN-Reach Central Servers: Item Paging Slip Template",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.paging-slip-template.item.get",
+          "replaces": [],
+          "displayName": "PUT INN-Reach Central Servers: Update Item Paging Slip Template",
+          "description": "PUT INN-Reach Central Servers: Update Item Paging Slip Template",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.paging-slips.collection.get",
+          "replaces": [],
+          "displayName": "GET INN-Reach Paging Slips Collection",
+          "description": "GET INN-Reach Paging Slips Collection",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.paging-slip-template.item.put",
+          "replaces": [],
+          "displayName": "PUT INN-Reach Central Servers: Item Paging Slip Template",
+          "description": "PUT INN-Reach Central Servers: Item Paging Slip Template",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.inn-reach-transaction.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of inn-reach transactions",
+          "description": "All permissions of inn-reach transactions scope",
+          "subPermissions": [
+            "inn-reach.d2ir.inn-reach-transaction.item.post",
+            "inn-reach.d2ir.inn-reach-transaction.item-receive.post",
+            "inn-reach.d2ir.inn-reach-transaction.receive-unshipped-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.check-out-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.patron.check-out-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.localhold.check-out-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.patron-hold.cancel.post",
+            "inn-reach.d2ir.inn-reach-transaction.item-hold.cancel.post",
+            "inn-reach.d2ir.inn-reach-transaction.localhold.cancel.post",
+            "inn-reach.d2ir.inn-reach-transaction.item-hold.recall.post",
+            "inn-reach.d2ir.inn-reach-transaction.patron-hold.return-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.item-hold.final-checkin.post",
+            "inn-reach.inn-reach-transaction.item.get",
+            "inn-reach.d2ir.inn-reach-transaction.patron-hold.remove.post"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.d2ir.bib-info.item.get",
+          "replaces": [],
+          "displayName": "get d2ir bib info",
+          "description": "get d2ir bib info",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.bib-info.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of bib info",
+          "description": "All permissions of d2ir bib info scope",
+          "subPermissions": [
+            "inn-reach.d2ir.bib-info.item.get"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.d2ir.patron-info.item.get",
+          "replaces": [],
+          "displayName": "get d2ir patron info",
+          "description": "get d2ir patron info",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.d2ir.patron-info.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of patron info",
+          "description": "All permissions of d2ir patron info scope",
+          "subPermissions": [
+            "inn-reach.d2ir.patron-info.item.get"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.central-server-agencies.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of all known agencies from available central servers",
+          "description": "Get a collection of all known agencies from available central servers",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-server-item-types.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of all known item types from available central servers",
+          "description": "Get a collection of all known item types from available central servers",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-server-patron-types.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of all known patron types from available central servers",
+          "description": "Get a collection of all known patron types from available central servers",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-server.sys-configuration.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of central server system configuration",
+          "description": "All permissions of central server system configuration scope",
+          "subPermissions": [
+            "inn-reach.central-server-agencies.collection.get",
+            "inn-reach.central-server-item-types.collection.get",
+            "inn-reach.central-server-patron-types.collection.get"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.inn-reach-transactions.collection.get",
+          "replaces": [],
+          "displayName": "get a collection of existing INN-Reach Transactions",
+          "description": "Get a collection of existing INN-Reach Transactions",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.inn-reach-transactions.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of inn-reach transactions",
+          "description": "All permissions of inn-reach transactions scope",
+          "subPermissions": [
+            "inn-reach.inn-reach-transactions.collection.get",
+            "inn-reach.inn-reach-transaction.item.put",
+            "inn-reach.transactions.transfer-item.post"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.d2ir.circulation.all",
+          "replaces": [],
+          "displayName": "all permissions of d2ir circulation operations",
+          "description": "All permissions of d2ir circulation operations",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.recall-user.item.get",
+          "replaces": [],
+          "displayName": "get central server inn-reach recall user",
+          "description": "Get central server inn-reach recall user",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.recall-user.item.post",
+          "replaces": [],
+          "displayName": "create central server inn-reach recall user",
+          "description": "Create central server inn-reach recall user",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.recall-user.item.put",
+          "replaces": [],
+          "displayName": "update central server inn-reach recall user",
+          "description": "Update central server inn-reach recall user",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.recall-user.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of central server inn-reach recall user configuration",
+          "description": "All permissions of inn-reach recall user",
+          "subPermissions": [
+            "inn-reach.recall-user.item.get",
+            "inn-reach.recall-user.item.post",
+            "inn-reach.recall-user.item.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.marc-record-transformation.item.get",
+          "replaces": [],
+          "displayName": "get marc record transformation",
+          "description": "Get MARC record transformation",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.marc-record-transformation.item.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of marc record transformation",
+          "description": "All permissions of MARC record transformation",
+          "subPermissions": [
+            "inn-reach.marc-record-transformation.item.get"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.central-servers.visible-patron-field-configuration.item.get",
+          "replaces": [],
+          "displayName": "get visible patron field configuration",
+          "description": "Get Visible Patron Field Configuration",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.visible-patron-field-configuration.item.post",
+          "replaces": [],
+          "displayName": "create visible patron field configuration",
+          "description": "Add Visible Patron Field Configuration",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.visible-patron-field-configuration.item.put",
+          "replaces": [],
+          "displayName": "update visible patron field configuration",
+          "description": "Update Visible Patron Field Configuration",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.transactions.transfer-item.post",
+          "replaces": [],
+          "displayName": "update visible patron field configuration",
+          "description": "Update Visible Patron Field Configuration",
+          "subPermissions": []
+        },
+        {
+          "permissionName": "inn-reach.central-servers.visible-patron-field-configuration.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of visible patron field configuration",
+          "description": "All permissions for Visible Patron Field Configuration",
+          "subPermissions": [
+            "inn-reach.central-servers.visible-patron-field-configuration.item.get",
+            "inn-reach.central-servers.visible-patron-field-configuration.item.post",
+            "inn-reach.central-servers.visible-patron-field-configuration.item.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.central-servers.paging-slip-template.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of paging slip template",
+          "description": "All permissions for Paging Slip Template",
+          "subPermissions": [
+            "inn-reach.central-servers.paging-slip-template.item.get",
+            "inn-reach.central-servers.paging-slip-template.item.put"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.paging-slips.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions of paging slips",
+          "description": "All permissions for Paging Slips",
+          "subPermissions": [
+            "inn-reach.paging-slips.collection.get"
+          ]
+        },
+        {
+          "permissionName": "inn-reach.all",
+          "replaces": [],
+          "displayName": "inn reach API module - all permissions",
+          "description": "All permissions for inn reach",
+          "subPermissions": [
+            "inn-reach.central-servers.all",
+            "inn-reach.central-servers.contribution-criteria-configuration.all",
+            "inn-reach.locations.all",
+            "inn-reach.material-type-mappings.all",
+            "inn-reach.library-mappings.all",
+            "inn-reach.location-mappings.all",
+            "inn-reach.d2ir.settings.any.get",
+            "inn-reach.authentication.all",
+            "inn-reach.central-servers.item-contribution-options-configuration.all",
+            "inn-reach.agency-mappings.all",
+            "inn-reach.central-servers.marc-transformation-options-settings.all",
+            "inn-reach.patron-type-mappings.all",
+            "inn-reach.contributions.all",
+            "inn-reach.item-type-mappings.all",
+            "inn-reach.user-custom-field-mappings.all",
+            "inn-reach.central-patron-type-mappings.all",
+            "inn-reach.d2ir.inn-reach-transaction.all",
+            "inn-reach.d2ir.bib-info.all",
+            "inn-reach.d2ir.patron-info.all",
+            "inn-reach.central-server.sys-configuration.all",
+            "inn-reach.inn-reach-transactions.all",
+            "inn-reach.d2ir.circulation.all",
+            "inn-reach.recall-user.all",
+            "inn-reach.central-servers.visible-patron-field-configuration.all",
+            "inn-reach.central-servers.paging-slip-template.all",
+            "inn-reach.paging-slips.all"
+          ]
+        }
+      ],
+      "env": [],
+      "launchDescriptor": {
+        "dockerImage": "folioci/mod-inn-reach:3.5.0-SNAPSHOT.420",
+        "dockerPull": true,
+        "dockerArgs": {
+          "HostConfig": {
+            "Memory": 536870912,
+            "PortBindings": {
+              "8081/tcp": [
+                {
+                  "HostPort": "%p"
+                }
+              ]
+            }
+          }
+        },
+        "env": [
+          {
+            "name": "JAVA_OPTIONS",
+            "value": "-XX:MaxRAMPercentage=85.0"
+          },
+          {
+            "name": "DB_HOST",
+            "value": "postgres"
+          },
+          {
+            "name": "DB_PORT",
+            "value": "5432"
+          },
+          {
+            "name": "DB_USERNAME",
+            "value": "folio_admin"
+          },
+          {
+            "name": "DB_PASSWORD",
+            "value": "folio_admin"
+          },
+          {
+            "name": "DB_DATABASE",
+            "value": "okapi_modules"
+          },
+          {
+            "name": "DB_QUERYTIMEOUT",
+            "value": "60000"
+          },
+          {
+            "name": "DB_CHARSET",
+            "value": "UTF-8"
+          },
+          {
+            "name": "DB_MAXPOOLSIZE",
+            "value": "5"
+          },
+          {
+            "name": "SYSTEM_USER_PASSWORD",
+            "value": "Mod-innreach-1-0-0"
+          },
+          {
+            "name": "OKAPI_URL",
+            "value": "http://okapi:9130"
+          },
+          {
+            "name": "KAFKA_HOST",
+            "value": "kafka"
+          },
+          {
+            "name": "KAFKA_PORT",
+            "value": "9092"
+          },
+          {
+            "name": "KAFKA_SECURITY_PROTOCOL",
+            "value": "PLAINTEXT"
+          },
+          {
+            "name": "KAFKA_SSL_KEYSTORE_LOCATION",
+            "value": ""
+          },
+          {
+            "name": "KAFKA_SSL_KEYSTORE_PASSWORD",
+            "value": ""
+          },
+          {
+            "name": "KAFKA_SSL_TRUSTSTORE_LOCATION",
+            "value": ""
+          },
+          {
+            "name": "KAFKA_SSL_TRUSTSTORE_PASSWORD",
+            "value": ""
+          }
+        ],
+        "dockerCMD": []
+      },
+      "metadata": {
+        "user": {
+          "type": "system",
+          "permissions": [
+            "inventory-storage.inventory-view.instances.collection.get",
+            "inventory-storage.instances.collection.get",
+            "inventory-storage.instances.item.get",
+            "inventory-storage.items.collection.get",
+            "inventory-storage.items.item.get",
+            "inventory-storage.holdings.item.get",
+            "inventory-storage.locations.collection.get",
+            "inventory-storage.material-types.collection.get",
+            "inventory.items.item.get",
+            "inventory.instances.item.get",
+            "users.collection.get",
+            "users.item.get",
+            "source-storage.records.formatted.item.get",
+            "circulation.requests.item.get",
+            "circulation.requests.collection.get",
+            "circulation.loans.collection.get",
+            "inventory.items.item.put",
+            "inventory-storage.holdings.item.put",
+            "circulation.requests.item.delete",
+            "circulation.loans.item.delete",
+            "inventory.items.item.delete",
+            "inventory-storage.holdings.item.delete",
+            "inventory.instances.item.delete"
+          ]
+        }
+      },
+      "name": "INN Reach API module"
+    }
+  ],
+  "uiModuleDescriptors": [
+    {
+      "id": "folio_inn-reach-6.1.109900000000128",
+      "replaces": [],
+      "tags": [],
+      "requires": [
+        {
+          "id": "inn-reach",
+          "version": "1.0"
+        },
+        {
+          "id": "loan-types",
+          "version": "2.3"
+        },
+        {
+          "id": "statistical-code-types",
+          "version": "1.0"
+        },
+        {
+          "id": "statistical-codes",
+          "version": "1.0"
+        },
+        {
+          "id": "location-units",
+          "version": "2.0"
+        },
+        {
+          "id": "users",
+          "version": "16.0 16.1"
+        }
+      ],
+      "provides": [],
+      "optional": [],
+      "filters": [],
+      "permissionSets": [
+        {
+          "permissionName": "module.inn-reach.enabled",
+          "replaces": [],
+          "displayName": "UI: ui-inn-reach module is enabled",
+          "subPermissions": [],
+          "visible": false
+        },
+        {
+          "permissionName": "settings.inn-reach.enabled",
+          "replaces": [],
+          "displayName": "Settings (inn-reach): display list of settings pages",
+          "subPermissions": [
+            "settings.enabled"
+          ],
+          "visible": false
+        },
+        {
+          "permissionName": "ui-inn-reach.settings.view",
+          "replaces": [],
+          "displayName": "Settings (inn-reach): All INN-Reach settings: Read-only",
+          "subPermissions": [
+            "settings.inn-reach.enabled",
+            "inn-reach.authentication.item.post",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.get",
+            "inn-reach.central-servers.visible-patron-field-configuration.item.get",
+            "inn-reach.central-servers.collection.get",
+            "inn-reach.central-servers.item.get",
+            "inn-reach.locations.collection.get",
+            "inn-reach.locations.item.get",
+            "inn-reach.material-type-mappings.collection.get",
+            "inn-reach.material-type-mappings.item.get",
+            "inn-reach.library-mappings.collection.get",
+            "inn-reach.location-mappings.collection.get",
+            "inn-reach.d2ir.settings.any.get",
+            "inn-reach.central-servers.item-contribution-options-configuration.item.get",
+            "inn-reach.agency-mappings.item.get",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.get",
+            "inn-reach.central-servers.marc-transformation-options-settings.collection.get",
+            "inn-reach.patron-type-mappings.collection.get",
+            "inn-reach.contributions.current.item.get",
+            "inn-reach.contributions.history.collection.get",
+            "inn-reach.marc-record-transformation.item.get",
+            "inn-reach.item-type-mappings.collection.get",
+            "inn-reach.user-custom-field-mappings.item.get",
+            "inn-reach.central-patron-type-mappings.collection.get",
+            "inn-reach.inn-reach-transaction.item.get",
+            "inn-reach.inn-reach-transactions.collection.get",
+            "inn-reach.d2ir.bib-info.item.get",
+            "inn-reach.d2ir.patron-info.item.get",
+            "inn-reach.recall-user.item.get",
+            "inn-reach.central-servers.paging-slip-template.item.get",
+            "inn-reach.central-server-agencies.collection.get",
+            "inn-reach.central-server-item-types.collection.get",
+            "inn-reach.central-server-patron-types.collection.get",
+            "inn-reach.paging-slips.collection.get",
+            "inventory-storage.instance-types.collection.get",
+            "inventory-storage.contributor-name-types.collection.get",
+            "inventory-storage.holdings.item.get",
+            "inventory-storage.hrid-settings.item.get",
+            "inventory-storage.service-points.collection.get",
+            "inventory.instances.collection.get",
+            "inventory.items.collection.get",
+            "inventory.items.item.get",
+            "circulation.requests.collection.get",
+            "circulation.requests.item.get",
+            "users.item.get",
+            "inventory-storage.service-points-users.collection.get",
+            "circulation-storage.loans.item.get",
+            "circulation.loans.item.get",
+            "inventory.instances.item.get",
+            "users.collection.get",
+            "perms.users.get",
+            "perms.users.assign.immutable",
+            "circulation-storage.cancellation-reasons.collection.get",
+            "inventory-storage.location-units.libraries.collection.get",
+            "inventory-storage.loan-types.collection.get",
+            "inventory-storage.locations.collection.get",
+            "inventory-storage.statistical-codes.collection.get",
+            "inventory-storage.statistical-code-types.collection.get",
+            "inventory-storage.material-types.collection.get",
+            "inventory-storage.location-units.libraries.collection.get",
+            "inventory-storage.identifier-types.collection.get",
+            "inventory-storage.location-units.institutions.collection.get",
+            "inventory-storage.location-units.campuses.collection.get",
+            "usergroups.collection.get",
+            "user-settings.custom-fields.collection.get",
+            "usergroups.collection.get",
+            "okapi.version.get",
+            "configuration.entries.collection.get"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-inn-reach.settings.edit",
+          "replaces": [],
+          "displayName": "Settings (inn-reach): All INN-Reach settings: Read, edit",
+          "subPermissions": [
+            "ui-inn-reach.settings.view",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.post",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.put",
+            "inn-reach.central-servers.visible-patron-field-configuration.item.post",
+            "inn-reach.central-servers.visible-patron-field-configuration.item.put",
+            "inn-reach.central-servers.item.post",
+            "inn-reach.central-servers.item.put",
+            "inn-reach.locations.item.post",
+            "inn-reach.locations.item.put",
+            "inn-reach.material-type-mappings.item.post",
+            "inn-reach.material-type-mappings.collection.put",
+            "inn-reach.material-type-mappings.item.put",
+            "inn-reach.library-mappings.collection.put",
+            "inn-reach.location-mappings.collection.put",
+            "inn-reach.central-servers.item-contribution-options-configuration.item.post",
+            "inn-reach.central-servers.item-contribution-options-configuration.item.put",
+            "inn-reach.agency-mappings.item.put",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.post",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.put",
+            "inn-reach.patron-type-mappings.collection.put",
+            "inn-reach.contributions.item.post",
+            "inn-reach.item-type-mappings.collection.put",
+            "inn-reach.user-custom-field-mappings.item.post",
+            "inn-reach.user-custom-field-mappings.item.put",
+            "inn-reach.recall-user.item.post",
+            "inn-reach.recall-user.item.put",
+            "inn-reach.central-patron-type-mappings.collection.put",
+            "inn-reach.central-servers.paging-slip-template.item.put",
+            "inventory-storage.holdings.item.post",
+            "inventory-storage.holdings.item.put",
+            "inventory.instances.item.post",
+            "inventory.items.item.post",
+            "inventory.items.item.put",
+            "circulation.requests.item.put",
+            "circulation.requests.item.post",
+            "circulation.requests.item.move.post",
+            "circulation.check-out-by-barcode.post",
+            "circulation.renew-by-id.post",
+            "circulation.loans.item.post",
+            "circulation.loans.item.put",
+            "circulation.loans.claim-item-returned.post",
+            "users.item.post",
+            "login.item.post",
+            "perms.users.item.post",
+            "inventory-storage.instance-types.item.post",
+            "inventory-storage.contributor-name-types.item.post",
+            "circulation-storage.cancellation-reasons.item.post"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-inn-reach.settings.all",
+          "replaces": [
+            "ui-inn-reach.settings.crud"
+          ],
+          "displayName": "Settings (inn-reach): All INN-Reach settings: CRUD",
+          "subPermissions": [
+            "ui-inn-reach.settings.edit",
+            "inn-reach.central-servers.item.delete",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.delete",
+            "inn-reach.locations.item.delete",
+            "inn-reach.material-type-mappings.item.delete",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.delete",
+            "inn-reach.contributions.current.item.delete"
+          ],
+          "visible": true
+        },
+        {
+          "permissionName": "ui-inn-reach.app.all",
+          "replaces": [],
+          "displayName": "INN-Reach App: All permissions",
+          "subPermissions": [
+            "module.inn-reach.enabled",
+            "inn-reach.central-servers.collection.get",
+            "inn-reach.central-servers.item.get",
+            "inn-reach.central-servers.item.post",
+            "inn-reach.central-servers.item.put",
+            "inn-reach.central-servers.item.delete",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.get",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.post",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.put",
+            "inn-reach.central-servers.contribution-criteria-configuration.item.delete",
+            "inn-reach.locations.collection.get",
+            "inn-reach.locations.item.get",
+            "inn-reach.locations.item.post",
+            "inn-reach.locations.item.put",
+            "inn-reach.locations.item.delete",
+            "inn-reach.material-type-mappings.item.post",
+            "inn-reach.material-type-mappings.collection.get",
+            "inn-reach.material-type-mappings.item.get",
+            "inn-reach.material-type-mappings.collection.put",
+            "inn-reach.material-type-mappings.item.put",
+            "inn-reach.material-type-mappings.item.delete",
+            "inn-reach.library-mappings.collection.get",
+            "inn-reach.library-mappings.collection.put",
+            "inn-reach.location-mappings.collection.get",
+            "inn-reach.location-mappings.collection.put",
+            "inn-reach.d2ir.settings.any.get",
+            "inn-reach.authentication.item.post",
+            "inn-reach.central-servers.item-contribution-options-configuration.item.get",
+            "inn-reach.central-servers.item-contribution-options-configuration.item.post",
+            "inn-reach.central-servers.item-contribution-options-configuration.item.put",
+            "inn-reach.agency-mappings.item.get",
+            "inn-reach.agency-mappings.item.put",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.get",
+            "inn-reach.central-servers.marc-transformation-options-settings.collection.get",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.post",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.put",
+            "inn-reach.central-servers.marc-transformation-options-settings.item.delete",
+            "inn-reach.patron-type-mappings.collection.get",
+            "inn-reach.patron-type-mappings.collection.put",
+            "inn-reach.contributions.current.item.get",
+            "inn-reach.contributions.current.item.delete",
+            "inn-reach.contributions.history.collection.get",
+            "inn-reach.contributions.item.post",
+            "inn-reach.item-type-mappings.collection.get",
+            "inn-reach.item-type-mappings.collection.put",
+            "inn-reach.user-custom-field-mappings.item.get",
+            "inn-reach.user-custom-field-mappings.item.post",
+            "inn-reach.user-custom-field-mappings.item.put",
+            "inn-reach.central-patron-type-mappings.collection.get",
+            "inn-reach.central-patron-type-mappings.collection.put",
+            "inn-reach.d2ir.inn-reach-transaction.item.post",
+            "inn-reach.inn-reach-transaction.item.get",
+            "inn-reach.d2ir.bib-info.item.get",
+            "inn-reach.d2ir.patron-info.item.get",
+            "inn-reach.central-server-agencies.collection.get",
+            "inn-reach.central-server-item-types.collection.get",
+            "inn-reach.central-server-patron-types.collection.get",
+            "inn-reach.central-servers.visible-patron-field-configuration.item.get",
+            "inn-reach.central-servers.visible-patron-field-configuration.item.post",
+            "inn-reach.central-servers.visible-patron-field-configuration.item.put",
+            "inn-reach.recall-user.item.get",
+            "inn-reach.recall-user.item.post",
+            "inn-reach.recall-user.item.put",
+            "inn-reach.inn-reach-transactions.collection.get",
+            "inn-reach.inn-reach-transaction.item.put",
+            "inn-reach.marc-record-transformation.item.get",
+            "inn-reach.central-servers.paging-slip-template.item.get",
+            "inn-reach.central-servers.paging-slip-template.item.put",
+            "inn-reach.paging-slips.collection.get",
+            "inn-reach.transactions.transfer-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.item-receive.post",
+            "inn-reach.d2ir.inn-reach-transaction.receive-unshipped-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.check-out-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.patron.check-out-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.localhold.check-out-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.patron-hold.cancel.post",
+            "inn-reach.d2ir.inn-reach-transaction.item-hold.cancel.post",
+            "inn-reach.d2ir.inn-reach-transaction.localhold.cancel.post",
+            "inn-reach.d2ir.inn-reach-transaction.item-hold.recall.post",
+            "inn-reach.d2ir.inn-reach-transaction.patron-hold.return-item.post",
+            "inn-reach.d2ir.inn-reach-transaction.item-hold.final-checkin.post",
+            "inn-reach.d2ir.inn-reach-transaction.patron-hold.remove.post",
+            "inn-reach.location-mappings.libraries.collection.get",
+            "inventory-storage.instance-types.collection.get",
+            "inventory-storage.contributor-name-types.collection.get",
+            "inventory-storage.holdings.item.post",
+            "inventory-storage.holdings.item.get",
+            "inventory-storage.holdings.item.put",
+            "inventory-storage.hrid-settings.item.get",
+            "inventory-storage.service-points.collection.get",
+            "inventory.instances.collection.get",
+            "inventory.instances.item.post",
+            "inventory.items.collection.get",
+            "inventory.items.item.post",
+            "inventory.items.item.get",
+            "inventory.items.item.put",
+            "circulation.requests.collection.get",
+            "circulation.requests.item.get",
+            "circulation.requests.item.put",
+            "circulation.requests.item.post",
+            "circulation.requests.item.move.post",
+            "users.item.get",
+            "users.item.post",
+            "login.item.post",
+            "perms.users.item.post",
+            "perms.users.get",
+            "perms.users.assign.immutable",
+            "inventory-storage.service-points-users.collection.get",
+            "inventory-storage.instance-types.item.post",
+            "circulation.check-out-by-barcode.post",
+            "circulation-storage.loans.item.get",
+            "circulation.renew-by-id.post",
+            "circulation.loans.item.get",
+            "circulation.loans.item.post",
+            "circulation.loans.item.put",
+            "circulation.loans.claim-item-returned.post",
+            "inventory.instances.item.get",
+            "users.collection.get",
+            "inventory-storage.contributor-name-types.item.post",
+            "circulation-storage.cancellation-reasons.collection.get",
+            "circulation-storage.cancellation-reasons.item.post",
+            "inventory-storage.location-units.libraries.collection.get",
+            "inventory-storage.loan-types.collection.get",
+            "inventory-storage.locations.collection.get",
+            "inventory-storage.statistical-codes.collection.get",
+            "inventory-storage.statistical-code-types.collection.get",
+            "inventory-storage.material-types.collection.get",
+            "inventory-storage.location-units.libraries.collection.get",
+            "inventory-storage.identifier-types.collection.get",
+            "inventory-storage.location-units.institutions.collection.get",
+            "inventory-storage.location-units.campuses.collection.get",
+            "usergroups.collection.get",
+            "user-settings.custom-fields.collection.get",
+            "usergroups.collection.get",
+            "okapi.version.get",
+            "configuration.entries.collection.get"
+          ],
+          "visible": true
+        }
+      ],
+      "env": [],
+      "name": "Description for inn-reach"
+    }
+  ],
+  "platform": "complete",
+  "dependencies": [
+    {
+      "name": "app-platform-complete",
+      "version": "^3.0.0-SNAPSHOT",
+      "optional": false
+    }
+  ],
+  "id": "app-inn-reach-1.1.0-SNAPSHOT.5861",
+  "name": "app-inn-reach",
+  "version": "1.1.0-SNAPSHOT.5861"
+}

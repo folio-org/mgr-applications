@@ -29,9 +29,9 @@ import java.util.Optional;
 import java.util.Set;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Module;
+import org.folio.am.domain.entity.ApplicationArtifact;
 import org.folio.am.domain.entity.ArtifactEntity;
 import org.folio.am.domain.entity.ModuleEntity;
-import org.folio.am.domain.model.ApplicationSlice;
 import org.folio.am.integration.mte.EntitlementService;
 import org.folio.am.mapper.ApplicationDescriptorMapper;
 import org.folio.am.repository.ApplicationRepository;
@@ -385,8 +385,8 @@ class ApplicationServiceTest {
     return result;
   }
 
-  private static ApplicationSlice createApplicationSlice(String id, String name, String version) {
-    return new ApplicationSlice() {
+  private static ApplicationArtifact createApplicationSlice(String id, String name, String version) {
+    return new ApplicationArtifact() {
       @Override
       public String getId() {
         return id;

@@ -1,5 +1,6 @@
 package org.folio.am.controller;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.am.support.TestConstants.APPLICATION_ID;
@@ -18,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -454,9 +456,33 @@ class ApplicationControllerTest {
         .content(asJsonString(requestBody))
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
-      .andExpect(status().isAccepted());
+      .andExpect(status().isOk());
 
     verify(applicationDescriptorsValidationService).validateDescriptors(any());
+  }
+
+  @Test
+  void validateDescriptorsDependenciesIntegrity_negative_emptyDescriptorList() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    var requestBody = new ApplicationDescriptorsValidation();
+    requestBody.setApplicationDescriptors(emptyList());
+
+    mockMvc.perform(post("/applications/validate-descriptors")
+        .content(asJsonString(requestBody))
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.total_records", is(1)))
+      .andExpect(jsonPath("$.errors[0].message", containsString("size must be between 1 and 2147483647")))
+      .andExpect(jsonPath("$.errors[0].type", is("MethodArgumentNotValidException")))
+      .andExpect(jsonPath("$.errors[0].code", is("validation_error")))
+      .andExpect(jsonPath("$.errors[0].parameters[0].key", is("applicationDescriptors")))
+      .andExpect(jsonPath("$.errors[0].parameters[0].value", is("[]")));
+
+    verifyNoInteractions(applicationDescriptorsValidationService);
   }
 
   @Test
