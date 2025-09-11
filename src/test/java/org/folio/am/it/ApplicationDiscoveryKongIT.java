@@ -112,7 +112,7 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
     var routes = kongAdminClient.getServiceRoutes(MODULE_BAR_ID, null);
     assertThat(routes.getData()).hasSize(1);
     assertThat(routes.getData().get(0).getExpression()).contains(
-      "(http.path == \"/foo/bar\" && http.method == \"POST\")");
+      "(http.path == \"/foo/bar\" && http.method == \"POST\" && http.headers.x_okapi_tenant ~ r#\".*\"#)");
 
     assertDiscoveryEvents(MODULE_BAR_ID);
   }
