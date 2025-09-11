@@ -3,6 +3,7 @@ package org.folio.am.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.assertArg;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,7 +12,6 @@ import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.am.exception.RequestValidationException;
-import org.folio.am.mapper.ApplicationEntityMapper;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
@@ -29,8 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ApplicationDescriptorsValidationServiceTest {
 
   @Mock private ApplicationService applicationService;
-  @Spy private final ApplicationEntityMapper applicationEntityMapper =
-    new org.folio.am.mapper.ApplicationEntityMapperImpl();
   @Spy private DependenciesValidator dependenciesValidator;
   @InjectMocks private ApplicationDescriptorsValidationService applicationDescriptorsValidationService;
 
@@ -63,37 +61,19 @@ class ApplicationDescriptorsValidationServiceTest {
   }
 
   @Test
-  void validate_positive_providedApplicationDescriptorsWithSameId() {
+  void validate_negative_providedApplicationDescriptorsWithSameName() {
     var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
     var applicationDescriptor2 = getApplicationDescriptor("app1", "1.0.0");
 
-    var actual = applicationDescriptorsValidationService
-      .validateDescriptors(List.of(applicationDescriptor1, applicationDescriptor2));
-    var expected = List.of("app1-1.0.0");
+    var descriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 
-    assertThat(actual).isEqualTo(expected);
-    verify(dependenciesValidator).validate(anyList());
-  }
-
-  @Test
-  void validate_negative_providedSameApplicationsWithDifferentVersions() {
-    var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
-    var dependency = new Dependency().name("app2").version("^2.0.1");
-    applicationDescriptor1.setDependencies(List.of(dependency));
-
-    var applicationDescriptor2 = getApplicationDescriptor("app2", "2.0.2");
-    var applicationDescriptor3 = getApplicationDescriptor("app2", "2.1.0");
-
-    var descriptors = List.of(applicationDescriptor1, applicationDescriptor2, applicationDescriptor3);
-    assertThatThrownBy(() -> applicationDescriptorsValidationService
-      .validateDescriptors(descriptors))
+    assertThatThrownBy(() -> applicationDescriptorsValidationService.validateDescriptors(descriptors))
       .isInstanceOf(RequestValidationException.class)
-      .hasMessage("Used same applications with different versions")
+      .hasMessage("Duplicate application descriptor with the same name in the request")
       .satisfies(error -> {
         var params = ((RequestValidationException) error).getErrorParameters();
-        assertThat(params).isEqualTo(List.of(new Parameter().key("applicationNames").value("app2")));
+        assertThat(params).isEqualTo(List.of(new Parameter().key("name").value("app1")));
       });
-    verify(dependenciesValidator).validate(anyList());
   }
 
   @Test
@@ -110,59 +90,23 @@ class ApplicationDescriptorsValidationServiceTest {
     applicationDescriptor2.setDependencies(List.of(dependency2));
     applicationEntity2.setApplicationDescriptor(applicationDescriptor2);
 
+    var applicationDescriptor3 = getApplicationDescriptor("app3", "3.0.0");
     var applicationEntity3 = getApplicationEntity("app3", "3.0.0");
 
-    when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1, applicationEntity2));
-    when(applicationService.findByNameWithModules("app3")).thenReturn(List.of(applicationEntity3));
+    when(applicationService.findAllApplicationIdsByName("app2")).thenReturn(
+      List.of(applicationEntity1.getId(), applicationEntity2.getId()));
+    when(applicationService.get(applicationEntity2.getId(), true)).thenReturn(applicationDescriptor2);
+    when(applicationService.findAllApplicationIdsByName("app3")).thenReturn(List.of(applicationEntity3.getId()));
+    when(applicationService.get(applicationEntity3.getId(), true)).thenReturn(applicationDescriptor3);
 
     var actual = applicationDescriptorsValidationService.validateDescriptors(List.of(applicationDescriptor1));
     var expected = List.of("app1-1.0.0", "app2-2.0.3", "app3-3.0.0");
 
     assertThat(actual).isEqualTo(expected);
-    verify(dependenciesValidator).validate(anyList());
-  }
-
-  @Test
-  void validate_positive_byLatestRetrievedOrProvidedDependencyVersionIfProvidedIsLast() {
-    var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
-    var dependency1 = new Dependency().name("app2").version("^2.0.1");
-    applicationDescriptor1.setDependencies(List.of(dependency1));
-
-    var applicationDescriptor2 = getApplicationDescriptor("app2", "2.0.3");
-    var applicationEntity1 = getApplicationEntity("app2", "2.0.2");
-
-    when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1));
-
-    var actual = applicationDescriptorsValidationService
-      .validateDescriptors(List.of(applicationDescriptor1, applicationDescriptor2));
-    var expected = List.of("app1-1.0.0", "app2-2.0.3");
-
-    assertThat(actual).isEqualTo(expected);
-    verify(dependenciesValidator).validate(anyList());
-  }
-
-  @Test
-  void validate_negative_byLatestRetrievedOrProvidedDependencyVersionIfRetrievedIsLast() {
-    var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
-    var dependency1 = new Dependency().name("app2").version("^2.0.1");
-    applicationDescriptor1.setDependencies(List.of(dependency1));
-
-    var applicationDescriptor2 = getApplicationDescriptor("app2", "2.0.2");
-    var applicationEntity1 = getApplicationEntity("app2", "2.0.3");
-
-    when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1));
-
-    var descriptors = List.of(applicationDescriptor1, applicationDescriptor2);
-
-    assertThatThrownBy(() -> applicationDescriptorsValidationService
-      .validateDescriptors(descriptors))
-      .isInstanceOf(RequestValidationException.class)
-      .hasMessage("Used same applications with different versions")
-      .satisfies(error -> {
-        var params = ((RequestValidationException) error).getErrorParameters();
-        assertThat(params).isEqualTo(List.of(new Parameter().key("applicationNames").value("app2")));
-      });
-    verify(dependenciesValidator).validate(anyList());
+    verify(dependenciesValidator).validate(assertArg(applicationDescriptors ->
+      assertThat(applicationDescriptors).containsExactlyInAnyOrder(
+        applicationDescriptor1, applicationDescriptor2, applicationDescriptor3))
+    );
   }
 
   @Test
@@ -175,15 +119,19 @@ class ApplicationDescriptorsValidationServiceTest {
     var applicationEntity2 = getApplicationEntity("app2", "1.3.0-SNAPSHOT.100000000000002");
     var applicationDescriptor2 = getApplicationDescriptor("app2", "1.3.0-SNAPSHOT.100000000000002");
 
-    when(applicationService.findByNameWithModules("app2")).thenReturn(List.of(applicationEntity1,
-      applicationEntity2));
+    when(applicationService.findAllApplicationIdsByName("app2")).thenReturn(
+      List.of(applicationEntity1.getId(), applicationEntity2.getId()));
+    when(applicationService.get(applicationEntity2.getId(), true)).thenReturn(applicationDescriptor2);
 
     var actual = applicationDescriptorsValidationService
       .validateDescriptors(List.of(applicationDescriptor1));
     var expected = List.of("app1-1.0.0", "app2-1.3.0-SNAPSHOT.100000000000002");
 
     assertThat(actual).isEqualTo(expected);
-    verify(dependenciesValidator).validate(List.of(applicationDescriptor1, applicationDescriptor2));
+    verify(dependenciesValidator).validate(assertArg(applicationDescriptors ->
+      assertThat(applicationDescriptors).containsExactlyInAnyOrder(
+        applicationDescriptor1, applicationDescriptor2))
+    );
   }
 
   private ApplicationDescriptor getApplicationDescriptor(String name, String version) {
