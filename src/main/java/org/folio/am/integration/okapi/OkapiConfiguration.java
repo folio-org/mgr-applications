@@ -7,7 +7,7 @@ import feign.codec.Encoder;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.repository.ModuleRepository;
 import org.folio.am.utils.ConditionalOnFarModeDisabled;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.openfeign.FeignClientsConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +16,8 @@ import org.springframework.context.annotation.Import;
 @Log4j2
 @Configuration
 @Import(FeignClientsConfiguration.class)
-@ConditionalOnBean(OkapiConfigurationProperties.class)
 @ConditionalOnFarModeDisabled
+@ConditionalOnProperty("application.okapi.enabled")
 public class OkapiConfiguration {
 
   @Bean
