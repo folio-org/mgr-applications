@@ -6,7 +6,8 @@
 * Update interface integrity validation logic for interfaces (MGRAPPS-59)
 * Use SECURE\_STORE\_ENV, not ENV, for secure store key (MGRAPPS-72)
 * mgr-applications FAR mode semver dependency validation fails with SNAPSHOT version ranges(MGRAPPS-68)
-
+* Fix test for tenant header Kong route expression updated in application-poc-tools (APPPOCTOOL-64)
+* FAR mode OOM crash due to excessive memory consumption during validation (MGRAPPS-67)
 ---
 
 ## Version `v3.0.0` (12.03.2025)
@@ -16,7 +17,7 @@
 * Return module permissions in module bootstrap info (MGRAPPS-44)
 * Not able to entitle applications after routes migration (MGRAPPS-45)
 * Reduce number of redundant routes in Kong (MGRAPPS-35)
-* Increase version of keycloak-admin-client to v26.0.4 (KEYCLOAK-25) 
+* Increase version of keycloak-admin-client to v26.0.4 (KEYCLOAK-25)
 
 ---
 

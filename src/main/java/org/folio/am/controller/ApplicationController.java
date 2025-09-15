@@ -1,7 +1,6 @@
 package org.folio.am.controller;
 
 import static java.lang.Boolean.TRUE;
-import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.CREATED;
 
 import java.util.List;
@@ -90,7 +89,7 @@ public class ApplicationController extends BaseController implements Application
     ApplicationDescriptorsValidation applicationDescriptorsValidation) {
     var applicationIds = applicationDescriptorsValidationService
       .validateDescriptors(applicationDescriptorsValidation.getApplicationDescriptors());
-    return ResponseEntity.status(ACCEPTED).body(applicationIds);
+    return ResponseEntity.ok(applicationIds);
   }
 
   private static org.folio.am.service.validator.ValidationMode toServiceMode(ValidationMode mode) {

@@ -1,29 +1,26 @@
 package org.folio.am.service;
 
-import static java.lang.String.join;
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toMap;
-import static org.folio.am.utils.CollectionUtils.union;
-import static org.folio.common.utils.CollectionUtils.mapItems;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 import static org.folio.common.utils.CollectionUtils.toStream;
+import static org.folio.common.utils.SemverUtils.getVersion;
 
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
-import org.folio.am.mapper.ApplicationEntityMapper;
+import org.folio.am.exception.RequestValidationException;
+import org.folio.common.domain.model.error.Parameter;
+import org.semver4j.RangesList;
 import org.semver4j.RangesListFactory;
 import org.semver4j.Semver;
 import org.springframework.stereotype.Service;
@@ -34,71 +31,146 @@ import org.springframework.stereotype.Service;
 public class ApplicationDescriptorsValidationService {
 
   private final ApplicationService applicationService;
-  private final ApplicationEntityMapper applicationEntityMapper;
   private final DependenciesValidator dependenciesValidator;
 
   public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors) {
-    log.info("Validate descriptors: ids = {}", getDescriptorIdsAsStr(descriptors));
-    var applicationDescriptorsMap = getApplicationDescriptorsMap(descriptors);
-    var dependencyQueue = getDependencyQueue(applicationDescriptorsMap);
-    var visited = new HashSet<>();
-    while (!dependencyQueue.isEmpty()) {
-      var dependency = dependencyQueue.poll();
-      if (!visited.contains(dependency)) {
-        var descriptorOpt = getByLatestDependencyVersion(dependency, applicationDescriptorsMap.values());
-        descriptorOpt.ifPresent(descriptor -> {
-          applicationDescriptorsMap.putIfAbsent(descriptor.getId(), descriptor);
-          dependencyQueue.addAll(descriptor.getDependencies());
-          visited.add(dependency);
-        });
-      }
+    var allResolvedAppDescriptorsByName = getApplicationDescriptorsByName(descriptors);
+
+    log.info("Validate descriptors: ids = {}", () -> toAppIdsString(descriptors));
+
+    toStream(descriptors)
+      .flatMap(ad -> toStream(ad.getDependencies())).distinct()
+      .forEach(dependency -> resolveDependencyToAppDescriptors(dependency, allResolvedAppDescriptorsByName));
+
+    var allDescriptors = new ArrayList<>(allResolvedAppDescriptorsByName.values());
+    log.info("Validate applications including dependencies: ids = {}", () -> toAppIdsString(allDescriptors));
+
+    dependenciesValidator.validate(allDescriptors);
+
+    return toStream(allDescriptors)
+      .map(ApplicationDescriptor::getId)
+      .sorted().toList();
+  }
+
+  /**
+   * Resolve the dependency to an application descriptor and recursively resolve its dependencies.
+   * If the dependency is already resolved, then validate the version range to ensure compatibility.
+   *
+   * @param dependency                the dependency to resolve
+   * @param resolvedDescriptorsByName the map of already resolved application descriptors by name
+   */
+  private void resolveDependencyToAppDescriptors(Dependency dependency,
+    Map<String, ApplicationDescriptor> resolvedDescriptorsByName) {
+    if (resolvedDescriptorsByName.containsKey(dependency.getName())) {
+      // already resolved, just validate the version range
+      // to ensure the dependency is compatible with the already resolved application
+      var resolved = resolvedDescriptorsByName.get(dependency.getName());
+
+      validateRangeOnResolvedApp(dependency, resolved);
+
+      log.debug("Application dependency already resolved: dependency = {}, application = {}",
+        dependency, resolved.getId());
+      return;
     }
-    log.info("Validate applications including dependencies: ids = {}",
-      getDescriptorIdsAsStr(applicationDescriptorsMap.values()));
-    dependenciesValidator.validate(new ArrayList<>(applicationDescriptorsMap.values()));
-    return mapItems(applicationDescriptorsMap.values(), ApplicationDescriptor::getId);
+
+    var resolvedDescriptor = getLatestApplicationMatchingDependency(dependency);
+    log.info("Dependency resolved to application: dependency = {}, application = {}",
+      dependency, resolvedDescriptor != null ? resolvedDescriptor.getId() : null);
+
+    if (resolvedDescriptor != null) {
+      resolvedDescriptorsByName.put(resolvedDescriptor.getName(), resolvedDescriptor);
+
+      toStream(resolvedDescriptor.getDependencies())
+        .forEach(dep -> resolveDependencyToAppDescriptors(dep, resolvedDescriptorsByName));
+    }
   }
 
-  private Map<String, ApplicationDescriptor> getApplicationDescriptorsMap(List<ApplicationDescriptor> descriptors) {
-    return toStream(descriptors)
-      .collect(toMap(ApplicationDescriptor::getId, Function.identity(),
-        (existing, replacement) -> existing, LinkedHashMap::new));
+  /**
+   * Find the latest application which satisfies the dependency.
+   * If not found and the dependency is optional, then return null.
+   * If not found and the dependency is required, then throw RequestValidationException.
+   *
+   * @param dependency the dependency to resolve
+   * @return the latest application which satisfies the dependency or null if the dependency is optional and not found
+   * @throws RequestValidationException if the dependency is required and not found
+   */
+  private @Nullable ApplicationDescriptor getLatestApplicationMatchingDependency(Dependency dependency) {
+    var dependencyVersionRange = semverRangeFrom(dependency);
+
+    return applicationService.findAllApplicationIdsByName(dependency.getName()).stream()
+      .filter(appVersionIsInRange(dependencyVersionRange))
+      .max(bySemver())
+      .map(latestAppId -> applicationService.get(latestAppId, true))
+      .orElseGet(() -> {
+        if (Boolean.TRUE.equals(dependency.getOptional())) {
+          log.info("Cannot find optional dependency application which satisfies the dependency: "
+            + "name = {}, version = {}", dependency.getName(), dependency.getVersion());
+          return null;
+        } else {
+          throw new RequestValidationException("Cannot find application which satisfies the dependency",
+            List.of(
+              param("dependencyName", dependency.getName()),
+              param("dependencyVersion", dependency.getVersion()))
+          );
+        }
+      });
   }
 
-  private LinkedList<Dependency> getDependencyQueue(Map<String, ApplicationDescriptor> applicationDescriptorsMap) {
-    return toStream(applicationDescriptorsMap.values())
-      .map(ApplicationDescriptor::getDependencies)
-      .flatMap(Collection::stream)
-      .filter(Objects::nonNull)
-      .collect(toCollection(LinkedList::new));
+  private void validateRangeOnResolvedApp(Dependency dependency, ApplicationDescriptor resolved) {
+    var dependencyVersionRange = semverRangeFrom(dependency);
+
+    if (!appVersionIsInRange(dependencyVersionRange).test(resolved.getId())) {
+      throw new RequestValidationException(
+        format("Dependency version range '%s' is not satisfied by already resolved application '%s' with version '%s'."
+            + " Check that all dependencies for the '%s' app are compatible",
+          dependency.getVersion(), resolved.getName(), resolved.getVersion(), resolved.getName()),
+        List.of(
+          param("dependencyName", dependency.getName()),
+          param("dependencyVersion", dependency.getVersion()))
+      );
+    }
   }
 
-  private Optional<ApplicationDescriptor> getByLatestDependencyVersion(Dependency dependency,
-    Collection<ApplicationDescriptor> existDescriptors) {
-    var requiredVersionRanges = RangesListFactory.create(dependency.getVersion(), true);
-    var descriptors = findApplicationDescriptorsByName(dependency.getName());
-    var retrievedSatisfied = toStream(descriptors)
-      .filter(descriptor -> requiredVersionRanges.isSatisfiedBy(getSemver(descriptor.getVersion())))
-      .toList();
-    var existSatisfied = toStream(existDescriptors)
-      .filter(descriptor -> StringUtils.equals(descriptor.getName(), dependency.getName())
-        && requiredVersionRanges.isSatisfiedBy(getSemver(descriptor.getVersion())))
-      .toList();
-    var unionDescriptors = union(retrievedSatisfied, existSatisfied);
-    return toStream(unionDescriptors)
-      .max(Comparator.comparing(descriptor -> getSemver(descriptor.getVersion())));
+  /**
+   * Convert the list of application descriptors to a map by name.
+   * If there are duplicate names, then throw RequestValidationException.
+   *
+   * @param descriptors the list of application descriptors
+   * @return the map of application descriptors by name
+   * @throws RequestValidationException if there are duplicate names
+   */
+  private static Map<String, ApplicationDescriptor> getApplicationDescriptorsByName(
+    List<ApplicationDescriptor> descriptors) {
+    var result = new HashMap<String, ApplicationDescriptor>();
+
+    for (var descriptor : emptyIfNull(descriptors)) {
+      if (result.containsKey(descriptor.getName())) {
+        throw new RequestValidationException("Duplicate application descriptor with the same name in the request",
+          "name", descriptor.getName());
+      }
+
+      result.put(descriptor.getName(), descriptor);
+    }
+    return result;
   }
 
-  private List<ApplicationDescriptor> findApplicationDescriptorsByName(String name) {
-    return mapItems(applicationService.findByNameWithModules(name), applicationEntityMapper::convert);
+  private static String toAppIdsString(Collection<ApplicationDescriptor> descriptors) {
+    return toStream(descriptors).map(ApplicationDescriptor::getId).collect(joining(", "));
   }
 
-  private Semver getSemver(String version) {
-    return new Semver(version);
+  private static Comparator<String> bySemver() {
+    return Comparator.comparing(appId -> new Semver(getVersion(appId)));
   }
 
-  private String getDescriptorIdsAsStr(Collection<ApplicationDescriptor> descriptors) {
-    var applicationDescriptorIds = mapItems(descriptors, ApplicationDescriptor::getId);
-    return join(",", applicationDescriptorIds);
+  private static RangesList semverRangeFrom(Dependency dependency) {
+    return RangesListFactory.create(dependency.getVersion(), true);
+  }
+
+  private static Parameter param(String key, String value) {
+    return new Parameter().key(key).value(value);
+  }
+
+  private static Predicate<String> appVersionIsInRange(RangesList requiredVersionRanges) {
+    return appId -> requiredVersionRanges.isSatisfiedBy(new Semver(getVersion(appId)));
   }
 }

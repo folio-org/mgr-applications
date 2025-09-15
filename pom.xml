@@ -27,10 +27,10 @@
     <java.version>21</java.version>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <lombok.version>1.18.38</lombok.version>
+    <lombok.version>1.18.40</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <hypersistence-utils-hibernate-63.version>3.10.3</hypersistence-utils-hibernate-63.version>
+    <hypersistence-utils-hibernate-63.version>3.11.0</hypersistence-utils-hibernate-63.version>
     <swagger-annotations.version>2.2.36</swagger-annotations.version>
     <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.5.0</apache-commons-collections4.version>
@@ -46,6 +46,7 @@
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
 
     <!-- Test dependencies versions -->
+    <mockito.version>5.19.0</mockito.version>
     <testcontainer.version>1.21.3</testcontainer.version>
     <awaitility.version>4.3.0</awaitility.version>
     <instancio.version>5.5.1</instancio.version>
@@ -69,6 +70,7 @@
       src/main/java/org/folio/am/rest/resource/**,
       src/main/java/org/folio/am/ApplicationManagerApplication.java
     </sonar.exclusions>
+    <argLine/>
   </properties>
 
   <dependencies>
@@ -346,6 +348,13 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-bom</artifactId>
+        <version>${mockito.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -470,6 +479,7 @@
         <configuration>
           <useSystemClassLoader>false</useSystemClassLoader>
           <groups>unit</groups>
+          <argLine>@{argLine} -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
         </configuration>
       </plugin>
 
@@ -479,6 +489,7 @@
         <version>${maven-failsafe-plugin.version}</version>
         <configuration>
           <groups>integration</groups>
+          <argLine>@{argLine} -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
         </configuration>
       </plugin>
 
