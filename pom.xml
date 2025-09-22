@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.5</version>
+    <version>3.5.6</version>
     <relativePath />
   </parent>
 
@@ -27,11 +27,11 @@
     <java.version>21</java.version>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <lombok.version>1.18.40</lombok.version>
+    <lombok.version>1.18.42</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.11.0</hypersistence-utils-hibernate-63.version>
-    <swagger-annotations.version>2.2.36</swagger-annotations.version>
+    <swagger-annotations.version>2.2.37</swagger-annotations.version>
     <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.5.0</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.7</openapi-tools.jackson-databind-nullable.version>
@@ -46,7 +46,7 @@
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
 
     <!-- Test dependencies versions -->
-    <mockito.version>5.19.0</mockito.version>
+    <mockito.version>5.20.0</mockito.version>
     <testcontainer.version>1.21.3</testcontainer.version>
     <awaitility.version>4.3.0</awaitility.version>
     <instancio.version>5.5.1</instancio.version>
