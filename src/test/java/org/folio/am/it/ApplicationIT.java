@@ -7,6 +7,7 @@ import static org.folio.am.support.TestValues.getApplicationDescriptor;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
 import static org.folio.test.extensions.impl.WireMockExtension.getWireMockAdminClient;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -479,5 +480,103 @@ class ApplicationIT extends BaseIntegrationTest {
       .andExpect(jsonPath("$.totalRecords", is(0)))
       .andExpect(jsonPath("$.applicationDescriptors").isArray())
       .andExpect(jsonPath("$.applicationDescriptors").isEmpty());
+  }
+
+  @Test
+  void getByAppName_preRelease_true() throws Exception {
+    // Test preRelease=true (default) - should include all versions
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("preRelease", "true"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(6)))
+      .andExpect(jsonPath("$.applicationDescriptors[*].version",
+        containsInAnyOrder("8.0.1", "8.1.0", "8.1.0-SNAPSHOT.2245", "9.0.0-SNAPSHOT.3456",
+          "9.0.0-SNAPSHOT.4012", "9.0.1")));
+  }
+
+  @Test
+  void getByAppName_preRelease_false() throws Exception {
+    // Test preRelease=false - should only include stable releases
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("preRelease", "false"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(3)))
+      .andExpect(jsonPath("$.applicationDescriptors[*].version",
+        containsInAnyOrder("8.0.1", "8.1.0", "9.0.1")));
+  }
+
+  @Test
+  void getByAppName_preRelease_only() throws Exception {
+    // Test preRelease=only - should only include pre-release versions
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("preRelease", "only"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(3)))
+      .andExpect(jsonPath("$.applicationDescriptors[*].version",
+        containsInAnyOrder("8.1.0-SNAPSHOT.2245", "9.0.0-SNAPSHOT.3456", "9.0.0-SNAPSHOT.4012")));
+  }
+
+  @Test
+  void getByAppName_preRelease_with_latest() throws Exception {
+    // Test preRelease=false with latest=2 - should get latest 2 stable releases
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("preRelease", "false")
+        .queryParam("latest", "2"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(2)))
+      .andExpect(jsonPath("$.applicationDescriptors[*].version",
+        containsInAnyOrder("9.0.1", "8.1.0")));
+  }
+
+  @Test
+  void getByAppName_preRelease_only_with_latest() throws Exception {
+    // Test preRelease=only with latest=1 - should get latest pre-release
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("preRelease", "only")
+        .queryParam("latest", "1"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(1)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].version", is("9.0.0-SNAPSHOT.4012")));
+  }
+
+  @Test
+  void getByAppName_preRelease_invalid_value() throws Exception {
+    // Test invalid preRelease value - should return bad request
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("preRelease", "invalid"))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].message", is("Invalid preRelease value: invalid."
+        + " Valid values are: true, false, only")))
+      .andExpect(jsonPath("$.errors[0].type", is("IllegalArgumentException")))
+      .andExpect(jsonPath("$.errors[0].code", is("validation_error")));
+  }
+
+  @Test
+  void getByAppName_preRelease_null_defaults_to_true() throws Exception {
+    // Test that omitting preRelease parameter defaults to including all versions
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(6)))
+      .andExpect(jsonPath("$.applicationDescriptors[*].version",
+        containsInAnyOrder("8.0.1", "8.1.0", "8.1.0-SNAPSHOT.2245", "9.0.0-SNAPSHOT.3456",
+          "9.0.0-SNAPSHOT.4012", "9.0.1")));
+  }
+
+  @Test
+  void getByAppName_preRelease_case_sensitivity() throws Exception {
+    // Test that preRelease values are case-sensitive
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "my-app")
+        .queryParam("preRelease", "TRUE"))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].message", is("Invalid preRelease value: TRUE."
+        + " Valid values are: true, false, only")));
   }
 }

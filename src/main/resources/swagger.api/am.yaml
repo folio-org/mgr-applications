@@ -464,10 +464,16 @@ components:
       in: query
       name: preRelease
       required: false
-      description: Whether to include pre-release versions. true (default) - include pre-releases; false - releases only (no pre-releases).
+      description: |
+        Control whether pre-release versions are included.
+        - "true" → include all versions (default)
+        - "false" → only stable releases
+        - "only" → only pre-releases
       schema:
-        type: boolean
+        type: string
+        enum: [true, false, only]
         default: true
+      example: false
     order:
       in: query
       name: order

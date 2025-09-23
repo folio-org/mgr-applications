@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
@@ -140,24 +141,26 @@ public class ApplicationService {
    * @param appName                  - specific application name to filter by
    * @param includeModuleDescriptors - if true, module descriptors will be included in the response
    * @param latest                   - if specified, limits results to the latest N versions per application name
-   * @param includePreRelease        - if true (default), includes pre-release versions; if false, releases only
+   * @param preRelease               - control pre-release inclusion: "true" (default) - include all versions,
+   *                                   "false" - only stable releases, "only" - only pre-releases
    * @param order                    - sort order (asc/desc)
    * @param orderBy                  - field name to order results by
    * @return {@link SearchResult} of {@link ApplicationDescriptor} objects
    */
   public SearchResult<ApplicationDescriptor> filterByAppVersions(String appName, boolean includeModuleDescriptors,
-    Integer latest, boolean includePreRelease, String order, String orderBy) {
+    Integer latest, String preRelease, String order, String orderBy) {
     if (StringUtils.isBlank(appName)) {
       throw new IllegalArgumentException(
         "Filter parameter `appName` is required when using `latest`, `preRelease`, `order`, `orderBy`"
           + " for version-specific filtering");
     }
 
+    validatePreReleaseValue(preRelease);
     List<ApplicationDescriptor> descriptors;
     if (includeModuleDescriptors) {
-      descriptors = streamByNameWithModules(appName, latest, includePreRelease, order, orderBy);
+      descriptors = streamByNameWithModules(appName, latest, preRelease, order, orderBy);
     } else {
-      descriptors = streamByNameBasicFields(appName, latest, includePreRelease, order, orderBy);
+      descriptors = streamByNameBasicFields(appName, latest, preRelease, order, orderBy);
     }
 
     return SearchResult.of(descriptors.size(), descriptors);
@@ -320,22 +323,22 @@ public class ApplicationService {
   }
 
   private List<ApplicationDescriptor> streamByNameWithModules(String appName,
-    Integer latest, boolean includePreRelease, String order, String orderBy) {
+    Integer latest, String preRelease, String order, String orderBy) {
     try (var stream = appRepository.streamByNameWithModules(appName)) {
       var descriptorStream = stream.map(this::getAppDescriptorWithModDescriptors);
-      var filteredStream = includePreRelease ? descriptorStream : descriptorStream.filter(this::isReleaseVersion);
+      var filteredStream = applyPreReleaseFilter(descriptorStream, preRelease);
       return processVersionsWithLatestAndSorting(filteredStream, latest, orderBy, order);
     }
   }
 
   private List<ApplicationDescriptor> streamByNameBasicFields(String appName,
-    Integer latest, boolean includePreRelease, String order, String orderBy) {
+    Integer latest, String preRelease, String order, String orderBy) {
     try (var stream = appRepository.streamByNameBasicFields(appName)) {
       var descriptorStream = stream.map(entity -> new ApplicationDescriptor()
         .id(entity.getId())
         .name(entity.getName())
         .version(entity.getVersion()));
-      var filteredStream = includePreRelease ? descriptorStream : descriptorStream.filter(this::isReleaseVersion);
+      var filteredStream = applyPreReleaseFilter(descriptorStream, preRelease);
       return processVersionsWithLatestAndSorting(filteredStream, latest, orderBy, order);
     }
   }
@@ -343,6 +346,31 @@ public class ApplicationService {
   private boolean isReleaseVersion(ApplicationDescriptor desc) {
     var preRelease = getSemver(desc.getVersion()).getPreRelease();
     return preRelease.isEmpty();
+  }
+
+  private void validatePreReleaseValue(String preRelease) {
+    if (preRelease == null || "true".equals(preRelease) || "false".equals(preRelease) || "only".equals(preRelease)) {
+      return;
+    }
+    throw new IllegalArgumentException("Invalid preRelease value: " + preRelease
+      + ". Valid values are: true, false, only");
+  }
+
+  private Stream<ApplicationDescriptor> applyPreReleaseFilter(Stream<ApplicationDescriptor> stream,
+    String preRelease) {
+    if (preRelease == null || "true".equals(preRelease)) {
+      return stream;
+    }
+    return switch (preRelease) {
+      case "false" -> stream.filter(this::isReleaseVersion);
+      case "only" -> stream.filter(this::isPreReleaseVersion);
+      default -> stream;
+    };
+  }
+
+  private boolean isPreReleaseVersion(ApplicationDescriptor desc) {
+    var preRelease = getSemver(desc.getVersion()).getPreRelease();
+    return CollectionUtils.isNotEmpty(preRelease);
   }
 
   private List<ApplicationDescriptor> processVersionsWithLatestAndSorting(

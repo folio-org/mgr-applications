@@ -409,7 +409,7 @@ class ApplicationServiceTest {
     when(repository.streamByNameBasicFields("app1"))
       .thenReturn(java.util.stream.Stream.of(createApplicationSlice("app1-1.0.0", "app1", "1.0.0")));
 
-    var result = service.filterByAppVersions("app1", false, null, true, null, null);
+    var result = service.filterByAppVersions("app1", false, null, "true", null, null);
 
     assertThat(result.getTotalRecords()).isEqualTo(1);
     assertThat(result.getRecords()).hasSize(1);
@@ -424,7 +424,7 @@ class ApplicationServiceTest {
         createApplicationSlice("my-app-2.0.0", "my-app", "2.0.0")
       ));
 
-    var result = service.filterByAppVersions("my-app", false, 1, true, null, null);
+    var result = service.filterByAppVersions("my-app", false, 1, "true", null, null);
 
     assertThat(result.getTotalRecords()).isEqualTo(1);
     assertThat(result.getRecords()).hasSize(1);
@@ -439,11 +439,26 @@ class ApplicationServiceTest {
         createApplicationSlice("app1-2.0.0-SNAPSHOT.123", "app1", "2.0.0-SNAPSHOT.123")
       ));
 
-    var result = service.filterByAppVersions("app1", false, null, false, null, null);
+    var result = service.filterByAppVersions("app1", false, null, "false", null, null);
 
     assertThat(result.getTotalRecords()).isEqualTo(1);
     assertThat(result.getRecords()).hasSize(1);
     assertThat(result.getRecords().getFirst().getVersion()).isEqualTo("1.0.0"); // Only release version
+  }
+
+  @Test
+  void filterByQueryWithJavaFiltering_positive_withPreReleaseOnlyFiltering() {
+    when(repository.streamByNameBasicFields("app1"))
+      .thenReturn(java.util.stream.Stream.of(
+        createApplicationSlice("app1-1.0.0", "app1", "1.0.0"),
+        createApplicationSlice("app1-2.0.0-SNAPSHOT.123", "app1", "2.0.0-SNAPSHOT.123")
+      ));
+
+    var result = service.filterByAppVersions("app1", false, null, "only", null, null);
+
+    assertThat(result.getTotalRecords()).isEqualTo(1);
+    assertThat(result.getRecords()).hasSize(1);
+    assertThat(result.getRecords().getFirst().getVersion()).isEqualTo("2.0.0-SNAPSHOT.123"); // Only pre-release version
   }
 
   @Test
@@ -452,7 +467,7 @@ class ApplicationServiceTest {
       .thenReturn(java.util.stream.Stream.of(
         createApplicationSlice("test-app-1.0.0", "test-app", "1.0.0")));
 
-    var result = service.filterByAppVersions("test-app", false, null, true, null, null);
+    var result = service.filterByAppVersions("test-app", false, null, "true", null, null);
 
     assertThat(result.getTotalRecords()).isEqualTo(1);
     assertThat(result.getRecords()).hasSize(1);
@@ -462,10 +477,18 @@ class ApplicationServiceTest {
   @Test
   void filterByApplicationName_negative_missingFilterWithVersions() {
     // Test validation when filter is missing but advanced params are provided
-    assertThatThrownBy(() -> service.filterByAppVersions(null, false, 1, true, null, null))
+    assertThatThrownBy(() -> service.filterByAppVersions(null, false, 1, "true", null, null))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Filter parameter `appName` is required when using `latest`, `preRelease`,"
         + " `order`, `orderBy` for version-specific filtering");
+  }
+
+  @Test
+  void filterByApplicationName_negative_invalidPreReleaseValue() {
+    // Test validation with invalid preRelease value
+    assertThatThrownBy(() -> service.filterByAppVersions("test-app", false, null, "invalid", null, null))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Invalid preRelease value: invalid. Valid values are: true, false, only");
   }
 
   @Test
@@ -475,7 +498,7 @@ class ApplicationServiceTest {
     when(repository.streamByNameBasicFields("test-app"))
       .thenReturn(java.util.stream.Stream.of(streamMock));
 
-    var result = service.filterByAppVersions("test-app", false, 5, true, null, null);
+    var result = service.filterByAppVersions("test-app", false, 5, "true", null, null);
 
     assertThat(result.getTotalRecords()).isEqualTo(1);
     assertThat(result.getRecords()).hasSize(1);
@@ -492,7 +515,7 @@ class ApplicationServiceTest {
     when(repository.streamByNameBasicFields("test-app"))
       .thenReturn(java.util.stream.Stream.of(streamMock));
 
-    var result = service.filterByAppVersions("test-app", false, 150, true, null, null);
+    var result = service.filterByAppVersions("test-app", false, 150, "true", null, null);
 
     assertThat(result.getTotalRecords()).isEqualTo(1);
     assertThat(result.getRecords()).hasSize(1);

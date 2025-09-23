@@ -490,7 +490,7 @@ class ApplicationControllerTest {
     var descriptor = new ApplicationDescriptor().id(APPLICATION_ID).name(APPLICATION_NAME).version(APPLICATION_VERSION);
 
     // Mock the service method with new signature (offset, limit first, validation handled internally)
-    when(applicationService.filterByAppVersions(APPLICATION_NAME, false, 1, true,
+    when(applicationService.filterByAppVersions(APPLICATION_NAME, false, 1, "true",
       "desc", "version"))
       .thenReturn(SearchResult.of(1, singletonList(descriptor)));
 
@@ -513,7 +513,7 @@ class ApplicationControllerTest {
     var descriptor = new ApplicationDescriptor().id(APPLICATION_ID).name(APPLICATION_NAME).version(APPLICATION_VERSION);
 
     // Mock the service method with new signature
-    when(applicationService.filterByAppVersions(APPLICATION_NAME, false, 2, false,
+    when(applicationService.filterByAppVersions(APPLICATION_NAME, false, 2, "false",
       "desc", "version"))
       .thenReturn(SearchResult.of(1, singletonList(descriptor)));
 
@@ -536,7 +536,7 @@ class ApplicationControllerTest {
   void getByQuery_positive_with_orderBy_parameter() throws Exception {
     var descriptor = new ApplicationDescriptor().id(APPLICATION_ID).name(APPLICATION_NAME).version(APPLICATION_VERSION);
 
-    when(applicationService.filterByAppVersions(APPLICATION_NAME, false, null, true,
+    when(applicationService.filterByAppVersions(APPLICATION_NAME, false, null, "true",
       "desc", "name"))
       .thenReturn(SearchResult.of(1, singletonList(descriptor)));
 
@@ -558,7 +558,7 @@ class ApplicationControllerTest {
   @Test
   void getByQuery_negative_missing_filter_with_advanced_params() throws Exception {
     // Mock service to throw validation exception
-    when(applicationService.filterByAppVersions(null, false, 1, true,
+    when(applicationService.filterByAppVersions(null, false, 1, "true",
       "desc", "version"))
       .thenThrow(new IllegalArgumentException("Filter parameter `appName` is required when using "
         + "`latest`, `preRelease`, `order`, `orderBy` for version-specific filtering"));
