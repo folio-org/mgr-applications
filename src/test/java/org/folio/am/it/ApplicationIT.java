@@ -491,7 +491,8 @@ class ApplicationIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.totalRecords", is(6)))
       .andExpect(jsonPath("$.applicationDescriptors[*].version",
-        containsInAnyOrder("8.0.1", "8.1.0", "8.1.0-SNAPSHOT.2245", "9.0.0-SNAPSHOT.3456", "9.0.0-SNAPSHOT.4012", "9.0.1")));
+        containsInAnyOrder("8.0.1", "8.1.0", "8.1.0-SNAPSHOT.2245", "9.0.0-SNAPSHOT.3456",
+          "9.0.0-SNAPSHOT.4012", "9.0.1")));
   }
 
   @Test
@@ -550,7 +551,8 @@ class ApplicationIT extends BaseIntegrationTest {
         .queryParam("appName", "my-app")
         .queryParam("preRelease", "invalid"))
       .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.errors[0].message", is("Invalid preRelease value: invalid. Valid values are: true, false, only")))
+      .andExpect(jsonPath("$.errors[0].message", is("Invalid preRelease value: invalid."
+        + " Valid values are: true, false, only")))
       .andExpect(jsonPath("$.errors[0].type", is("IllegalArgumentException")))
       .andExpect(jsonPath("$.errors[0].code", is("validation_error")));
   }
@@ -563,7 +565,8 @@ class ApplicationIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.totalRecords", is(6)))
       .andExpect(jsonPath("$.applicationDescriptors[*].version",
-        containsInAnyOrder("8.0.1", "8.1.0", "8.1.0-SNAPSHOT.2245", "9.0.0-SNAPSHOT.3456", "9.0.0-SNAPSHOT.4012", "9.0.1")));
+        containsInAnyOrder("8.0.1", "8.1.0", "8.1.0-SNAPSHOT.2245", "9.0.0-SNAPSHOT.3456",
+          "9.0.0-SNAPSHOT.4012", "9.0.1")));
   }
 
   @Test
@@ -573,6 +576,7 @@ class ApplicationIT extends BaseIntegrationTest {
         .queryParam("appName", "my-app")
         .queryParam("preRelease", "TRUE"))
       .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.errors[0].message", is("Invalid preRelease value: TRUE. Valid values are: true, false, only")));
+      .andExpect(jsonPath("$.errors[0].message", is("Invalid preRelease value: TRUE."
+        + " Valid values are: true, false, only")));
   }
 }
