@@ -31,6 +31,9 @@ application:
       password: ${KC_ADMIN_CLIENT_SECRET}
   okapi:
     enabled: true
+  kong:
+    tenant-checks:
+      enabled: ${KONG_TENANT_CHECKS_ENABLED:false}
   secret-store:
     type: EPHEMERAL
     ephemeral:
@@ -39,5 +42,13 @@ application:
         folio_master_folio-backend-admin-client: ${KC_ADMIN_CLIENT_SECRET}
   validation:
     default-mode: basic
+  retry:
+    tenant-routes:
+      retry-delay: 250ms
+      retry-attempts: 5
 routemanagement:
   enable: true
+
+kafka:
+  topics:
+    entitlement: ${KAFKA_ENTITLEMENT_TOPIC:it.entitlement}

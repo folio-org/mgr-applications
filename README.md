@@ -112,15 +112,17 @@ docker run \
 | KONG_TLS_ENABLED                         | false                        |  false   | Allows to enable/disable TLS connection to Kong.                                                                                                                                                           |
 | KONG_TLS_TRUSTSTORE_PATH                 | -                            |  false   | Truststore file path for TLS connection to Kong.                                                                                                                                                           |
 | KONG_TLS_TRUSTSTORE_PASSWORD             | -                            |  false   | Truststore password for TLS connection to Kong.                                                                                                                                                            |
-| KONG_TLS_TRUSTSTORE_TYPE                 | -                            |  false   | Truststore file type for TLS connection to Kong.                                                                                                                                                           |
+| KONG_TLS_TRUSTSTORE_TYPE                 | -                            |  false   | Truststore type for TLS connection to Kong.                                                                                                                                                                |
+| KONG_TENANT_CHECKS_ENABLED               | false                        |  false   | Enables tenant checks enforcement via entitlement consumption. When true, mgr-applications consumes entitlement Kafka events and updates Kong route expressions to enforce tenant checks per route.    |
 | ENV                                      | folio                        |  false   | The logical name of the deployment (kafka topic prefix), must be unique across all environments using the same shared Kafka/Elasticsearch clusters, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed |
-| KAFKA_HOST                               | kafka                        |  false   | Kafka broker hostname                                                                                                                                                                                      |
-| KAFKA_PORT                               | 9092                         |  false   | Kafka broker port                                                                                                                                                                                          |
-| KAFKA_SECURITY_PROTOCOL                  | PLAINTEXT                    |  false   | Kafka security protocol used to communicate with brokers (SSL or PLAINTEXT)                                                                                                                                |
-| KAFKA_SSL_KEYSTORE_LOCATION              | -                            |  false   | The location of the Kafka key store file. This is optional for client and can be used for two-way authentication for client.                                                                               |
-| KAFKA_SSL_KEYSTORE_PASSWORD              | -                            |  false   | The store password for the Kafka key store file. This is optional for client and only needed if 'ssl.keystore.location' is configured.                                                                     |
-| KAFKA_SSL_TRUSTSTORE_LOCATION            | -                            |  false   | The location of the Kafka trust store file.                                                                                                                                                                |
-| KAFKA_SSL_TRUSTSTORE_PASSWORD            | -                            |  false   | The password for the Kafka trust store file. If a password is not set, trust store file configured will still be used, but integrity checking is disabled.                                                 |
+| KAFKA_HOST                               | kafka                        |  false   | Kafka broker hostname                                                                                                                                                                                       |
+| KAFKA_PORT                               | 9092                         |  false   | Kafka broker port                                                                                                                                                                                           |
+| KAFKA_ENTITLEMENT_TOPIC                  | ${ENV}.entitlement           |  false   | Kafka topic for entitlement events. Defaults to environment-specific topic using KafkaUtils.getEnvTopicName('entitlement')                                                                               |
+| KAFKA_SECURITY_PROTOCOL                  | PLAINTEXT                    |  false   | Kafka security protocol                                                                                                                                                                                     |
+| KAFKA_SSL_KEYSTORE_LOCATION              | -                            |  false   | Kafka SSL keystore location                                                                                                                                                                                 |
+| KAFKA_SSL_KEYSTORE_PASSWORD              | -                            |  false   | Kafka SSL keystore password                                                                                                                                                                                 |
+| KAFKA_SSL_TRUSTSTORE_LOCATION            | -                            |  false   | Kafka SSL truststore location                                                                                                                                                                               |
+| KAFKA_SSL_TRUSTSTORE_PASSWORD            | -                            |  false   | Kafka SSL truststore password                                                                                                                                                                               |
 | KAFKA_DISCOVERY_TOPIC_PARTITIONS         | 1                            |  false   | Amount of partitions for `discovery` topic.                                                                                                                                                                |
 | KAFKA_DISCOVERY_TOPIC_REPLICATION_FACTOR | -                            |  false   | Replication factor for `discovery` topic.                                                                                                                                                                  |
 | TE_URL                                   | -                            |   true   | Tenant Entitlement URL used to perform HTTP requests by `TenantEntitlementClient`.                                                                                                                         |
@@ -271,6 +273,41 @@ or
 ```shell
 curl -XGET "$KONG_ADMIN_URL/services/$moduleId/routes?tags=$tenantId"
 ```
+
+### Kong Tenant Checks Enforcement
+
+The application supports dynamic tenant-specific route enforcement through entitlement events. When `KONG_TENANT_CHECKS_ENABLED=true`:
+
+- **Entitlement Subscription**: The application subscribes to the `${ENV}.entitlement` Kafka topic to receive tenant entitlement events.
+- **Dynamic Route Updates**: Routes are automatically updated with tenant-specific expressions based on entitlement events:
+  - **ENTITLE/UPGRADE**: Adds tenant to route's tenant-check clause using `x-okapi-tenant` header validation
+  - **REVOKE**: Removes tenant from route's tenant-check clause
+  - **First tenant**: Replaces wildcard routes with explicit tenant-check expressions
+  - **Last tenant removed**: Reverts routes back to wildcard (no tenant restrictions)
+
+#### Route Expression Examples
+
+**Wildcard route (default behavior):**
+```
+(http.path == "/users" && http.method == "GET")
+```
+
+**Single tenant route:**
+```
+(http.path == "/users" && http.method == "GET") && (http.headers["x-okapi-tenant"] == "tenant1")
+```
+
+**Multiple tenant route:**
+```
+(http.path == "/users" && http.method == "GET") && (http.headers["x-okapi-tenant"] == "tenant1" || http.headers["x-okapi-tenant"] == "tenant2")
+```
+
+#### Behavior
+
+- **Default (KONG_TENANT_CHECKS_ENABLED=false)**: No entitlement subscription, no route expression changes
+- **Enabled (KONG_TENANT_CHECKS_ENABLED=true)**: Consumes entitlement events and dynamically updates Kong route expressions
+- **Idempotent**: Updates are applied incrementally based on current route state
+- **Fallback**: Routes without tenant restrictions allow access to all tenants (wildcard behavior)
 
 ## Kafka Integration
 ### Events upon discovery changes
