@@ -111,7 +111,7 @@ class EntitlementConsumerConfigurationTest {
     try {
       var method = EntitlementConsumerConfiguration.class.getDeclaredMethod("getBackOff", Exception.class);
       method.setAccessible(true);
-      return (org.springframework.util.backoff.BackOff) method.invoke(configuration, exception);
+      return (BackOff) method.invoke(configuration, exception);
     } catch (Exception e) {
       throw new RuntimeException("Failed to invoke getBackOff method", e);
     }

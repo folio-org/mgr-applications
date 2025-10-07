@@ -1,7 +1,6 @@
 package org.folio.am.integration.kafka.config;
 
 import java.util.HashMap;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -58,18 +57,22 @@ public class EntitlementConsumerConfiguration {
   }
 
   private BackOff getBackOff(Exception exception) {
-    var throwable = findTenantUpdateException(exception);
-    if (throwable.isPresent()) {
-      log.warn("Error during tenant routes change [message: {}]", throwable.get().getMessage());
+    if (hasTenantRouteUpdateException(exception)) {
+      log.warn("Error during tenant routes change [message: {}]", exception.getMessage());
       return new FixedBackOff(retryConfiguration.getRetryDelay().toMillis(), retryConfiguration.getRetryAttempts());
     }
 
     return new FixedBackOff(0L, 0L);
   }
 
-  private static Optional<Throwable> findTenantUpdateException(Exception exception) {
-    return Optional.of(exception)
-      .map(Throwable::getCause)
-      .filter(TenantRouteUpdateException.class::isInstance);
+  private boolean hasTenantRouteUpdateException(Exception exception) {
+    Throwable cause = exception;
+    while (cause != null) {
+      if (cause instanceof TenantRouteUpdateException) {
+        return true;
+      }
+      cause = cause.getCause();
+    }
+    return false;
   }
 }
