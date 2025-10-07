@@ -35,6 +35,8 @@ spring:
         max.in.flight.requests.per.connection: 5
         retries: 5
         spring.json.add.type.headers: false
+    topics:
+      entitlement: ${KAFKA_ENTITLEMENT_TOPIC:${application.environment}.entitlement}
   cloud:
     openfeign:
       okhttp:
@@ -59,6 +61,8 @@ application:
     read-timeout: ${KONG_READ_TIMEOUT:}
     write-timeout: ${KONG_WRITE_TIMEOUT:}
     retries: ${KONG_RETRIES:}
+    tenant-checks:
+      enabled: ${KONG_TENANT_CHECKS_ENABLED:false}
     tls:
       enabled: ${KONG_TLS_ENABLED:false}
       trust-store-path: ${KONG_TLS_TRUSTSTORE_PATH:}
@@ -74,6 +78,10 @@ application:
       - name: discovery
         numPartitions: ${KAFKA_DISCOVERY_TOPIC_PARTITIONS:1}
         replicationFactor: ${KAFKA_DISCOVERY_TOPIC_REPLICATION_FACTOR:}
+  retry:
+    tenant-routes:
+      retry-delay: ${TENANT_ROUTES_RETRY_DELAY:500ms}
+      retry-attempts: ${TENANT_ROUTES_RETRY_ATTEMPTS:10}
   keycloak:
     enabled: ${KC_INTEGRATION_ENABLED:true}
     url: ${KC_URL:http://keycloak:8080}
