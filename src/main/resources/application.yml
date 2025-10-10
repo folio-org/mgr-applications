@@ -99,6 +99,7 @@ application:
       trust-store-path: ${KC_CLIENT_TLS_TRUSTSTORE_PATH}
       trust-store-password: ${KC_CLIENT_TLS_TRUSTSTORE_PASSWORD}
       trust-store-type: ${KC_CLIENT_TLS_TRUSTSTORE_TYPE}
+    jwks-base-url: ${KC_JWKS_BASE_URL:}
     jwt-cache-configuration:
       validate-uri: ${KC_AUTH_TOKEN_VALIDATE_URI:false}
       jwks-refresh-interval: ${KC_JWKS_REFRESH_INTERVAL:60}
