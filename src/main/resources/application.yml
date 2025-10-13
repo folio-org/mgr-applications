@@ -35,6 +35,10 @@ spring:
         max.in.flight.requests.per.connection: 5
         retries: 5
         spring.json.add.type.headers: false
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:${application.environment}-mgr-applications-group}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
     topics:
       entitlement: ${KAFKA_ENTITLEMENT_TOPIC:${application.environment}.entitlement}
   cloud:
