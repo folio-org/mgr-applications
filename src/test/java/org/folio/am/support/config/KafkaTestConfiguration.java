@@ -22,7 +22,7 @@ public class KafkaTestConfiguration {
   @Value("${spring.kafka.bootstrap-servers:${KAFKA_HOST:localhost}:${KAFKA_PORT:9092}}")
   private String bootstrapServers;
 
-  @Value("${kafka.topics.entitlement}")
+  @Value("${spring.kafka.topics.entitlement}")
   private String entitlementTopic;
 
   @Bean

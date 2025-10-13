@@ -17,8 +17,10 @@ public class EntitlementEventListener {
   private final KongGatewayService gatewayService;
 
   @KafkaListener(
-    topics = "${kafka.topics.entitlement}",
-    containerFactory = "entitlementKafkaListenerContainerFactory")
+    id = "entitlement-event-listener",
+    containerFactory = "entitlementKafkaListenerContainerFactory",
+    groupId = "${spring.kafka.consumer.group-id}",
+    topicPattern = "${spring.kafka.topics.entitlement}")
   public void onEntitlementEvent(TenantEntitlementEvent event) {
     log.info("Received entitlement event: {}", event);
 
