@@ -204,6 +204,7 @@ The feature is controlled by two env variables `SECURITY_ENABLED` and `KC_INTEGR
 | KC_CLIENT_TLS_TRUSTSTORE_PATH     | -                          |    false    | Truststore file path for keycloak clients.                                                                                                              |
 | KC_CLIENT_TLS_TRUSTSTORE_PASSWORD | -                          |    false    | Truststore password for keycloak clients.                                                                                                               |
 | KC_AUTH_TOKEN_VALIDATE_URI        | false                      |    false    | Defines if validation for JWT must be run to compare configuration URL and token issuer for keycloak.                                                   |
+| KC_JWKS_BASE_URL                  |                            |    false    | Custom base URL for JWKS endpoint. If specified, will be used instead of issuer URL from token's iss claim (e.g., http://keycloak:8080).                |
 | KC_JWKS_REFRESH_INTERVAL          | 60                         |    false    | Jwks refresh interval for realm JWT parser (in minutes).                                                                                                |
 | KC_FORCED_JWKS_REFRESH_INTERVAL   | 60                         |    false    | Forced jwks refresh interval for realm JWT parser (used in signing key rotation, in minutes).                                                           |
 
