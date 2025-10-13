@@ -1,6 +1,10 @@
 package org.folio.am.integration.kafka.config;
 
+import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
+
 import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -13,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
@@ -30,21 +35,22 @@ public class EntitlementConsumerConfiguration {
 
   @Bean
   public ConcurrentKafkaListenerContainerFactory<String, TenantEntitlementEvent>
-    entitlementKafkaListenerContainerFactory() {
-    var props = new HashMap<>(kafkaProperties.buildConsumerProperties(null));
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-    var jd = new JsonDeserializer<>(TenantEntitlementEvent.class);
-    jd.addTrustedPackages("org.folio.am.integration.kafka.model");
-
-    var cf = new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), jd);
+    entitlementKafkaListenerContainerFactory(
+    ConsumerFactory<String, TenantEntitlementEvent> consumerFactory) {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, TenantEntitlementEvent>();
-
-    factory.setConsumerFactory(cf);
+    factory.setConsumerFactory(consumerFactory);
     factory.setCommonErrorHandler(eventErrorHandler());
     return factory;
+  }
+
+  @Bean
+  public ConsumerFactory<String, TenantEntitlementEvent> consumerFactory() {
+    var deserializer = new JsonDeserializer<>(TenantEntitlementEvent.class);
+    Map<String, Object> config = new HashMap<>(kafkaProperties.buildConsumerProperties(null));
+    config.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+    config.put(VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
+    config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), deserializer);
   }
 
   private DefaultErrorHandler eventErrorHandler() {

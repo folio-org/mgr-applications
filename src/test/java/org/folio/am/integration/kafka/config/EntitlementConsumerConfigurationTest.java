@@ -40,26 +40,29 @@ class EntitlementConsumerConfigurationTest {
 
   @Test
   void entitlementKafkaListenerContainerFactory_positive() {
-    var factory = configuration.entitlementKafkaListenerContainerFactory();
+    var consumerFactory = configuration.consumerFactory();
+    var factory = configuration.entitlementKafkaListenerContainerFactory(consumerFactory);
 
     assertThat(factory).isNotNull();
     assertThat(factory.getConsumerFactory()).isNotNull();
 
-    var consumerFactory = factory.getConsumerFactory();
-    var configMap = consumerFactory.getConfigurationProperties();
+    var factoryConsumer = factory.getConsumerFactory();
+    var configMap = factoryConsumer.getConfigurationProperties();
 
     assertThat(configMap)
       .containsEntry(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
-      .containsEntry(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class)
       .containsEntry(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+    assertThat(configMap.get(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG))
+      .isInstanceOf(JsonDeserializer.class);
   }
 
   @Test
   void entitlementKafkaListenerContainerFactory_positive_consumerProperties() {
-    var factory = configuration.entitlementKafkaListenerContainerFactory();
+    var consumerFactory = configuration.consumerFactory();
+    var factory = configuration.entitlementKafkaListenerContainerFactory(consumerFactory);
 
-    var consumerFactory = factory.getConsumerFactory();
-    var configMap = consumerFactory.getConfigurationProperties();
+    var factoryConsumer = factory.getConsumerFactory();
+    var configMap = factoryConsumer.getConfigurationProperties();
 
     assertThat(configMap)
       .containsKey(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)
