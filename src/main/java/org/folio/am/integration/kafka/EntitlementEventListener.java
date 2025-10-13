@@ -17,7 +17,7 @@ public class EntitlementEventListener {
   private final KongGatewayService gatewayService;
 
   @KafkaListener(
-    topics = "${kafka.topics.entitlement}",
+    topics = "${spring.kafka.topics.entitlement}",
     containerFactory = "entitlementKafkaListenerContainerFactory")
   public void onEntitlementEvent(TenantEntitlementEvent event) {
     log.info("Received entitlement event: {}", event);

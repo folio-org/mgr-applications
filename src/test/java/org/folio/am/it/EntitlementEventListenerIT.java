@@ -55,7 +55,7 @@ class EntitlementEventListenerIT extends BaseIntegrationTest {
   private static final String TENANT_2 = "tenant2";
   private static final String TENANT_3 = "tenant3";
 
-  @Value("${kafka.topics.entitlement}")
+  @Value("${spring.kafka.topics.entitlement}")
   private String entitlementTopic;
 
   @Autowired private KongAdminClient kongAdminClient;
