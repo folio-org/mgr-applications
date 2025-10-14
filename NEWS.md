@@ -1,3 +1,8 @@
+## Version `v3.0.4` (14.10.2025)
+* Consume entitlement Kafka events for Kong route mgmt (MGRAPPS-70)
+
+---
+
 ## Version `v3.0.3` (26.09.2025)
 * Use SECURE_STORE_ENV, not ENV, for secure store key (MGRAPPS-72)
 * Fix test for tenant header Kong route expression updated in application-poc-tools (APPPOCTOOL-64)
