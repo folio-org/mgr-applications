@@ -1,3 +1,7 @@
+## Version `v3.0.5` (15.10.2025)
+* Add support for custom Keycloak base URL for JWKS endpoint, new environment variable `KC_JWKS_BASE_URL` (MODSIDECAR-148)
+---
+
 ## Version `v3.0.4` (14.10.2025)
 * Consume entitlement Kafka events for Kong route mgmt (MGRAPPS-70)
 
