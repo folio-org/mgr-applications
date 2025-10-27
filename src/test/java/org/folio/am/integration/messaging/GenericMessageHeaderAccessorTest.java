@@ -8,11 +8,11 @@ import static org.folio.am.integration.messaging.GenericMessageHeaderAccessor.DE
 import static org.folio.am.integration.messaging.GenericMessageHeaderAccessor.PRIMARY_ID_HEADER;
 
 import java.util.UUID;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 
 @UnitTest
 class GenericMessageHeaderAccessorTest {
@@ -86,7 +86,7 @@ class GenericMessageHeaderAccessorTest {
   void destination_setter() {
     var accessor = new GenericMessageHeaderAccessor();
 
-    var expected = RandomStringUtils.random(10);
+    var expected = RandomStringUtils.secure().next(10);
     accessor.setDestination(expected);
     var actual = accessor.getMessageHeaders().get(DESTINATION_HEADER, String.class);
 
@@ -97,7 +97,7 @@ class GenericMessageHeaderAccessorTest {
   void destination_getter() {
     var accessor = new GenericMessageHeaderAccessor();
 
-    var expected = RandomStringUtils.random(10);
+    var expected = RandomStringUtils.secure().next(10);
     accessor.setDestination(expected);
     var actual = accessor.getDestination();
 
