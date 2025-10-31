@@ -241,25 +241,46 @@ with [Kong Admin API](https://docs.konghq.com/gateway/latest/admin-api/).
 
 ### Kong Service Registration
 
-The Kong Gateway services are added on service discovery registration for each module. 
+On service discovery registration for each module, Kong Gateway services are added and configured to enable proper routing and access through Kong.
 
-Kong Services in kong can be found using a following HTTP request:
+- For every application module discovered, a Kong Service is created (or updated if it already exists) using the module's descriptor and the configured `MODULE_URL`.
+- Service configuration includes:
+  - Service name (typically mapped to module id, e.g. `mod-foo-1.2.3`)
+  - Host and port pointing to the backend application instance
+  - Optional protocol and path settings, as defined in the module descriptor
+  - Tags and metadata for traceability (such as `moduleId`, `interfaceId`)
+- Changes to discovery information (such as updates to service URL or enabled/disabled states) result in corresponding updates to the Kong Service.
+- Services are managed idempotently: existing services are updated as needed, new services are created, and unused services are removed.
+
+To view registered services in Kong, use:
 
 ```shell
-curl -XGET "$KONG_ADMIN_URL/services"
+curl -X GET "$KONG_ADMIN_URL/services"
 ```
+
+This will return a list of all services registered in the Kong Gateway.
 
 ### Kong Route Registration
 
-The Kong routes registered for each module.
+Routes are registered for each module and mapped to the corresponding Kong Service. Routes define how incoming requests are matched and forwarded to the backend service.
 
-Routes as well populated with tags: `moduleId` and `interfaceId`.
+- For each module, routes are created or updated according to the OpenAPI specification and routing entries in the module descriptor.
+- Route configuration includes:
+  - Paths and methods handled by the module (e.g., `/users`, `GET`)
+  - Optional host, headers, and path prefix matches
+  - Tags for module identification (`moduleId`, `interfaceId`)
+- Routes are managed idempotently: existing routes are updated in place, new routes are created, and obsolete routes are removed.
+- Tenant-specific route enforcement is supported via entitlement events (see [Kong Tenant Checks Enforcement](#kong-tenant-checks-enforcement)).
 
-Routes per module can be found with:
+To view the routes for a specific service, use:
 
 ```shell
-curl -XGET "$KONG_ADMIN_URL/services/$moduleId/routes"
+curl -X GET "$KONG_ADMIN_URL/services/$moduleId/routes"
 ```
+
+This will return all routes registered for the specified module's service.
+
+**Note:** Route expressions and tenant restrictions are dynamically managed based on entitlement events when `KONG_TENANT_CHECKS_ENABLED=true`. See the dedicated section for details.
 
 ### Kong Tenant Checks Enforcement
 
