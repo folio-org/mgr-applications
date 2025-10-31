@@ -247,8 +247,7 @@ On service discovery registration for each module, Kong Gateway services are add
 - Service configuration includes:
   - Service name (typically mapped to module id, e.g. `mod-foo-1.2.3`)
   - Host and port pointing to the backend application instance
-  - Optional protocol and path settings, as defined in the module descriptor
-  - Tags and metadata for traceability (such as `moduleId`, `interfaceId`)
+  - Timeout setting for connections timeout, reads, writes
 - Changes to discovery information (such as updates to service URL or enabled/disabled states) result in corresponding updates to the Kong Service.
 - Services are managed idempotently: existing services are updated as needed, new services are created, and unused services are removed.
 
