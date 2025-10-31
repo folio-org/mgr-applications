@@ -267,7 +267,7 @@ Routes are registered for each module and mapped to the corresponding Kong Servi
 - For each module, routes are created or updated according to the OpenAPI specification and routing entries in the module descriptor.
 - Route configuration includes:
   - Paths and methods handled by the module (e.g., `/users`, `GET`)
-  - Optional host, headers, and path prefix matches
+  - Routes expression matches
   - Tags for module identification (`moduleId`, `interfaceId`)
 - Routes are managed idempotently: existing routes are updated in place, new routes are created, and obsolete routes are removed.
 - Tenant-specific route enforcement is supported via entitlement events (see [Kong Tenant Checks Enforcement](#kong-tenant-checks-enforcement)).
