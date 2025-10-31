@@ -241,38 +241,24 @@ with [Kong Admin API](https://docs.konghq.com/gateway/latest/admin-api/).
 
 ### Kong Service Registration
 
-The Kong Gateway services are added on service discovery registration per application. Each Kong Service has tag equal
-to `applicationId` to improve observability. Tags can be used to filter core entities, via the `?tags` querystring
-parameter.
+The Kong Gateway services are added on service discovery registration for each module. 
 
-Kong Services per application in kong can be found using a following HTTP request:
+Kong Services in kong can be found using a following HTTP request:
 
 ```shell
-curl -XGET "$KONG_ADMIN_URL/services?tags=$applicationId"
+curl -XGET "$KONG_ADMIN_URL/services"
 ```
 
 ### Kong Route Registration
 
-The Kong routes registered per-tenant using header filter:
+The Kong routes registered for each module.
 
-```json
-{
-  "headers": { "x-okapi-tenant": [ "$tenantId" ] }
-}
-```
+Routes as well populated with tags: `moduleId` and `interfaceId`.
 
-Routes as well populated with tags: `moduleId` and `tenantId` to be filtered.
-
-Routes per tenant can be found with:
+Routes per module can be found with:
 
 ```shell
-curl -XGET "$KONG_ADMIN_URL/routes?tags=$moduleId,$tenantId"
-```
-
-or
-
-```shell
-curl -XGET "$KONG_ADMIN_URL/services/$moduleId/routes?tags=$tenantId"
+curl -XGET "$KONG_ADMIN_URL/services/$moduleId/routes"
 ```
 
 ### Kong Tenant Checks Enforcement
