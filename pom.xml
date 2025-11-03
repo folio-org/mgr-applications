@@ -31,7 +31,7 @@
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <hypersistence-utils-hibernate-63.version>3.11.0</hypersistence-utils-hibernate-63.version>
-    <swagger-annotations.version>2.2.39</swagger-annotations.version>
+    <swagger-annotations.version>2.2.40</swagger-annotations.version>
     <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.5.0</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.8</openapi-tools.jackson-databind-nullable.version>
@@ -39,7 +39,7 @@
     <cql2pgjson.version>35.4.0</cql2pgjson.version>
     <folio-spring-cql.version>9.1.0</folio-spring-cql.version>
     <applications-poc-tools.version>3.1.0-SNAPSHOT</applications-poc-tools.version>
-    <folio-java-checkstyle.version>1.2.0-SNAPSHOT</folio-java-checkstyle.version>
+    <folio-java-checkstyle.version>1.2.0</folio-java-checkstyle.version>
     <semver4j.version>5.8.0</semver4j.version>
     <jackson-bom.version>2.17.2</jackson-bom.version>
 
@@ -55,7 +55,7 @@
     <maven-checkstyle.version>12.1.1</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
-    <openapi-generator.version>7.16.0</openapi-generator.version>
+    <openapi-generator.version>7.17.0</openapi-generator.version>
 
     <sonar.exclusions>
       <!--
