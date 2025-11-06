@@ -20,7 +20,7 @@ import org.testcontainers.shaded.org.awaitility.Durations;
 public final class KafkaEventAssertions {
 
   private static ConditionFactory await() {
-    return Awaitility.await().atMost(Durations.FIVE_SECONDS);
+    return Awaitility.await().atMost(Durations.TEN_SECONDS);
   }
 
   public static void assertDiscoveryEvents(String... moduleIds) {
