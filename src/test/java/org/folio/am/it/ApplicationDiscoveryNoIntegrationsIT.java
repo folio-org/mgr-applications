@@ -105,24 +105,6 @@ class ApplicationDiscoveryNoIntegrationsIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
-  void create_positive_batchRequestModuleNotFound() throws Exception {
-    var moduleDiscoveries = moduleDiscoveries(moduleDiscovery("mod-unknown", "1.2.3", "http://test:80801"));
-
-    mockMvc.perform(post("/modules/discovery")
-        .contentType(APPLICATION_JSON)
-        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
-        .content(asJsonString(moduleDiscoveries)))
-      .andExpect(status().isNotFound())
-      .andExpect(jsonPath("$.total_records", is(1)))
-      .andExpect(jsonPath("$.errors[0].message", is("Modules are not found for ids: [mod-unknown-1.2.3]")))
-      .andExpect(jsonPath("$.errors[0].type", is("EntityNotFoundException")))
-      .andExpect(jsonPath("$.errors[0].code", is("not_found_error")));
-
-    assertNoDiscoveryEvents();
-  }
-
-  @Test
-  @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
   void create_positive_batchRequest() throws Exception {
     var moduleDiscoveries = moduleDiscoveries(moduleBarDiscovery(), moduleFooDiscovery());
 
@@ -140,6 +122,24 @@ class ApplicationDiscoveryNoIntegrationsIT extends BaseIntegrationTest {
       .andExpect(content().json(asJsonString(moduleDiscoveries), true));
 
     assertDiscoveryEvents(MODULE_BAR_ID, MODULE_FOO_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
+  void create_positive_batchRequestModuleNotFound() throws Exception {
+    var moduleDiscoveries = moduleDiscoveries(moduleDiscovery("mod-unknown", "1.2.3", "http://test:80801"));
+
+    mockMvc.perform(post("/modules/discovery")
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(moduleDiscoveries)))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.total_records", is(1)))
+      .andExpect(jsonPath("$.errors[0].message", is("Modules are not found for ids: [mod-unknown-1.2.3]")))
+      .andExpect(jsonPath("$.errors[0].type", is("EntityNotFoundException")))
+      .andExpect(jsonPath("$.errors[0].code", is("not_found_error")));
+
+    assertNoDiscoveryEvents();
   }
 
   @Test
