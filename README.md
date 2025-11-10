@@ -263,7 +263,7 @@ This will return a list of all services registered in the Kong Gateway.
 
 Routes are registered for each module and mapped to the corresponding Kong Service. Routes define how incoming requests are matched and forwarded to the backend service.
 
-- For each module, routes are created or updated according to the OpenAPI specification and routing entries in the module descriptor.
+- For each module, routes are created or updated according to routing entries in the module descriptor.
 - Route configuration includes:
   - Paths and methods handled by the module (e.g., `/users`, `GET`)
   - Routes expression matches
