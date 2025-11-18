@@ -55,7 +55,7 @@ public class EntitlementConsumerConfiguration {
 
   private DefaultErrorHandler eventErrorHandler() {
     var errorHandler = new DefaultErrorHandler((message, exception) ->
-      log.debug("Failed to process event [record: {}]", message, exception.getCause()));
+      log.warn("Failed to process event [record: {}]", message, exception.getCause()));
     errorHandler.setBackOffFunction((message, exception) -> getBackOff(exception));
     errorHandler.setLogLevel(KafkaException.Level.INFO);
 
@@ -64,7 +64,7 @@ public class EntitlementConsumerConfiguration {
 
   private BackOff getBackOff(Exception exception) {
     if (hasTenantRouteUpdateException(exception)) {
-      log.debug("Error during tenant routes change [message: {}]", exception.getMessage());
+      log.warn("Error during tenant routes change [message: {}]", exception.getMessage());
       return new FixedBackOff(retryConfiguration.getRetryDelay().toMillis(), retryConfiguration.getRetryAttempts());
     }
 
