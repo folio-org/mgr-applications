@@ -1,7 +1,6 @@
 package org.folio.am.integration.messaging.channel.handler;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.folio.am.integration.messaging.MessageUtils.messageId;
 import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
 
 import lombok.RequiredArgsConstructor;
