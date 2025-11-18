@@ -23,7 +23,7 @@ public class ApplicationDiscoveryService {
 
   @Transactional(readOnly = true)
   public ModuleDiscoveries get(String appId, Integer offset, Integer limit) {
-    log.info("Getting paged module discoveries for application: appId = {}, offset = {}, limit = {}",
+    log.debug("Getting paged module discoveries for application: appId = {}, offset = {}, limit = {}",
       appId, offset, limit);
 
     var pageable = OffsetRequest.of(offset, limit);

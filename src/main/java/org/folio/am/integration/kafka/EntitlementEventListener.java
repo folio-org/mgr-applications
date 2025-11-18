@@ -22,7 +22,7 @@ public class EntitlementEventListener {
     groupId = "${spring.kafka.consumer.group-id}",
     topicPattern = "${spring.kafka.topics.entitlement}")
   public void onEntitlementEvent(TenantEntitlementEvent event) {
-    log.info("Received entitlement event: {}", event);
+    log.debug("Received entitlement event: {}", event);
 
     var moduleId = event.getModuleId();
     var tenant = event.getTenantName();
