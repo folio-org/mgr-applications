@@ -10,6 +10,7 @@
 * FAR mode OOM crash due to excessive memory consumption during validation (MGRAPPS-67)
 * Consume entitlement Kafka events for Kong route mgmt (MGRAPPS-70)
 * Add support for custom Keycloak base URL for JWKS endpoint, new environment variable `KC_JWKS_BASE_URL` (MODSIDECAR-148)
+* Review and clean up logs in mgr-apllications (MGRAPPS-84)
 ---
 
 ## Version `v3.0.0` (12.03.2025)
