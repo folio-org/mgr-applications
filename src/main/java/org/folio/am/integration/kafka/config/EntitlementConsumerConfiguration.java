@@ -57,7 +57,7 @@ public class EntitlementConsumerConfiguration {
     var errorHandler = new DefaultErrorHandler((message, exception) ->
       log.warn("Failed to process event [record: {}]", message, exception.getCause()));
     errorHandler.setBackOffFunction((message, exception) -> getBackOff(exception));
-    errorHandler.setLogLevel(KafkaException.Level.DEBUG);
+    errorHandler.setLogLevel(KafkaException.Level.INFO);
 
     return errorHandler;
   }

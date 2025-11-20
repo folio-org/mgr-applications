@@ -1,7 +1,6 @@
 package org.folio.am.integration.messaging.channel.handler;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.folio.am.integration.messaging.MessageUtils.messageId;
 import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
 
 import lombok.RequiredArgsConstructor;
@@ -21,11 +20,7 @@ public class KafkaHandler implements MessageHandler {
 
   @Override
   public void handleMessage(Message<?> message) throws MessagingException {
-    if (log.isDebugEnabled()) {
-      log.debug("Sending message to Kafka: {}", message);
-    } else {
-      log.info("Sending message to Kafka: messageId = {}", () -> messageId(message));
-    }
+    log.debug("Sending message to Kafka: {}", message);
 
     var accessor = GenericMessageHeaderAccessor.wrap(message);
 
@@ -38,6 +33,6 @@ public class KafkaHandler implements MessageHandler {
     var topic = getEnvTopicName(destination);
     kafkaTemplate.send(topic, message.getPayload());
 
-    log.info("Message sent to the topic: {}", topic);
+    log.debug("Message sent to the topic: {}", topic);
   }
 }

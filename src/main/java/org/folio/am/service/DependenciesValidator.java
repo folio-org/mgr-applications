@@ -49,7 +49,7 @@ public class DependenciesValidator {
     if (isNotEmpty(appNamesWithSeveralVersions)) {
       var parameter = new Parameter().key("applicationNames").value(appNamesWithSeveralVersions);
       var validationMessage = "Used same applications with different versions";
-      log.info(validationMessage + " " + appNamesWithSeveralVersions);
+      log.debug(validationMessage + " " + appNamesWithSeveralVersions);
       throw new RequestValidationException(validationMessage, List.of(parameter));
     }
     var mapApplicationNameToVersions = toStream(applicationDescriptors)

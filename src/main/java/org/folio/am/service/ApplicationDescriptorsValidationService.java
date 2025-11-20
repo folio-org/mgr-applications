@@ -36,14 +36,14 @@ public class ApplicationDescriptorsValidationService {
   public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors) {
     var allResolvedAppDescriptorsByName = getApplicationDescriptorsByName(descriptors);
 
-    log.info("Validate descriptors: ids = {}", () -> toAppIdsString(descriptors));
+    log.debug("Validate descriptors: ids = {}", () -> toAppIdsString(descriptors));
 
     toStream(descriptors)
       .flatMap(ad -> toStream(ad.getDependencies())).distinct()
       .forEach(dependency -> resolveDependencyToAppDescriptors(dependency, allResolvedAppDescriptorsByName));
 
     var allDescriptors = new ArrayList<>(allResolvedAppDescriptorsByName.values());
-    log.info("Validate applications including dependencies: ids = {}", () -> toAppIdsString(allDescriptors));
+    log.debug("Validate applications including dependencies: ids = {}", () -> toAppIdsString(allDescriptors));
 
     dependenciesValidator.validate(allDescriptors);
 
@@ -74,7 +74,7 @@ public class ApplicationDescriptorsValidationService {
     }
 
     var resolvedDescriptor = getLatestApplicationMatchingDependency(dependency);
-    log.info("Dependency resolved to application: dependency = {}, application = {}",
+    log.debug("Dependency resolved to application: dependency = {}, application = {}",
       dependency, resolvedDescriptor != null ? resolvedDescriptor.getId() : null);
 
     if (resolvedDescriptor != null) {
@@ -103,7 +103,7 @@ public class ApplicationDescriptorsValidationService {
       .map(latestAppId -> applicationService.get(latestAppId, true))
       .orElseGet(() -> {
         if (Boolean.TRUE.equals(dependency.getOptional())) {
-          log.info("Cannot find optional dependency application which satisfies the dependency: "
+          log.debug("Cannot find optional dependency application which satisfies the dependency: "
             + "name = {}, version = {}", dependency.getName(), dependency.getVersion());
           return null;
         } else {

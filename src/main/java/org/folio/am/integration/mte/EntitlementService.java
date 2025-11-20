@@ -18,7 +18,7 @@ public class EntitlementService {
   private final TenantEntitlementClient entitlementClient;
 
   public List<String> getTenants(String id, String authToken) {
-    log.info("Retrieving entitlement [appId: {}]", id);
+    log.debug("Retrieving entitlement [appId: {}]", id);
     var query = getEntitlementQuery(id);
 
     try {

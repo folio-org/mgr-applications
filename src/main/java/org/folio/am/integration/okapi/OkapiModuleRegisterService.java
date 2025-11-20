@@ -38,10 +38,10 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
     var moduleDescriptors = descriptor.getModuleDescriptors();
 
     if (isNotEmpty(moduleDescriptors)) {
-      log.info("Module Descriptors to register in Okapi: {}", moduleDescriptors.size());
+      log.debug("Module Descriptors to register in Okapi: {}", moduleDescriptors.size());
 
       okapiClient.createModuleDescriptors(moduleDescriptors, false, token);
-      log.info("Module registered in Okapi. Total count: {}", moduleDescriptors.size());
+      log.debug("Module registered in Okapi. Total count: {}", moduleDescriptors.size());
     }
   }
 
@@ -111,7 +111,7 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
   }
 
   private void deleteModuleDescriptor(ModuleDescriptor md, String token) {
-    log.info("Removing Module Descriptors: id = {}", md.getId());
+    log.debug("Removing Module Descriptors: id = {}", md.getId());
     okapiClient.deleteModuleDescriptor(md.getId(), token);
   }
 

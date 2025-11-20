@@ -37,10 +37,10 @@ public class ApplicationReferencesValidationService {
       .collect(joining(","));
     if (isNotEmpty(notFoundIds)) {
       var validationMessage = format("Applications not exist: ids = %s", notFoundIds);
-      log.info(validationMessage);
+      log.debug(validationMessage);
       throw new RequestValidationException(validationMessage);
     }
-    log.info("Validate applications: ids = {}", () -> join(",", foundIds));
+    log.debug("Validate applications: ids = {}", () -> join(",", foundIds));
     dependenciesValidator.validate(new ArrayList<>(applicationDescriptors));
   }
 }
