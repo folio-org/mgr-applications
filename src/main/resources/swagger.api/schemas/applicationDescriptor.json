@@ -50,10 +50,6 @@
         "$ref": "module/descriptor/moduleDescriptor.json"
       }
     },
-    "platform"  : {
-      "description": "information about version of a platform",
-      "type": "string"
-    },
     "dependencies" : {
       "description": "List of dependencies to other applications",
       "type": "array",
@@ -67,5 +63,5 @@
       "$ref": "applicationDeployment.json"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

@@ -8334,7 +8334,6 @@
       "name": "Tags manager"
     }
   ],
-  "platform": "base",
   "dependencies": [],
   "id": "app-platform-minimal-2.1.0-SNAPSHOT.5821",
   "name": "app-platform-minimal",

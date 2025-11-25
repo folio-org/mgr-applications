@@ -2027,7 +2027,6 @@
       "name": "FOLIO UI module for eHoldings"
     }
   ],
-  "platform": "complete",
   "dependencies": [
     {
       "name": "app-platform-minimal",
