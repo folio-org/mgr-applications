@@ -24,7 +24,6 @@ public interface ApplicationEntityMapper {
   @Mapping(target = "uiModules", ignore = true)
   @Mapping(target = "description", ignore = true)
   @Mapping(target = "metadata", ignore = true)
-  @Mapping(target = "platform", ignore = true)
   @Mapping(target = "deployment", ignore = true)
   ApplicationDescriptor convert(ApplicationEntity applicationEntity);
 

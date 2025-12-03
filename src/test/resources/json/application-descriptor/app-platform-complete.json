@@ -38583,7 +38583,6 @@
       "name": "User management"
     }
   ],
-  "platform": "base",
   "dependencies": [
     {
       "name": "app-platform-minimal",

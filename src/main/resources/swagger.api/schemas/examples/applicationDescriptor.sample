@@ -86,7 +86,6 @@
          ]
       }
    ],
-   "platform":"2+",
    "dependencies":[
       {
          "id":"application-2.3.7",

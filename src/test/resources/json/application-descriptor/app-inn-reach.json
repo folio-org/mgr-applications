@@ -2684,7 +2684,6 @@
       "name": "Description for inn-reach"
     }
   ],
-  "platform": "complete",
   "dependencies": [
     {
       "name": "app-platform-complete",
