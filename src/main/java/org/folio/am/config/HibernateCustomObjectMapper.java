@@ -10,6 +10,8 @@ public class HibernateCustomObjectMapper implements ObjectMapperSupplier {
   public ObjectMapper get() {
     var objectMapper = new ObjectMapper();
     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+    objectMapper.findAndRegisterModules();
     return objectMapper;
   }
 }
