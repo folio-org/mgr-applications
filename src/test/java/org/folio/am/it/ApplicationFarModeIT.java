@@ -40,7 +40,7 @@ class ApplicationFarModeIT extends BaseIntegrationTest {
   void delete_positive() throws Exception {
     doDelete("/applications/{id}", APPLICATION_ID);
     doGet(get("/applications").queryParam("query", "cql.allRecords=1"))
-      .andExpect(jsonPath("$.totalRecords", is(2)));
+      .andExpect(jsonPath("$.totalRecords", is(3)));
   }
 
   @Test

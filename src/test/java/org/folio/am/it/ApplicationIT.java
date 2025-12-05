@@ -62,6 +62,16 @@ class ApplicationIT extends BaseIntegrationTest {
   }
 
   @Test
+  void getById_positive_descriptorWithPlatformFieldNotInSchema() throws Exception {
+    mockMvc.perform(get("/applications/{id}", "test-app-4.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.id", is("test-app-4.0.0")))
+      .andExpect(jsonPath("$.name", is("test-app")))
+      .andExpect(jsonPath("$.version", is("4.0.0")));
+  }
+
+  @Test
   void getByQuery_positive() throws Exception {
     mockMvc.perform(get("/applications").queryParam("query", "id==\"test-app-1.0.0\"")
         .header(TOKEN, generateAccessToken(keycloakProperties)))
@@ -75,7 +85,7 @@ class ApplicationIT extends BaseIntegrationTest {
   void getByQuery_positive_allValues() throws Exception {
     mockMvc.perform(get("/applications")
         .queryParam("limit", "1"))
-      .andExpect(jsonPath("$.totalRecords", is(9)));
+      .andExpect(jsonPath("$.totalRecords", is(10)));
   }
 
   @Test

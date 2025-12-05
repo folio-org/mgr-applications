@@ -23,7 +23,14 @@ values
     "name": "test-app",
     "version": "3.0.0",
     "modules": [ { "id": "mod-foo-2.0.0", "name": "mod-foo", "version": "2.0.0" } ]
-  }');
+  }'),
+  ('test-app-4.0.0', 'test-app', '4.0.0', '{
+      "id": "test-app-4.0.0",
+      "name": "test-app",
+      "platform": "base",
+      "version": "4.0.0",
+      "modules": [ { "id": "mod-foo-2.0.0", "name": "mod-foo", "version": "2.0.0" } ]
+    }');
 
 INSERT INTO module(id, name, version, descriptor)
 VALUES
