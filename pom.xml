@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.7</version>
+    <version>4.0.0</version>
     <relativePath />
   </parent>
 
@@ -30,13 +30,13 @@
     <lombok.version>1.18.42</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <hypersistence-utils-hibernate-63.version>3.12.0</hypersistence-utils-hibernate-63.version>
-    <swagger-annotations.version>2.2.40</swagger-annotations.version>
+    <hypersistence-utils-hibernate-63.version>3.13.3</hypersistence-utils-hibernate-63.version>
+    <swagger-annotations.version>2.2.41</swagger-annotations.version>
     <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.5.0</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.8</openapi-tools.jackson-databind-nullable.version>
-    <spring-cloud-bom.version>2025.0.0</spring-cloud-bom.version>
-    <cql2pgjson.version>35.4.0</cql2pgjson.version>
+    <spring-cloud-bom.version>2025.1.0</spring-cloud-bom.version>
+    <cql2pgjson.version>35.4.1</cql2pgjson.version>
     <folio-spring-cql.version>9.1.0</folio-spring-cql.version>
     <applications-poc-tools.version>3.1.0-SNAPSHOT</applications-poc-tools.version>
     <folio-java-checkstyle.version>1.2.0</folio-java-checkstyle.version>
@@ -46,15 +46,15 @@
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
 
     <!-- Test dependencies versions -->
-    <mockito.version>5.20.0</mockito.version>
-    <testcontainer.version>2.0.1</testcontainer.version>
+    <mockito.version>5.21.0</mockito.version>
+    <testcontainer.version>2.0.2</testcontainer.version>
     <awaitility.version>4.3.0</awaitility.version>
     <instancio.version>5.5.1</instancio.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>12.1.1</maven-checkstyle.version>
+    <maven-checkstyle.version>12.3.0</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-    <maven-release-plugin.version>3.2.0</maven-release-plugin.version>
+    <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <openapi-generator.version>7.17.0</openapi-generator.version>
 
     <sonar.exclusions>
