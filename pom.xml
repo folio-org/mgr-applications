@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.7</version>
+    <version>4.0.1</version>
     <relativePath />
   </parent>
 
@@ -35,7 +35,7 @@
     <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.5.0</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.8</openapi-tools.jackson-databind-nullable.version>
-    <spring-cloud-bom.version>2025.0.0</spring-cloud-bom.version>
+    <spring-cloud-bom.version>2025.1.0</spring-cloud-bom.version>
     <cql2pgjson.version>35.4.2</cql2pgjson.version>
     <folio-spring-cql.version>9.1.0</folio-spring-cql.version>
     <applications-poc-tools.version>3.1.0-SNAPSHOT</applications-poc-tools.version>
@@ -46,13 +46,13 @@
     <am.yaml-file>${project.basedir}/src/main/resources/swagger.api/am.yaml</am.yaml-file>
 
     <!-- Test dependencies versions -->
-    <mockito.version>5.20.0</mockito.version>    
+    <mockito.version>5.21.0</mockito.version>    
     <testcontainer.version>2.0.3</testcontainer.version>
     <awaitility.version>4.3.0</awaitility.version>
     <instancio.version>5.5.1</instancio.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>12.3.0</maven-checkstyle.version>
+    <maven-checkstyle.version>13.0.0</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <openapi-generator.version>7.18.0</openapi-generator.version>
