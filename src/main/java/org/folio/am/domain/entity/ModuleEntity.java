@@ -6,6 +6,8 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
@@ -17,13 +19,20 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.folio.common.domain.model.ModuleDescriptor;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 @Data
 @Entity
 @Table(name = "module")
 @EqualsAndHashCode(callSuper = true)
 public class ModuleEntity extends ArtifactEntity {
+
+  @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+  @Column(name = "type", columnDefinition = "module_type")
+  private ModuleType type;
 
   @Type(JsonBinaryType.class)
   @Column(name = "descriptor", columnDefinition = "jsonb")
@@ -64,6 +73,14 @@ public class ModuleEntity extends ArtifactEntity {
     interfaceEntity.setModule(this);
 
     interfaces.add(interfaceEntity);
+  }
+
+  public boolean isBackendModule() {
+    return ModuleType.BACKEND.equals(type);
+  }
+
+  public boolean isUiModule() {
+    return ModuleType.UI.equals(type);
   }
 
   private void removeExistingInterfaces() {

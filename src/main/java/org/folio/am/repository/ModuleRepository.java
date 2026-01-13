@@ -13,9 +13,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ModuleRepository extends JpaCqlRepository<ModuleEntity, String> {
 
-  @Query(value = "SELECT module FROM ModuleEntity module WHERE module.discoveryUrl IS NOT NULL")
-  List<ModuleEntity> findAllByHasDiscovery();
-
   @Query(value = """
     SELECT DISTINCT module FROM ModuleEntity module
       INNER JOIN module.applications app

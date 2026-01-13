@@ -17,7 +17,6 @@ public interface ApplicationDescriptorMapper {
    */
   @Mapping(target = "applicationDescriptor", expression = "java(removeModDescriptors(descriptor))")
   @Mapping(target = "modules", source = "descriptor")
-  @Mapping(target = "uiModules", source = "descriptor")
   ApplicationEntity convert(ApplicationDescriptor descriptor);
 
   default ApplicationDescriptor removeModDescriptors(ApplicationDescriptor descriptor) {

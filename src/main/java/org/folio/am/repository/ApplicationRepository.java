@@ -48,15 +48,6 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
   @Query(value = """
     SELECT CASE WHEN COUNT(app) > 0 THEN true ELSE false END
       FROM ApplicationEntity app
-      INNER JOIN app.uiModules uiModule
-      WHERE uiModule.id = :uiModuleId
-        AND app.id <> :id
-    """)
-  boolean existsByNotIdAndUiModuleId(@Param("id") String id, @Param("uiModuleId") String uiModuleId);
-
-  @Query(value = """
-    SELECT CASE WHEN COUNT(app) > 0 THEN true ELSE false END
-      FROM ApplicationEntity app
       INNER JOIN app.modules module
       WHERE module.id = :moduleId
         AND app.id <> :id

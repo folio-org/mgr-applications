@@ -11,7 +11,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
@@ -42,16 +41,6 @@ public class ApplicationEntity extends ArtifactEntity {
   @EqualsAndHashCode.Exclude
   private Set<ModuleEntity> modules = new TreeSet<>(idComparator());
 
-  @OrderBy("id")
-  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-  @JoinTable(name = "application_ui_module",
-    joinColumns = @JoinColumn(name = "application_id"),
-    inverseJoinColumns = @JoinColumn(name = "ui_module_id")
-  )
-  @ToString.Exclude
-  @EqualsAndHashCode.Exclude
-  private Set<UiModuleEntity> uiModules = new TreeSet<>(idComparator());
-
   public static ApplicationEntity of(String id) {
     var entity = new ApplicationEntity();
     entity.id = id;
@@ -79,36 +68,6 @@ public class ApplicationEntity extends ArtifactEntity {
 
   public void removeAllModules(Consumer<ModuleEntity> onModuleRemoved) {
     for (var itr = modules.iterator(); itr.hasNext(); ) {
-      var module = itr.next();
-
-      module.getApplications().remove(this);
-      itr.remove();
-
-      onModuleRemoved.accept(module);
-    }
-  }
-
-  public void setUiModules(List<UiModuleEntity> newModules) {
-    removeAllUiModules();
-
-    emptyIfNull(newModules).forEach(this::addUiModule);
-  }
-
-  public void addUiModule(UiModuleEntity module) {
-    if (module.getId() == null) {
-      module.setId(module.getName() + "-" + module.getVersion());
-    }
-    module.getApplications().add(this);
-
-    uiModules.add(module);
-  }
-
-  public void removeAllUiModules() {
-    removeAllUiModules(module -> {});
-  }
-
-  public void removeAllUiModules(Consumer<UiModuleEntity> onModuleRemoved) {
-    for (var itr = uiModules.iterator(); itr.hasNext(); ) {
       var module = itr.next();
 
       module.getApplications().remove(this);
