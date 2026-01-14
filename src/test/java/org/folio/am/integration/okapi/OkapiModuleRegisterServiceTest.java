@@ -60,7 +60,7 @@ class OkapiModuleRegisterServiceTest {
   void onDescriptorDelete_positive_modulesDontExist() {
     var appDescriptor = applicationDescriptor();
 
-    var modules = new ArrayList<>(applicationDescriptorEntity(appDescriptor).getModules());
+    var modules = new ArrayList<>(applicationDescriptorEntity(appDescriptor).getBackendModules());
     var moduleIds = mapItems(modules, ArtifactEntity::getId);
     when(moduleRepository.findAllById(moduleIds)).thenReturn(emptyList());
 
@@ -86,7 +86,7 @@ class OkapiModuleRegisterServiceTest {
   void onDescriptorDelete_negative_modulesExist() {
     var appDescriptor = applicationDescriptor();
 
-    var modules = new ArrayList<>(applicationDescriptorEntity(appDescriptor).getModules());
+    var modules = new ArrayList<>(applicationDescriptorEntity(appDescriptor).getBackendModules());
     var moduleIds = mapItems(modules, ArtifactEntity::getId);
     when(moduleRepository.findAllById(moduleIds)).thenReturn(modules);
 

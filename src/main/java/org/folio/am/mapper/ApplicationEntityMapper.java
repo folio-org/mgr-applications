@@ -1,6 +1,6 @@
 package org.folio.am.mapper;
 
-import static org.folio.common.utils.CollectionUtils.toStream;
+import static org.folio.am.utils.CollectionUtils.filterAndMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +45,6 @@ public interface ApplicationEntityMapper {
 
   private static List<ModuleDescriptor> getModuleDescriptorsOf(ApplicationEntity applicationEntity,
     Predicate<ModuleEntity> moduleFilter) {
-    return toStream(applicationEntity.getModules())
-      .filter(moduleFilter)
-      .map(ModuleEntity::getDescriptor)
-      .toList();
+    return filterAndMap(applicationEntity.getModules(), moduleFilter, ModuleEntity::getDescriptor);
   }
 }

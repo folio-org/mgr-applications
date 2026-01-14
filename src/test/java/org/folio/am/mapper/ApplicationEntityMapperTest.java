@@ -56,10 +56,9 @@ class ApplicationEntityMapperTest {
     return applicationEntity;
   }
 
-  private static ModuleEntity createModule(ModuleType backend, ModuleDescriptor beModuleDescriptor) {
-    var moduleEntity = new ModuleEntity();
-    moduleEntity.setType(backend);
-    moduleEntity.setDescriptor(beModuleDescriptor);
+  private static ModuleEntity createModule(ModuleType type, ModuleDescriptor md) {
+    var moduleEntity = ModuleEntity.of(md.getId(), type);
+    moduleEntity.setDescriptor(md);
     return moduleEntity;
   }
 }
