@@ -16,7 +16,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Set;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
 import org.folio.am.repository.ModuleRepository;
-import org.folio.am.repository.UiModuleRepository;
 import org.folio.am.support.KafkaEventAssertions;
 import org.folio.am.support.base.BaseIntegrationTest;
 import org.folio.security.integration.keycloak.configuration.properties.KeycloakProperties;
@@ -46,7 +45,6 @@ class ApplicationRemovingIT extends BaseIntegrationTest {
   private static final String UI_MODULE_BAR_ID = "ui-bar-1.0.0";
 
   @Autowired private ModuleRepository moduleRepository;
-  @Autowired private UiModuleRepository uiModuleRepository;
   @Autowired private KeycloakProperties keycloakProperties;
 
   @BeforeAll
@@ -83,7 +81,7 @@ class ApplicationRemovingIT extends BaseIntegrationTest {
     doGet(get("/applications").queryParam("query", "cql.allRecords=1"))
       .andExpect(jsonPath("$.totalRecords", is(3)));
 
-    var found = uiModuleRepository.findAllById(Set.of(UI_MODULE_FOO_ID, UI_MODULE_BAR_ID));
+    var found = moduleRepository.findAllById(Set.of(UI_MODULE_FOO_ID, UI_MODULE_BAR_ID));
     assertThat(found).hasSize(1)
       .allMatch(module -> module.getId().equals(UI_MODULE_FOO_ID));
 

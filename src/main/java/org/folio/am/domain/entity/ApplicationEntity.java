@@ -1,6 +1,8 @@
 package org.folio.am.domain.entity;
 
+import static java.util.function.Function.identity;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
+import static org.folio.am.utils.CollectionUtils.filterAndMapToSet;
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.CascadeType;
@@ -45,6 +47,14 @@ public class ApplicationEntity extends ArtifactEntity {
     var entity = new ApplicationEntity();
     entity.id = id;
     return entity;
+  }
+
+  public Set<ModuleEntity> getUiModules() {
+    return filterAndMapToSet(modules, ModuleEntity::isUiModule, identity());
+  }
+
+  public Set<ModuleEntity> getBackendModules() {
+    return filterAndMapToSet(modules, ModuleEntity::isBackendModule, identity());
   }
 
   public void setModules(Set<ModuleEntity> newModules) {

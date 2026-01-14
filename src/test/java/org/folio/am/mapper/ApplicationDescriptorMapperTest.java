@@ -42,15 +42,19 @@ class ApplicationDescriptorMapperTest {
       .uiModuleDescriptors(List.of(new ModuleDescriptor().id("uiModule1-1.0.0").description("uiModule1")))
       .dependencies(List.of(dependency1, dependency2));
 
-    var applicationDescriptorEntity = mapper.convert(descriptor);
+    var descriptorEntity = mapper.convert(descriptor);
 
-    assertThat(applicationDescriptorEntity.getId()).isEqualTo(APPLICATION_ID);
-    assertThat(applicationDescriptorEntity.getName()).isEqualTo("app1");
-    assertThat(applicationDescriptorEntity.getVersion()).isEqualTo("1.0.0");
-    assertThat(takeOne(applicationDescriptorEntity.getModules()).getId()).isEqualTo("module1-1.0.0");
-    assertThat(takeOne(applicationDescriptorEntity.getUiModules()).getId()).isEqualTo("uiModule1-1.0.0");
+    assertThat(descriptorEntity.getId()).isEqualTo(APPLICATION_ID);
+    assertThat(descriptorEntity.getName()).isEqualTo("app1");
+    assertThat(descriptorEntity.getVersion()).isEqualTo("1.0.0");
 
-    var deps = applicationDescriptorEntity.getApplicationDescriptor().getDependencies();
+    var beModule = takeOne(descriptorEntity.getBackendModules());
+    assertThat(beModule.getId()).isEqualTo("module1-1.0.0");
+
+    var uiModule = takeOne(descriptorEntity.getUiModules());
+    assertThat(uiModule.getId()).isEqualTo("uiModule1-1.0.0");
+
+    var deps = descriptorEntity.getApplicationDescriptor().getDependencies();
     assertThat(deps).hasSize(2);
     var dep1 = deps.stream().filter(dep -> "dep1".equals(dep.getName())).findFirst().orElseThrow();
     var dep2 = deps.stream().filter(dep -> "dep2".equals(dep.getName())).findFirst().orElseThrow();

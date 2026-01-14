@@ -44,7 +44,7 @@ import org.folio.am.domain.entity.InterfaceReferenceEntity;
 import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.folio.am.domain.entity.ModuleDiscoveryEntity;
 import org.folio.am.domain.entity.ModuleEntity;
-import org.folio.am.domain.entity.UiModuleEntity;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.service.validator.ValidationMode;
 import org.folio.common.domain.model.AnyDescriptor;
@@ -100,6 +100,7 @@ public class TestValues {
       moduleEntity.setId(module.getId());
       moduleEntity.setName(module.getName());
       moduleEntity.setVersion(module.getVersion());
+      moduleEntity.setType(ModuleType.BACKEND);
 
       var moduleDescriptor = mds.stream()
         .filter(md -> Objects.equals(module.getName() + '-' + module.getVersion(), md.getId()))
@@ -111,11 +112,12 @@ public class TestValues {
     });
 
     emptyIfNull(descriptor.getUiModules()).forEach(module -> {
-      var uiModuleEntity = new UiModuleEntity();
+      var uiModuleEntity = new ModuleEntity();
 
       uiModuleEntity.setId(module.getId());
       uiModuleEntity.setName(module.getName());
       uiModuleEntity.setVersion(module.getVersion());
+      uiModuleEntity.setType(ModuleType.UI);
 
       var moduleDescriptor = uimds.stream()
         .filter(md -> Objects.equals(module.getName() + '-' + module.getVersion(), md.getId()))
@@ -123,7 +125,7 @@ public class TestValues {
 
       uiModuleEntity.setDescriptor(moduleDescriptor);
 
-      entity.addUiModule(uiModuleEntity);
+      entity.addModule(uiModuleEntity);
     });
 
     return entity;
@@ -298,6 +300,7 @@ public class TestValues {
     entity.setId(MODULE_ID);
     entity.setName(SERVICE_NAME);
     entity.setDiscoveryUrl(discoveryUrl);
+    entity.setType(ModuleType.BACKEND);
 
     var application = applicationDescriptorEntity();
     application.addModule(entity);
