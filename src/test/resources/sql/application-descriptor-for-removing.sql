@@ -37,25 +37,25 @@ values
     ]
   }');
 
-INSERT INTO module(id, name, version, discovery_url, descriptor)
+INSERT INTO module(id, name, version, discovery_url, descriptor, type)
 VALUES
   ('mod-foo-1.0.0', 'mod-foo', '1.0.0', 'http://mod-foo:8080', '{
     "id": "mod-foo-1.0.0",
     "name": "foo",
     "provides": [ { "id": "int-foo", "version": "1.0" } ]
-  }'),
+  }', 'BACKEND'),
   ('mod-bar-1.0.0', 'mod-bar', '1.0.0', 'http://mod-bar:8080', '{
     "id": "mod-bar-1.0.0",
     "name": "bar",
     "provides": [ { "id": "int-bar", "version": "1.0" } ],
     "requires": [ { "id": "int-foo", "version": "1.0" } ]
-  }'),
+  }', 'BACKEND'),
   ('mod-bar-1.0.1', 'mod-bar', '1.0.1', 'http://mod-bar:8081', '{
     "id": "mod-bar-1.0.1",
     "name": "bar",
     "provides": [ { "id": "int-bar", "version": "1.1" } ],
     "requires": [ { "id": "int-foo", "version": "1.1" } ]
-  }');
+  }', 'BACKEND');
 
 INSERT INTO application_module(application_id, module_id)
 VALUES ('test-app-1.0.0', 'mod-foo-1.0.0'),
@@ -63,25 +63,25 @@ VALUES ('test-app-1.0.0', 'mod-foo-1.0.0'),
        ('test-app-2.0.0', 'mod-foo-1.0.0'),
        ('test-app-2.0.0', 'mod-bar-1.0.1');
 
-INSERT INTO ui_module(id, name, version, descriptor)
+INSERT INTO module(id, name, version, descriptor, type)
 VALUES
   ('ui-foo-1.0.0', 'ui-foo', '1.0.0', '{
     "id": "ui-foo-1.0.0",
     "name": "foo",
     "requires": [ { "id": "int-foo", "version": "1.0" } ]
-  }'),
+  }', 'UI'),
   ('ui-bar-1.0.0', 'ui-bar', '1.0.0', '{
     "id": "ui-bar-1.0.0",
     "name": "bar",
     "requires": [ { "id": "int-bar", "version": "1.0" } ]
-  }'),
+  }', 'UI'),
   ('ui-bar-1.0.1', 'ui-bar', '1.0.1', '{
     "id": "ui-bar-1.0.1",
     "name": "bar",
     "requires": [ { "id": "int-bar", "version": "1.1" } ]
-  }');
+  }', 'UI');
 
-INSERT INTO application_ui_module(application_id, ui_module_id)
+INSERT INTO application_module(application_id, ui_module_id)
 VALUES ('test-app-3.0.0', 'ui-foo-1.0.0'),
        ('test-app-3.0.0', 'ui-bar-1.0.0'),
        ('test-app-4.0.0', 'ui-foo-1.0.0'),

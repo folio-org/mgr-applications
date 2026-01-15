@@ -27,11 +27,11 @@ values
         ]
     }');
 
-INSERT INTO module(id, name, version, discovery_url, descriptor)
+INSERT INTO module(id, name, version, discovery_url, descriptor, type)
 VALUES
-  ('test-module-foo-1.0.0', 'test-module-foo', '1.0.0', 'http://test-module-foo:8080', '{}'),
-  ('test-module-bar-1.0.0', 'test-module-bar', '1.0.0', 'http://test-module-bar:8080', '{}'),
-  ('test-module-baz-1.0.0', 'test-module-baz', '1.0.0', 'http://test-module-baz:8080', '{}');
+  ('test-module-foo-1.0.0', 'test-module-foo', '1.0.0', 'http://test-module-foo:8080', '{}', 'BACKEND'),
+  ('test-module-bar-1.0.0', 'test-module-bar', '1.0.0', 'http://test-module-bar:8080', '{}', 'BACKEND'),
+  ('test-module-baz-1.0.0', 'test-module-baz', '1.0.0', 'http://test-module-baz:8080', '{}', 'BACKEND');
 
 INSERT INTO application_module(application_id, module_id)
 VALUES ('test-app-1.0.0', 'test-module-foo-1.0.0'),

@@ -47,7 +47,11 @@
 
     <changeSet id="add-backend-condition-to-module-bootstrap-view" author="dmtkachenko">
         <createView viewName="module_bootstrap" replaceIfExists="true">
-            SELECT m.*,
+            SELECT m.id,
+                   m.name,
+                   m.version,
+                   m.descriptor,
+                   m.discovery_url,
                    am.application_id,
                    COALESCE(m.descriptor, '{}'::jsonb) @> '{"metadata": {"user": {"type": "system"}}}'
                        AS system_user_required

@@ -52,28 +52,28 @@ values
   }');
 
 -- Corresponding modules
-INSERT INTO module(id, name, version, descriptor)
+INSERT INTO module(id, name, version, descriptor, type)
 VALUES
   ('mod-core-8.0.1', 'mod-core', '8.0.1', '{
     "id": "mod-core-8.0.1",
     "name": "core",
     "provides": [ { "id": "int-core", "version": "8.0" } ]
-  }'),
+  }', 'BACKEND'),
   ('mod-core-8.1.0', 'mod-core', '8.1.0', '{
     "id": "mod-core-8.1.0",
     "name": "core",
     "provides": [ { "id": "int-core", "version": "8.1" } ]
-  }'),
+  }', 'BACKEND'),
   ('mod-core-9.0.0', 'mod-core', '9.0.0', '{
     "id": "mod-core-9.0.0",
     "name": "core",
     "provides": [ { "id": "int-core", "version": "9.0" } ]
-  }'),
+  }', 'BACKEND'),
   ('mod-core-9.0.1', 'mod-core', '9.0.1', '{
     "id": "mod-core-9.0.1",
     "name": "core",
     "provides": [ { "id": "int-core", "version": "9.0" } ]
-  }');
+  }', 'BACKEND');
 
 -- Module associations
 INSERT INTO application_module(application_id, module_id)
