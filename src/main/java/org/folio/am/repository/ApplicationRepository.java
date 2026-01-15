@@ -20,15 +20,15 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
   @Query(value = "SELECT entity FROM ApplicationEntity entity WHERE entity.id IN :ids")
   List<ApplicationEntity> findByIds(@Param("ids") List<String> applicationIds);
 
-  @EntityGraph(attributePaths = {"modules", "uiModules"})
+  @EntityGraph(attributePaths = {"modules"})
   @Query(value = "SELECT entity FROM ApplicationEntity entity WHERE entity.id IN :ids")
   List<ApplicationEntity> findByIdsWihModules(@Param("ids") List<String> applicationIds);
 
-  @EntityGraph(attributePaths = {"modules", "uiModules"})
+  @EntityGraph(attributePaths = {"modules"})
   @Query(value = "SELECT entity FROM ApplicationEntity entity WHERE entity.name = :name")
   List<ApplicationEntity> findByNameWithModules(String name);
 
-  @EntityGraph(attributePaths = {"modules", "uiModules"})
+  @EntityGraph(attributePaths = {"modules"})
   @Query(value = "SELECT entity FROM ApplicationEntity entity WHERE entity.name = :name ORDER BY entity.id")
   @QueryHints(@QueryHint(name = HINT_FETCH_SIZE, value = "50"))
   Stream<ApplicationEntity> streamByNameWithModules(@Param("name") String name);

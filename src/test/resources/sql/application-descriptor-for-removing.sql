@@ -81,7 +81,7 @@ VALUES
     "requires": [ { "id": "int-bar", "version": "1.1" } ]
   }', 'UI');
 
-INSERT INTO application_module(application_id, ui_module_id)
+INSERT INTO application_module(application_id, module_id)
 VALUES ('test-app-3.0.0', 'ui-foo-1.0.0'),
        ('test-app-3.0.0', 'ui-bar-1.0.0'),
        ('test-app-4.0.0', 'ui-foo-1.0.0'),
