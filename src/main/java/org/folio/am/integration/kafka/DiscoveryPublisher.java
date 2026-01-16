@@ -3,6 +3,7 @@ package org.folio.am.integration.kafka;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.domain.dto.ModuleDiscovery;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
 import org.folio.am.integration.messaging.MessagePublisher;
 import org.folio.am.service.ApplicationDiscoveryListener;
@@ -16,17 +17,17 @@ public class DiscoveryPublisher implements ApplicationDiscoveryListener {
   private final MessagePublisher<DiscoveryEvent> messagePublisher;
 
   @Override
-  public void onDiscoveryCreate(ModuleDiscovery moduleDiscovery, String token) {
+  public void onDiscoveryCreate(ModuleDiscovery moduleDiscovery, ModuleType type, String token) {
     sendMessage(moduleDiscovery.getId());
   }
 
   @Override
-  public void onDiscoveryUpdate(ModuleDiscovery moduleDiscovery, String token) {
+  public void onDiscoveryUpdate(ModuleDiscovery moduleDiscovery, ModuleType type, String token) {
     sendMessage(moduleDiscovery.getId());
   }
 
   @Override
-  public void onDiscoveryDelete(String serviceId, String instanceId, String token) {
+  public void onDiscoveryDelete(String serviceId, String instanceId, ModuleType type, String token) {
     sendMessage(serviceId);
   }
 

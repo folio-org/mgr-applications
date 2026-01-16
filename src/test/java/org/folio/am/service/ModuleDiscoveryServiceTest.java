@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import org.folio.am.domain.dto.ModuleDiscoveries;
 import org.folio.am.domain.dto.ModuleDiscovery;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.am.exception.RequestValidationException;
 import org.folio.am.mapper.ModuleDiscoveryMapper;
 import org.folio.am.repository.ModuleDiscoveryRepository;
@@ -146,7 +147,8 @@ class ModuleDiscoveryServiceTest {
 
       when(repository.findById(MODULE_ID)).thenReturn(Optional.of(moduleEntity));
       when(repository.saveAndFlush(any())).thenReturn(moduleEntity);
-      doNothing().when(eventPublisher).publishDiscoveryCreate(expectedModuleDiscovery, OKAPI_AUTH_TOKEN);
+      doNothing().when(eventPublisher).publishDiscoveryCreate(expectedModuleDiscovery, ModuleType.BACKEND,
+        OKAPI_AUTH_TOKEN);
       when(mapper.convert(moduleEntity)).thenReturn(expectedModuleDiscovery);
 
       var moduleDiscovery = TestValues.moduleDiscovery().id(null);
@@ -184,7 +186,8 @@ class ModuleDiscoveryServiceTest {
 
       when(repository.findAllById(List.of(MODULE_ID))).thenReturn(List.of(moduleEntity));
       when(repository.saveAndFlush(any())).thenReturn(moduleEntity);
-      doNothing().when(eventPublisher).publishDiscoveryCreate(expectedModuleDiscovery, OKAPI_AUTH_TOKEN);
+      doNothing().when(eventPublisher).publishDiscoveryCreate(expectedModuleDiscovery, ModuleType.BACKEND,
+        OKAPI_AUTH_TOKEN);
       when(mapper.convert(moduleEntity)).thenReturn(TestValues.moduleDiscovery());
 
       var moduleDiscovery = TestValues.moduleDiscovery().id(null);
@@ -237,7 +240,8 @@ class ModuleDiscoveryServiceTest {
 
       when(repository.findById(UI_MODULE_ID)).thenReturn(Optional.of(uiModuleEntity));
       when(repository.saveAndFlush(any())).thenReturn(uiModuleEntity);
-      doNothing().when(eventPublisher).publishDiscoveryCreate(expectedUiModuleDiscovery, OKAPI_AUTH_TOKEN);
+      doNothing().when(eventPublisher).publishDiscoveryCreate(expectedUiModuleDiscovery, ModuleType.UI,
+        OKAPI_AUTH_TOKEN);
       when(mapper.convert(uiModuleEntity)).thenReturn(expectedUiModuleDiscovery);
 
       var uiModuleDiscovery = TestValues.uiModuleDiscovery().id(null);
@@ -281,11 +285,13 @@ class ModuleDiscoveryServiceTest {
       when(repository.findById(MODULE_ID)).thenReturn(Optional.of(moduleEntity));
       when(repository.saveAndFlush(any())).thenReturn(moduleEntity);
       when(mapper.convert(moduleEntity)).thenReturn(discovery);
-      doNothing().when(eventPublisher).publishDiscoveryUpdate(moduleDiscoveryCaptor.capture(), eq(OKAPI_AUTH_TOKEN));
+      doNothing().when(eventPublisher).publishDiscoveryUpdate(moduleDiscoveryCaptor.capture(), eq(ModuleType.BACKEND),
+        eq(OKAPI_AUTH_TOKEN));
 
       service.update(MODULE_ID, discovery, OKAPI_AUTH_TOKEN);
 
-      verify(eventPublisher).publishDiscoveryUpdate(any(ModuleDiscovery.class), eq(OKAPI_AUTH_TOKEN));
+      verify(eventPublisher).publishDiscoveryUpdate(any(ModuleDiscovery.class), eq(ModuleType.BACKEND),
+        eq(OKAPI_AUTH_TOKEN));
 
       var capturedValue = moduleDiscoveryCaptor.getValue();
       assertThat(capturedValue).usingRecursiveComparison().ignoringFields("instId").isEqualTo(discovery);
@@ -327,11 +333,13 @@ class ModuleDiscoveryServiceTest {
       when(repository.findById(UI_MODULE_ID)).thenReturn(Optional.of(uiModuleEntity));
       when(repository.saveAndFlush(any())).thenReturn(uiModuleEntity);
       when(mapper.convert(uiModuleEntity)).thenReturn(uiDiscovery);
-      doNothing().when(eventPublisher).publishDiscoveryUpdate(moduleDiscoveryCaptor.capture(), eq(OKAPI_AUTH_TOKEN));
+      doNothing().when(eventPublisher).publishDiscoveryUpdate(moduleDiscoveryCaptor.capture(), eq(ModuleType.UI),
+        eq(OKAPI_AUTH_TOKEN));
 
       service.update(UI_MODULE_ID, uiDiscovery, OKAPI_AUTH_TOKEN);
 
-      verify(eventPublisher).publishDiscoveryUpdate(any(ModuleDiscovery.class), eq(OKAPI_AUTH_TOKEN));
+      verify(eventPublisher).publishDiscoveryUpdate(any(ModuleDiscovery.class), eq(ModuleType.UI),
+        eq(OKAPI_AUTH_TOKEN));
 
       var capturedValue = moduleDiscoveryCaptor.getValue();
       assertThat(capturedValue).usingRecursiveComparison().ignoringFields("instId").isEqualTo(uiDiscovery);
@@ -357,11 +365,12 @@ class ModuleDiscoveryServiceTest {
       when(repository.findByHasDiscoveryAndId(MODULE_ID)).thenReturn(Optional.of(entity));
       when(repository.save(entity)).thenReturn(entity);
 
-      doNothing().when(eventPublisher).publishDiscoveryDelete(MODULE_ID, MODULE_ID, OKAPI_AUTH_TOKEN);
+      doNothing().when(eventPublisher).publishDiscoveryDelete(MODULE_ID, MODULE_ID, ModuleType.BACKEND,
+        OKAPI_AUTH_TOKEN);
 
       service.delete(MODULE_ID, OKAPI_AUTH_TOKEN);
 
-      verify(eventPublisher).publishDiscoveryDelete(SERVICE_ID, SERVICE_ID, OKAPI_AUTH_TOKEN);
+      verify(eventPublisher).publishDiscoveryDelete(SERVICE_ID, SERVICE_ID, ModuleType.BACKEND, OKAPI_AUTH_TOKEN);
     }
 
     @Test
@@ -370,7 +379,8 @@ class ModuleDiscoveryServiceTest {
 
       service.delete(MODULE_ID, OKAPI_AUTH_TOKEN);
 
-      verify(eventPublisher, times(0)).publishDiscoveryDelete(SERVICE_ID, SERVICE_ID, OKAPI_AUTH_TOKEN);
+      verify(eventPublisher, times(0)).publishDiscoveryDelete(SERVICE_ID, SERVICE_ID, ModuleType.BACKEND,
+        OKAPI_AUTH_TOKEN);
     }
 
     @Test
@@ -379,11 +389,12 @@ class ModuleDiscoveryServiceTest {
       when(repository.findByHasDiscoveryAndId(UI_MODULE_ID)).thenReturn(Optional.of(uiEntity));
       when(repository.save(uiEntity)).thenReturn(uiEntity);
 
-      doNothing().when(eventPublisher).publishDiscoveryDelete(UI_MODULE_ID, UI_MODULE_ID, OKAPI_AUTH_TOKEN);
+      doNothing().when(eventPublisher).publishDiscoveryDelete(UI_MODULE_ID, UI_MODULE_ID, ModuleType.UI,
+        OKAPI_AUTH_TOKEN);
 
       service.delete(UI_MODULE_ID, OKAPI_AUTH_TOKEN);
 
-      verify(eventPublisher).publishDiscoveryDelete(UI_MODULE_ID, UI_MODULE_ID, OKAPI_AUTH_TOKEN);
+      verify(eventPublisher).publishDiscoveryDelete(UI_MODULE_ID, UI_MODULE_ID, ModuleType.UI, OKAPI_AUTH_TOKEN);
     }
 
     @Test
@@ -392,7 +403,8 @@ class ModuleDiscoveryServiceTest {
 
       service.delete(UI_MODULE_ID, OKAPI_AUTH_TOKEN);
 
-      verify(eventPublisher, times(0)).publishDiscoveryDelete(UI_MODULE_ID, UI_MODULE_ID, OKAPI_AUTH_TOKEN);
+      verify(eventPublisher, times(0)).publishDiscoveryDelete(UI_MODULE_ID, UI_MODULE_ID, ModuleType.UI,
+        OKAPI_AUTH_TOKEN);
     }
   }
 }

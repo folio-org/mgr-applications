@@ -132,7 +132,7 @@ public class ModuleDiscoveryService {
     var updatedEntity = repository.saveAndFlush(moduleEntity);
 
     var newModuleDiscovery = mapper.convert(updatedEntity);
-    eventPublisher.publishDiscoveryUpdate(newModuleDiscovery, token);
+    eventPublisher.publishDiscoveryUpdate(newModuleDiscovery, moduleEntity.getType(), token);
 
     log.info("Module discovery updated: moduleId = {}", moduleId);
   }
@@ -195,7 +195,7 @@ public class ModuleDiscoveryService {
     var savedModule = repository.saveAndFlush(entity);
     var moduleDiscovery = mapper.convert(savedModule);
 
-    eventPublisher.publishDiscoveryCreate(moduleDiscovery, token);
+    eventPublisher.publishDiscoveryCreate(moduleDiscovery, entity.getType(), token);
     log.info("Module discovery created: moduleId = {}", moduleId);
 
     return moduleDiscovery;
@@ -204,7 +204,7 @@ public class ModuleDiscoveryService {
   private void cleanModuleDiscoveryUrl(String moduleId, String token, ModuleEntity module) {
     module.setDiscoveryUrl(null);
     repository.save(module);
-    eventPublisher.publishDiscoveryDelete(module.getId(), module.getId(), token);
+    eventPublisher.publishDiscoveryDelete(module.getId(), module.getId(), module.getType(), token);
     log.info("Discovery deleted: moduleId = {}", moduleId);
   }
 

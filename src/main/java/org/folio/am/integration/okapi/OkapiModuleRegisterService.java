@@ -15,6 +15,7 @@ import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.DeploymentDescriptor;
 import org.folio.am.domain.dto.ModuleDiscovery;
 import org.folio.am.domain.entity.ArtifactEntity;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.am.repository.ModuleRepository;
 import org.folio.am.service.ApplicationDescriptorListener;
 import org.folio.am.service.ApplicationDiscoveryListener;
@@ -69,22 +70,30 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
   /**
    * Creates module discovery in Okapi.
    *
-   * @param discovery     module discovery descriptor
-   * @param token         authentication token
+   * @param discovery module discovery descriptor
+   * @param type      module type
+   * @param token     authentication token
    */
   @Override
-  public void onDiscoveryCreate(ModuleDiscovery discovery, String token) {
+  public void onDiscoveryCreate(ModuleDiscovery discovery, ModuleType type, String token) {
+    if (type == ModuleType.UI) {
+      return;
+    }
     upsertDiscovery(discovery, token);
   }
 
   /**
    * Updates module discovery in Okapi.
    *
-   * @param discovery     module discovery descriptor
-   * @param token         authentication token
+   * @param discovery module discovery descriptor
+   * @param type      module type
+   * @param token     authentication token
    */
   @Override
-  public void onDiscoveryUpdate(ModuleDiscovery discovery, String token) {
+  public void onDiscoveryUpdate(ModuleDiscovery discovery, ModuleType type, String token) {
+    if (type == ModuleType.UI) {
+      return;
+    }
     upsertDiscovery(discovery, token);
   }
 
@@ -93,10 +102,14 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
    *
    * @param serviceId  service id
    * @param instanceId instance id
+   * @param type       module type
    * @param token      authentication token
    */
   @Override
-  public void onDiscoveryDelete(String serviceId, String instanceId, String token) {
+  public void onDiscoveryDelete(String serviceId, String instanceId, ModuleType type, String token) {
+    if (type == ModuleType.UI) {
+      return;
+    }
     deleteDiscovery(serviceId, instanceId, token);
   }
 

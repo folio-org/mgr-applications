@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.domain.dto.ModuleDiscovery;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.am.repository.ModuleRepository;
 import org.folio.am.service.ApplicationDiscoveryListener;
 import org.folio.tools.kong.model.Service;
@@ -29,26 +30,36 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
   /**
    * Creates service into API Gateway.
    *
-   * @param moduleDiscovery      module discovery descriptor
-   * @param token                authentication token
+   * @param moduleDiscovery module discovery descriptor
+   * @param type            module type
+   * @param token           authentication token
    */
   @Override
-  public void onDiscoveryCreate(ModuleDiscovery moduleDiscovery, String token) {
-    log.info("Discovery information created for {}", moduleDiscovery.getId());
+  public void onDiscoveryCreate(ModuleDiscovery moduleDiscovery, ModuleType type, String token) {
+    if (type == ModuleType.UI) {
+      return;
+    }
+
     upsertService(moduleDiscovery);
+    log.info("Discovery information created for {}", moduleDiscovery.getId());
   }
 
   /**
    * Updates service in API Gateway.
    *
-   * @param moduleDiscovery      module discovery descriptor
-   * @param token                authentication token
+   * @param moduleDiscovery module discovery descriptor
+   * @param type            module type
+   * @param token           authentication token
    */
   @Override
-  public void onDiscoveryUpdate(ModuleDiscovery moduleDiscovery, String token) {
-    log.info("Discovery information updated for {}", moduleDiscovery.getId());
+  public void onDiscoveryUpdate(ModuleDiscovery moduleDiscovery, ModuleType type, String token) {
+    if (type == ModuleType.UI) {
+      return;
+    }
+
     deleteServiceKongRoutes(moduleDiscovery.getId());
     upsertService(moduleDiscovery);
+    log.info("Discovery information updated for {}", moduleDiscovery.getId());
   }
 
   /**
@@ -56,12 +67,17 @@ public class KongDiscoveryListener implements ApplicationDiscoveryListener {
    *
    * @param serviceId  service id
    * @param instanceId instance id
+   * @param type       module type
    * @param token      authentication token
    */
   @Override
-  public void onDiscoveryDelete(String serviceId, String instanceId, String token) {
+  public void onDiscoveryDelete(String serviceId, String instanceId, ModuleType type, String token) {
+    if (type == ModuleType.UI) {
+      return;
+    }
     deleteServiceKongRoutes(serviceId);
     kongGatewayService.deleteService(serviceId);
+    log.info("Discovery information deleted for {}", serviceId);
   }
 
   private void upsertService(ModuleDiscovery moduleDiscovery) {
