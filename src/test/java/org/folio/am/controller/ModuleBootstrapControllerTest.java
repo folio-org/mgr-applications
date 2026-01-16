@@ -23,10 +23,10 @@ import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @UnitTest
@@ -38,10 +38,8 @@ class ModuleBootstrapControllerTest {
 
   private static final String ENDPOINT_PATH = "/modules/{id}";
 
-  @Autowired
-  private MockMvc mockMvc;
-  @MockBean
-  private ModuleBootstrapService service;
+  @Autowired private MockMvc mockMvc;
+  @MockitoBean private ModuleBootstrapService service;
 
   @Test
   void get_positive() throws Exception {

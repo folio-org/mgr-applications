@@ -30,9 +30,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @UnitTest
@@ -47,9 +47,9 @@ class ModuleDiscoveryControllerTest {
 
   @Autowired private MockMvc mockMvc;
   @Mock private JsonWebToken jsonWebToken;
-  @MockBean private JsonWebTokenParser jsonWebTokenParser;
-  @MockBean private KeycloakAuthClient keycloakAuthClient;
-  @MockBean private ModuleDiscoveryService moduleDiscoveryService;
+  @MockitoBean private JsonWebTokenParser jsonWebTokenParser;
+  @MockitoBean private KeycloakAuthClient keycloakAuthClient;
+  @MockitoBean private ModuleDiscoveryService moduleDiscoveryService;
 
   @Test
   void getModuleDiscovery_positive() throws Exception {
