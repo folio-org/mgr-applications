@@ -76,10 +76,7 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
    */
   @Override
   public void onDiscoveryCreate(ModuleDiscovery discovery, ModuleType type, String token) {
-    if (type == ModuleType.UI) {
-      return;
-    }
-    upsertDiscovery(discovery, token);
+    upsertDiscovery(discovery, type, token);
   }
 
   /**
@@ -91,10 +88,7 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
    */
   @Override
   public void onDiscoveryUpdate(ModuleDiscovery discovery, ModuleType type, String token) {
-    if (type == ModuleType.UI) {
-      return;
-    }
-    upsertDiscovery(discovery, token);
+    upsertDiscovery(discovery, type, token);
   }
 
   /**
@@ -107,10 +101,7 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
    */
   @Override
   public void onDiscoveryDelete(String serviceId, String instanceId, ModuleType type, String token) {
-    if (type == ModuleType.UI) {
-      return;
-    }
-    deleteDiscovery(serviceId, instanceId, token);
+    deleteDiscovery(serviceId, instanceId, type, token);
   }
 
   private Set<String> findExistingModuleIds(List<ModuleDescriptor> moduleDescriptors) {
@@ -128,7 +119,11 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
     okapiClient.deleteModuleDescriptor(md.getId(), token);
   }
 
-  private void upsertDiscovery(ModuleDiscovery moduleDiscovery, String token) {
+  private void upsertDiscovery(ModuleDiscovery moduleDiscovery, ModuleType type, String token) {
+    if (type == ModuleType.UI) {
+      return;
+    }
+
     try {
       var moduleId = moduleDiscovery.getId();
       var discoveryInfo = okapiClient.getDiscovery(moduleId, moduleId, token);
@@ -155,7 +150,11 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
     log.debug("Discovery info registered in Okapi: {}", moduleDiscovery.getId());
   }
 
-  private void deleteDiscovery(String serviceId, String instanceId, String token) {
+  private void deleteDiscovery(String serviceId, String instanceId, ModuleType type, String token) {
+    if (type == ModuleType.UI) {
+      return;
+    }
+
     try {
       okapiClient.deleteDiscovery(serviceId, instanceId, token);
       log.debug("Discovery info removed from Okapi: {}", serviceId);
