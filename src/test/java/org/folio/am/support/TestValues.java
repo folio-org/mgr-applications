@@ -18,6 +18,10 @@ import static org.folio.am.support.TestConstants.MODULE_URL;
 import static org.folio.am.support.TestConstants.SERVICE_ID;
 import static org.folio.am.support.TestConstants.SERVICE_NAME;
 import static org.folio.am.support.TestConstants.SERVICE_VERSION;
+import static org.folio.am.support.TestConstants.UI_MODULE_ID;
+import static org.folio.am.support.TestConstants.UI_MODULE_NAME;
+import static org.folio.am.support.TestConstants.UI_MODULE_URL;
+import static org.folio.am.support.TestConstants.UI_MODULE_VERSION;
 import static org.folio.am.support.TestConstants.id;
 
 import java.util.Arrays;
@@ -290,6 +294,14 @@ public class TestValues {
       .location(MODULE_BAR_URL);
   }
 
+  public static ModuleDiscovery uiModuleDiscovery() {
+    return new ModuleDiscovery()
+      .id(UI_MODULE_ID)
+      .name(UI_MODULE_NAME)
+      .version(UI_MODULE_VERSION)
+      .location(UI_MODULE_URL);
+  }
+
   public static ModuleEntity moduleEntity() {
     return moduleEntity(null);
   }
@@ -301,6 +313,24 @@ public class TestValues {
     entity.setName(SERVICE_NAME);
     entity.setDiscoveryUrl(discoveryUrl);
     entity.setType(ModuleType.BACKEND);
+
+    var application = applicationDescriptorEntity();
+    application.addModule(entity);
+
+    return entity;
+  }
+
+  public static ModuleEntity uiModuleEntity() {
+    return uiModuleEntity(null);
+  }
+
+  public static ModuleEntity uiModuleEntity(String discoveryUrl) {
+    var entity = new ModuleEntity();
+
+    entity.setId(UI_MODULE_ID);
+    entity.setName(UI_MODULE_NAME);
+    entity.setDiscoveryUrl(discoveryUrl);
+    entity.setType(ModuleType.UI);
 
     var application = applicationDescriptorEntity();
     application.addModule(entity);

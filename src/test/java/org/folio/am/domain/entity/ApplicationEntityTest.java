@@ -26,8 +26,9 @@ class ApplicationEntityTest {
 
     var backendModules = application.getBackendModules();
 
-    assertThat(backendModules).hasSize(2);
-    assertThat(backendModules).containsExactlyInAnyOrder(backendModule1, backendModule2);
+    assertThat(backendModules)
+      .hasSize(2)
+      .containsExactlyInAnyOrder(backendModule1, backendModule2);
   }
 
   @Test
@@ -53,8 +54,9 @@ class ApplicationEntityTest {
 
     var uiModules = application.getUiModules();
 
-    assertThat(uiModules).hasSize(2);
-    assertThat(uiModules).containsExactlyInAnyOrder(uiModule1, uiModule2);
+    assertThat(uiModules)
+      .hasSize(2)
+      .containsExactlyInAnyOrder(uiModule1, uiModule2);
   }
 
   @Test

@@ -100,7 +100,8 @@ class CollectionUtilsTest {
       Object::toString
     );
 
-    assertThat(result).containsExactly("2", "2", "3", "3");
-    assertThat(result).isInstanceOf(List.class);
+    assertThat(result)
+      .containsExactly("2", "2", "3", "3")
+      .isInstanceOf(List.class);
   }
 }
