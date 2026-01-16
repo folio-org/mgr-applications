@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.MERGE;
+import static org.springframework.test.json.JsonCompareMode.STRICT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -66,7 +67,7 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
   }
 
   @Test
@@ -84,13 +85,13 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
         .content(asJsonString(moduleDiscovery)))
       .andExpect(status().isCreated())
-      .andExpect(content().json(asJsonString(moduleDiscovery), true));
+      .andExpect(content().json(asJsonString(moduleDiscovery), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries(moduleDiscovery)), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries(moduleDiscovery)), STRICT));
 
     assertDiscoveryEvents(MODULE_BAR_ID);
   }
@@ -131,13 +132,13 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
         .content(asJsonString(moduleDiscoveries)))
       .andExpect(status().isCreated())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     assertDiscoveryEvents(MODULE_BAR_ID, MODULE_FOO_ID);
   }
@@ -183,7 +184,7 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscovery), true));
+      .andExpect(content().json(asJsonString(moduleDiscovery), STRICT));
 
     assertDiscoveryEvents(MODULE_FOO_ID);
   }
@@ -223,13 +224,13 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     assertDiscoveryEvents(MODULE_FOO_ID);
   }
@@ -251,13 +252,13 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     assertDiscoveryEvents(MODULE_FOO_ID);
   }
@@ -274,7 +275,7 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
         .content(asJsonString(uiModuleDiscovery)))
       .andExpect(status().isCreated())
-      .andExpect(content().json(asJsonString(uiModuleDiscovery), true));
+      .andExpect(content().json(asJsonString(uiModuleDiscovery), STRICT));
 
     assertDiscoveryEvents(UI_MODULE_ID);
   }
