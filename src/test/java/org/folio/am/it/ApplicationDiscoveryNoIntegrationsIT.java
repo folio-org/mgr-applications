@@ -8,10 +8,12 @@ import static org.folio.am.support.TestConstants.APPLICATION_ID;
 import static org.folio.am.support.TestConstants.MODULE_BAR_ID;
 import static org.folio.am.support.TestConstants.MODULE_FOO_ID;
 import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
+import static org.folio.am.support.TestConstants.UI_MODULE_ID;
 import static org.folio.am.support.TestValues.moduleBarDiscovery;
 import static org.folio.am.support.TestValues.moduleDiscoveries;
 import static org.folio.am.support.TestValues.moduleDiscovery;
 import static org.folio.am.support.TestValues.moduleFooDiscovery;
+import static org.folio.am.support.TestValues.uiModuleDiscovery;
 import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.is;
@@ -201,5 +203,72 @@ class ApplicationDiscoveryNoIntegrationsIT extends BaseIntegrationTest {
       .andExpect(content().json(asJsonString(moduleDiscoveries), true));
 
     assertDiscoveryEvents(MODULE_FOO_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-ui-it.sql")
+  void create_positive_uiModule() throws Exception {
+    var uiModuleDiscovery = uiModuleDiscovery();
+
+    mockMvc.perform(post("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(uiModuleDiscovery)))
+      .andExpect(status().isCreated())
+      .andExpect(content().json(asJsonString(uiModuleDiscovery), true));
+
+    mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(moduleDiscoveries(uiModuleDiscovery)), true));
+
+    assertDiscoveryEvents(UI_MODULE_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
+  void get_positive_uiModule() throws Exception {
+    mockMvc.perform(get("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(uiModuleDiscovery()), true));
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
+  void update_positive_uiModule() throws Exception {
+    var newUrl = "http://test-ui-module-updated:8080";
+    var uiModuleDiscovery = uiModuleDiscovery().location(newUrl);
+
+    mockMvc.perform(put("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(uiModuleDiscovery)))
+      .andExpect(status().isNoContent());
+
+    mockMvc.perform(get("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(uiModuleDiscovery), true));
+
+    assertDiscoveryEvents(UI_MODULE_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
+  void delete_positive_uiModule() throws Exception {
+    mockMvc.perform(delete("/modules/{id}/discovery", UI_MODULE_ID)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNoContent());
+
+    mockMvc.perform(get("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNotFound());
+
+    assertDiscoveryEvents(UI_MODULE_ID);
   }
 }

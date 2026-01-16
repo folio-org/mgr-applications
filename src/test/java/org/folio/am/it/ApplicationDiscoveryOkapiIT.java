@@ -8,10 +8,12 @@ import static org.folio.am.support.TestConstants.APPLICATION_ID;
 import static org.folio.am.support.TestConstants.MODULE_BAR_ID;
 import static org.folio.am.support.TestConstants.MODULE_FOO_ID;
 import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
+import static org.folio.am.support.TestConstants.UI_MODULE_ID;
 import static org.folio.am.support.TestValues.moduleBarDiscovery;
 import static org.folio.am.support.TestValues.moduleDiscoveries;
 import static org.folio.am.support.TestValues.moduleDiscovery;
 import static org.folio.am.support.TestValues.moduleFooDiscovery;
+import static org.folio.am.support.TestValues.uiModuleDiscovery;
 import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.is;
@@ -258,5 +260,34 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
       .andExpect(content().json(asJsonString(moduleDiscoveries), true));
 
     assertDiscoveryEvents(MODULE_FOO_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-ui-it.sql")
+  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-create-module-discovery.json")
+  void create_positive_uiModuleSkipsOkapi() throws Exception {
+    var uiModuleDiscovery = uiModuleDiscovery();
+
+    // No Okapi discovery stubs needed - UI modules skip Okapi
+    mockMvc.perform(post("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(uiModuleDiscovery)))
+      .andExpect(status().isCreated())
+      .andExpect(content().json(asJsonString(uiModuleDiscovery), true));
+
+    assertDiscoveryEvents(UI_MODULE_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
+  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json")
+  void delete_positive_uiModuleSkipsOkapi() throws Exception {
+    // No Okapi discovery stubs needed - UI modules skip Okapi
+    mockMvc.perform(delete("/modules/{id}/discovery", UI_MODULE_ID)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNoContent());
+
+    assertDiscoveryEvents(UI_MODULE_ID);
   }
 }
