@@ -16,10 +16,12 @@ import static org.folio.am.support.TestConstants.MODULE_FOO_NAME;
 import static org.folio.am.support.TestConstants.MODULE_FOO_URL;
 import static org.folio.am.support.TestConstants.MODULE_FOO_VERSION;
 import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
+import static org.folio.am.support.TestConstants.UI_MODULE_ID;
 import static org.folio.am.support.TestValues.moduleBarDiscovery;
 import static org.folio.am.support.TestValues.moduleDiscoveries;
 import static org.folio.am.support.TestValues.moduleDiscovery;
 import static org.folio.am.support.TestValues.moduleFooDiscovery;
+import static org.folio.am.support.TestValues.uiModuleDiscovery;
 import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.is;
@@ -272,6 +274,43 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
 
     assertThatThrownBy(() -> kongAdminClient.getService(MODULE_FOO_ID)).isInstanceOf(NotFound.class);
     assertDiscoveryEvents(MODULE_FOO_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-ui-it.sql")
+  void create_positive_uiModuleSkipsKong() throws Exception {
+    var uiModuleDiscovery = uiModuleDiscovery();
+
+    mockMvc.perform(post("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(uiModuleDiscovery)))
+      .andExpect(status().isCreated())
+      .andExpect(content().json(asJsonString(uiModuleDiscovery), true));
+
+    // Verify NO Kong service created for UI module
+    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
+      .isInstanceOf(NotFound.class);
+
+    assertDiscoveryEvents(UI_MODULE_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
+  void delete_positive_uiModuleSkipsKong() throws Exception {
+    // Verify no Kong service exists before deletion
+    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
+      .isInstanceOf(NotFound.class);
+
+    mockMvc.perform(delete("/modules/{id}/discovery", UI_MODULE_ID)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNoContent());
+
+    // Still no Kong service after deletion
+    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
+      .isInstanceOf(NotFound.class);
+
+    assertDiscoveryEvents(UI_MODULE_ID);
   }
 
   @SneakyThrows

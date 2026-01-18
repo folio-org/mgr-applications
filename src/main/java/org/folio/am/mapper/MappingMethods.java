@@ -1,7 +1,7 @@
 package org.folio.am.mapper;
 
-import static java.util.Collections.emptySet;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 import static org.folio.am.domain.entity.InterfaceReferenceEntity.ReferenceType.OPTIONAL;
 import static org.folio.am.domain.entity.InterfaceReferenceEntity.ReferenceType.PROVIDES;
 import static org.folio.am.domain.entity.InterfaceReferenceEntity.ReferenceType.REQUIRES;
@@ -10,19 +10,17 @@ import static org.folio.common.utils.CollectionUtils.mapItemsToSet;
 import static org.folio.common.utils.CollectionUtils.toStream;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.entity.InterfaceReferenceEntity;
 import org.folio.am.domain.entity.ModuleEntity;
-import org.folio.am.domain.entity.UiModuleEntity;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
@@ -33,37 +31,16 @@ import org.springframework.stereotype.Component;
 public class MappingMethods {
 
   public Set<ModuleEntity> mapModuleEntitiesFromAppDescriptor(ApplicationDescriptor descriptor) {
-    var modules = descriptor.getModules();
-
-    if (isEmpty(modules)) {
-      return emptySet();
-    }
-
-    var mdById = toStream(descriptor.getModuleDescriptors())
-      .collect(Collectors.toMap(ModuleDescriptor::getId, Function.identity()));
-
-    return mapItemsToSet(modules, module -> moduleToModuleEntity(module, mdById));
-  }
-
-  public List<UiModuleEntity> mapUiModuleEntitiesFromAppDescriptor(ApplicationDescriptor descriptor) {
-    var modules = descriptor.getUiModules();
-
-    if (isEmpty(modules)) {
-      return Collections.emptyList();
-    }
-
-    var mdById = toStream(descriptor.getUiModuleDescriptors())
-      .collect(Collectors.toMap(ModuleDescriptor::getId, Function.identity()));
-
-    return mapItems(modules, module -> moduleToUiModuleEntity(module, mdById));
+    return union(
+      mapItemsToSet(descriptor.getModules(),
+        module -> moduleToModuleEntity(module, moduleDescriptorsById(descriptor))),
+      mapItemsToSet(descriptor.getUiModules(),
+        module -> moduleToUiModuleEntity(module, uiModuleDescriptorsById(descriptor)))
+    );
   }
 
   private ModuleEntity moduleToModuleEntity(Module module, Map<String, ModuleDescriptor> descriptorMap) {
-    var entity = new ModuleEntity();
-
-    entity.setId(module.getId());
-    entity.setName(module.getName());
-    entity.setVersion(module.getVersion());
+    var entity = moduleEntityOf(module, ModuleType.BACKEND);
 
     var md = descriptorMap.get(entity.getId());
     if (md == null) {
@@ -77,12 +54,8 @@ public class MappingMethods {
     return entity;
   }
 
-  private UiModuleEntity moduleToUiModuleEntity(Module module, Map<String, ModuleDescriptor> descriptorMap) {
-    var entity = new UiModuleEntity();
-
-    entity.setId(module.getId());
-    entity.setName(module.getName());
-    entity.setVersion(module.getVersion());
+  private ModuleEntity moduleToUiModuleEntity(Module module, Map<String, ModuleDescriptor> descriptorMap) {
+    var entity = moduleEntityOf(module, ModuleType.UI);
 
     var md = descriptorMap.get(entity.getId());
     if (md == null) {
@@ -127,5 +100,35 @@ public class MappingMethods {
     e.setVersion(ref.getVersion());
     e.setType(type);
     return e;
+  }
+
+  private static Map<String, ModuleDescriptor> moduleDescriptorsById(ApplicationDescriptor descriptor) {
+    return toStream(descriptor.getModuleDescriptors())
+      .collect(toMap(ModuleDescriptor::getId, identity()));
+  }
+
+  private static Map<String, ModuleDescriptor> uiModuleDescriptorsById(ApplicationDescriptor descriptor) {
+    return toStream(descriptor.getUiModuleDescriptors())
+      .collect(toMap(ModuleDescriptor::getId, identity()));
+  }
+
+  private static ModuleEntity moduleEntityOf(Module module, ModuleType moduleType) {
+    var entity = new ModuleEntity();
+
+    entity.setId(module.getId());
+    entity.setName(module.getName());
+    entity.setVersion(module.getVersion());
+    entity.setType(moduleType);
+    return entity;
+  }
+
+  private static <T> Set<T> union(Set<? extends T> setA, Set<? extends T> setB) {
+    Objects.requireNonNull(setA, "First set is null");
+    Objects.requireNonNull(setB, "Second set is null");
+
+    Set<T> union = new HashSet<>(setA);
+    union.addAll(setB);
+
+    return union;
   }
 }

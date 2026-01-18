@@ -36,7 +36,6 @@ import org.folio.am.integration.mte.EntitlementService;
 import org.folio.am.mapper.ApplicationDescriptorMapper;
 import org.folio.am.repository.ApplicationRepository;
 import org.folio.am.repository.ModuleRepository;
-import org.folio.am.repository.UiModuleRepository;
 import org.folio.am.support.TestValues;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.common.domain.model.OffsetRequest;
@@ -63,7 +62,6 @@ class ApplicationServiceTest {
   @InjectMocks private ApplicationService service;
   @Mock private ApplicationRepository repository;
   @Mock private ModuleRepository moduleRepository;
-  @Mock private UiModuleRepository uiModuleRepository;
   @Mock private ApplicationDescriptorMapper mapper;
   @Mock private ApplicationEventPublisher eventPublisher;
   @Mock private ModuleDiscoveryService discoveryService;
@@ -242,11 +240,6 @@ class ApplicationServiceTest {
       doNothing().when(discoveryService).delete(module.getId(), OKAPI_AUTH_TOKEN);
       doNothing().when(moduleRepository).delete(module);
     });
-    expectedEntityToDelete.getUiModules().forEach(uiModule -> {
-      when(repository.existsByNotIdAndUiModuleId(expectedEntityToDelete.getId(), uiModule.getId()))
-        .thenReturn(false);
-      doNothing().when(uiModuleRepository).delete(uiModule);
-    });
 
     service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
 
@@ -266,11 +259,6 @@ class ApplicationServiceTest {
       doNothing().when(discoveryService).delete(module.getId(), OKAPI_AUTH_TOKEN);
       doNothing().when(moduleRepository).delete(module);
     });
-    expectedEntityToDelete.getUiModules().forEach(uiModule -> {
-      when(repository.existsByNotIdAndUiModuleId(expectedEntityToDelete.getId(), uiModule.getId()))
-        .thenReturn(false);
-      doNothing().when(uiModuleRepository).delete(uiModule);
-    });
 
     service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
 
@@ -288,11 +276,6 @@ class ApplicationServiceTest {
     when(entitlementService.getTenants(APPLICATION_ID, OKAPI_AUTH_TOKEN)).thenReturn(List.of());
     expectedEntityToDelete.getModules().forEach(module ->
       when(repository.existsByNotIdAndModuleId(expectedEntityToDelete.getId(), module.getId())).thenReturn(true));
-    expectedEntityToDelete.getUiModules().forEach(uiModule -> {
-      when(repository.existsByNotIdAndUiModuleId(expectedEntityToDelete.getId(), uiModule.getId()))
-        .thenReturn(false);
-      doNothing().when(uiModuleRepository).delete(uiModule);
-    });
 
     service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
 
@@ -313,8 +296,6 @@ class ApplicationServiceTest {
       doNothing().when(discoveryService).delete(module.getId(), OKAPI_AUTH_TOKEN);
       doNothing().when(moduleRepository).delete(module);
     });
-    expectedEntityToDelete.getUiModules().forEach(uiModule ->
-      when(repository.existsByNotIdAndUiModuleId(expectedEntityToDelete.getId(), uiModule.getId())).thenReturn(true));
 
     service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
 
@@ -374,7 +355,7 @@ class ApplicationServiceTest {
   }
 
   private static ModuleEntity copyOf(ModuleEntity module) {
-    var result = ModuleEntity.of(module.getId());
+    var result = ModuleEntity.of(module.getId(), module.getType());
 
     result.setName(module.getName());
     result.setVersion(module.getVersion());

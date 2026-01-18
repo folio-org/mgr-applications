@@ -15,6 +15,7 @@ import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.DeploymentDescriptor;
 import org.folio.am.domain.dto.ModuleDiscovery;
 import org.folio.am.domain.entity.ArtifactEntity;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.am.repository.ModuleRepository;
 import org.folio.am.service.ApplicationDescriptorListener;
 import org.folio.am.service.ApplicationDiscoveryListener;
@@ -69,23 +70,25 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
   /**
    * Creates module discovery in Okapi.
    *
-   * @param discovery     module discovery descriptor
-   * @param token         authentication token
+   * @param discovery module discovery descriptor
+   * @param type      module type
+   * @param token     authentication token
    */
   @Override
-  public void onDiscoveryCreate(ModuleDiscovery discovery, String token) {
-    upsertDiscovery(discovery, token);
+  public void onDiscoveryCreate(ModuleDiscovery discovery, ModuleType type, String token) {
+    upsertDiscovery(discovery, type, token);
   }
 
   /**
    * Updates module discovery in Okapi.
    *
-   * @param discovery     module discovery descriptor
-   * @param token         authentication token
+   * @param discovery module discovery descriptor
+   * @param type      module type
+   * @param token     authentication token
    */
   @Override
-  public void onDiscoveryUpdate(ModuleDiscovery discovery, String token) {
-    upsertDiscovery(discovery, token);
+  public void onDiscoveryUpdate(ModuleDiscovery discovery, ModuleType type, String token) {
+    upsertDiscovery(discovery, type, token);
   }
 
   /**
@@ -93,11 +96,12 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
    *
    * @param serviceId  service id
    * @param instanceId instance id
+   * @param type       module type
    * @param token      authentication token
    */
   @Override
-  public void onDiscoveryDelete(String serviceId, String instanceId, String token) {
-    deleteDiscovery(serviceId, instanceId, token);
+  public void onDiscoveryDelete(String serviceId, String instanceId, ModuleType type, String token) {
+    deleteDiscovery(serviceId, instanceId, type, token);
   }
 
   private Set<String> findExistingModuleIds(List<ModuleDescriptor> moduleDescriptors) {
@@ -115,7 +119,11 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
     okapiClient.deleteModuleDescriptor(md.getId(), token);
   }
 
-  private void upsertDiscovery(ModuleDiscovery moduleDiscovery, String token) {
+  private void upsertDiscovery(ModuleDiscovery moduleDiscovery, ModuleType type, String token) {
+    if (type == ModuleType.UI) {
+      return;
+    }
+
     try {
       var moduleId = moduleDiscovery.getId();
       var discoveryInfo = okapiClient.getDiscovery(moduleId, moduleId, token);
@@ -142,7 +150,11 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
     log.debug("Discovery info registered in Okapi: {}", moduleDiscovery.getId());
   }
 
-  private void deleteDiscovery(String serviceId, String instanceId, String token) {
+  private void deleteDiscovery(String serviceId, String instanceId, ModuleType type, String token) {
+    if (type == ModuleType.UI) {
+      return;
+    }
+
     try {
       okapiClient.deleteDiscovery(serviceId, instanceId, token);
       log.debug("Discovery info removed from Okapi: {}", serviceId);

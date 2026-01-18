@@ -16,13 +16,17 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import feign.FeignException;
 import java.util.ArrayList;
 import org.folio.am.domain.entity.ArtifactEntity;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.am.repository.ModuleRepository;
 import org.folio.test.types.UnitTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +40,11 @@ class OkapiModuleRegisterServiceTest {
   @Mock private OkapiClient okapiClient;
   @Mock private ModuleRepository moduleRepository;
   @InjectMocks private OkapiModuleRegisterService service;
+
+  @AfterEach
+  void tearDown() {
+    verifyNoMoreInteractions(okapiClient, moduleRepository);
+  }
 
   @Test
   void onDescriptorCreate_positive() {
@@ -60,7 +69,7 @@ class OkapiModuleRegisterServiceTest {
   void onDescriptorDelete_positive_modulesDontExist() {
     var appDescriptor = applicationDescriptor();
 
-    var modules = new ArrayList<>(applicationDescriptorEntity(appDescriptor).getModules());
+    var modules = new ArrayList<>(applicationDescriptorEntity(appDescriptor).getBackendModules());
     var moduleIds = mapItems(modules, ArtifactEntity::getId);
     when(moduleRepository.findAllById(moduleIds)).thenReturn(emptyList());
 
@@ -86,7 +95,7 @@ class OkapiModuleRegisterServiceTest {
   void onDescriptorDelete_negative_modulesExist() {
     var appDescriptor = applicationDescriptor();
 
-    var modules = new ArrayList<>(applicationDescriptorEntity(appDescriptor).getModules());
+    var modules = new ArrayList<>(applicationDescriptorEntity(appDescriptor).getBackendModules());
     var moduleIds = mapItems(modules, ArtifactEntity::getId);
     when(moduleRepository.findAllById(moduleIds)).thenReturn(modules);
 
@@ -99,7 +108,7 @@ class OkapiModuleRegisterServiceTest {
   void onDiscoveryCreate_positive() {
     when(okapiClient.getDiscovery(MODULE_ID, MODULE_ID, OKAPI_AUTH_TOKEN)).thenThrow(FeignException.NotFound.class);
 
-    service.onDiscoveryCreate(moduleDiscovery(), OKAPI_AUTH_TOKEN);
+    service.onDiscoveryCreate(moduleDiscovery(), ModuleType.BACKEND, OKAPI_AUTH_TOKEN);
 
     var deploymentDescriptor = deploymentDescriptor();
     verify(okapiClient).createDiscovery(deploymentDescriptor, OKAPI_AUTH_TOKEN);
@@ -110,7 +119,7 @@ class OkapiModuleRegisterServiceTest {
     var deploymentDescriptor = deploymentDescriptor();
     when(okapiClient.getDiscovery(MODULE_ID, MODULE_ID, OKAPI_AUTH_TOKEN)).thenReturn(deploymentDescriptor);
 
-    service.onDiscoveryCreate(moduleDiscovery(), OKAPI_AUTH_TOKEN);
+    service.onDiscoveryCreate(moduleDiscovery(), ModuleType.BACKEND, OKAPI_AUTH_TOKEN);
     verify(okapiClient, never()).createDiscovery(deploymentDescriptor, OKAPI_AUTH_TOKEN);
   }
 
@@ -120,10 +129,33 @@ class OkapiModuleRegisterServiceTest {
 
     when(okapiClient.getDiscovery(SERVICE_ID, SERVICE_ID, OKAPI_AUTH_TOKEN)).thenReturn(deploymentDescriptor);
 
-    service.onDiscoveryCreate(moduleDiscovery(SERVICE_NAME, SERVICE_VERSION, UPDATED_URL), OKAPI_AUTH_TOKEN);
+    service.onDiscoveryCreate(moduleDiscovery(SERVICE_NAME, SERVICE_VERSION, UPDATED_URL), ModuleType.BACKEND,
+      OKAPI_AUTH_TOKEN);
 
     var updatedDescriptor = deploymentDescriptor(SERVICE_ID, UPDATED_URL);
     verify(okapiClient).deleteDiscovery(SERVICE_ID, SERVICE_ID, OKAPI_AUTH_TOKEN);
     verify(okapiClient).createDiscovery(updatedDescriptor, OKAPI_AUTH_TOKEN);
+  }
+
+  @Test
+  void onDiscoveryCreate_positive_uiModule() {
+    service.onDiscoveryCreate(moduleDiscovery(), ModuleType.UI, OKAPI_AUTH_TOKEN);
+
+    verifyNoInteractions(okapiClient, moduleRepository);
+  }
+
+  @Test
+  void onDiscoveryUpdate_positive_uiModule() {
+    service.onDiscoveryUpdate(moduleDiscovery(SERVICE_NAME, SERVICE_VERSION, UPDATED_URL), ModuleType.UI,
+      OKAPI_AUTH_TOKEN);
+
+    verifyNoInteractions(okapiClient, moduleRepository);
+  }
+
+  @Test
+  void onDiscoveryDelete_positive_uiModule() {
+    service.onDiscoveryDelete(SERVICE_ID, SERVICE_ID, ModuleType.UI, OKAPI_AUTH_TOKEN);
+
+    verifyNoInteractions(okapiClient, moduleRepository);
   }
 }

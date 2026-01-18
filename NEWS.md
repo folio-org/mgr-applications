@@ -11,6 +11,7 @@
 * Consume entitlement Kafka events for Kong route mgmt (MGRAPPS-70)
 * Add support for custom Keycloak base URL for JWKS endpoint, new environment variable `KC_JWKS_BASE_URL` (MODSIDECAR-148)
 * Review and clean up logs in mgr-apllications (MGRAPPS-84)
+* Allow discovery information to be specified for UI modules (MGRAPPS-92)
 ---
 
 ## Version `v3.0.0` (12.03.2025)

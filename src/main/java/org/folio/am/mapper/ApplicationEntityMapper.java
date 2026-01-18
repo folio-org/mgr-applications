@@ -1,14 +1,14 @@
 package org.folio.am.mapper;
 
-import static org.folio.common.utils.CollectionUtils.mapItems;
+import static org.folio.am.utils.CollectionUtils.filterAndMap;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.am.domain.entity.ModuleEntity;
-import org.folio.am.domain.entity.UiModuleEntity;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
@@ -28,11 +28,11 @@ public interface ApplicationEntityMapper {
   ApplicationDescriptor convert(ApplicationEntity applicationEntity);
 
   default List<ModuleDescriptor> addModuleDescriptors(ApplicationEntity applicationEntity) {
-    return mapItems(applicationEntity.getModules(), ModuleEntity::getDescriptor);
+    return getModuleDescriptorsOf(applicationEntity, ModuleEntity::isBackendModule);
   }
 
   default List<ModuleDescriptor> addUiModuleDescriptors(ApplicationEntity applicationEntity) {
-    return mapItems(applicationEntity.getUiModules(), UiModuleEntity::getDescriptor);
+    return getModuleDescriptorsOf(applicationEntity, ModuleEntity::isUiModule);
   }
 
   default List<Dependency> addDependencies(ApplicationEntity applicationEntity) {
@@ -41,5 +41,10 @@ public interface ApplicationEntityMapper {
       return applicationDescriptor.getDependencies();
     }
     return new ArrayList<>();
+  }
+
+  private static List<ModuleDescriptor> getModuleDescriptorsOf(ApplicationEntity applicationEntity,
+    Predicate<ModuleEntity> moduleFilter) {
+    return filterAndMap(applicationEntity.getModules(), moduleFilter, ModuleEntity::getDescriptor);
   }
 }

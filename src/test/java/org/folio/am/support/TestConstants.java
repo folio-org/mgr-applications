@@ -29,6 +29,11 @@ public class TestConstants {
   public static final String MODULE_BAR_URL = "http://test-module-bar:8080";
   public static final String MODULE_BAR_INTERFACE_ID = "test-bar-interface";
 
+  public static final String UI_MODULE_NAME = "test-ui-module";
+  public static final String UI_MODULE_VERSION = "1.0.0";
+  public static final String UI_MODULE_ID = UI_MODULE_NAME + "-" + UI_MODULE_VERSION;
+  public static final String UI_MODULE_URL = "http://test-ui-module:8080";
+
   public static final String SERVICE_NAME = "test-module";
   public static final String SERVICE_VERSION = "1.0.0";
   public static final String SERVICE_ID = id(SERVICE_NAME, SERVICE_VERSION);

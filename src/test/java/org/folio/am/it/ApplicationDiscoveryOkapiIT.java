@@ -8,16 +8,19 @@ import static org.folio.am.support.TestConstants.APPLICATION_ID;
 import static org.folio.am.support.TestConstants.MODULE_BAR_ID;
 import static org.folio.am.support.TestConstants.MODULE_FOO_ID;
 import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
+import static org.folio.am.support.TestConstants.UI_MODULE_ID;
 import static org.folio.am.support.TestValues.moduleBarDiscovery;
 import static org.folio.am.support.TestValues.moduleDiscoveries;
 import static org.folio.am.support.TestValues.moduleDiscovery;
 import static org.folio.am.support.TestValues.moduleFooDiscovery;
+import static org.folio.am.support.TestValues.uiModuleDiscovery;
 import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.MERGE;
+import static org.springframework.test.json.JsonCompareMode.STRICT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -64,7 +67,7 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
   }
 
   @Test
@@ -82,13 +85,13 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
         .content(asJsonString(moduleDiscovery)))
       .andExpect(status().isCreated())
-      .andExpect(content().json(asJsonString(moduleDiscovery), true));
+      .andExpect(content().json(asJsonString(moduleDiscovery), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries(moduleDiscovery)), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries(moduleDiscovery)), STRICT));
 
     assertDiscoveryEvents(MODULE_BAR_ID);
   }
@@ -129,13 +132,13 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
         .content(asJsonString(moduleDiscoveries)))
       .andExpect(status().isCreated())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     assertDiscoveryEvents(MODULE_BAR_ID, MODULE_FOO_ID);
   }
@@ -181,7 +184,7 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscovery), true));
+      .andExpect(content().json(asJsonString(moduleDiscovery), STRICT));
 
     assertDiscoveryEvents(MODULE_FOO_ID);
   }
@@ -221,13 +224,13 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     assertDiscoveryEvents(MODULE_FOO_ID);
   }
@@ -249,14 +252,43 @@ class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     assertDiscoveryEvents(MODULE_FOO_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-ui-it.sql")
+  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-create-module-discovery.json")
+  void create_positive_uiModuleSkipsOkapi() throws Exception {
+    var uiModuleDiscovery = uiModuleDiscovery();
+
+    // No Okapi discovery stubs needed - UI modules skip Okapi
+    mockMvc.perform(post("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(uiModuleDiscovery)))
+      .andExpect(status().isCreated())
+      .andExpect(content().json(asJsonString(uiModuleDiscovery), STRICT));
+
+    assertDiscoveryEvents(UI_MODULE_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
+  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json")
+  void delete_positive_uiModuleSkipsOkapi() throws Exception {
+    // No Okapi discovery stubs needed - UI modules skip Okapi
+    mockMvc.perform(delete("/modules/{id}/discovery", UI_MODULE_ID)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNoContent());
+
+    assertDiscoveryEvents(UI_MODULE_ID);
   }
 }

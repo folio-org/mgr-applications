@@ -27,10 +27,4 @@ public interface ModuleDiscoveryMapper {
    * @return converted {@link List} with {@link ModuleDiscovery} objects
    */
   List<ModuleDiscovery> convert(List<ModuleDiscoveryEntity> entities);
-
-  @Mapping(target = "discoveryUrl", source = "moduleDiscovery.location")
-  @Mapping(target = "applications", ignore = true)
-  @Mapping(target = "descriptor", ignore = true)
-  @Mapping(target = "interfaces", ignore = true)
-  ModuleEntity convert(ModuleDiscovery moduleDiscovery);
 }

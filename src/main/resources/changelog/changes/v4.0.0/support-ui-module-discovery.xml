@@ -1,0 +1,64 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="create-module-type" author="dmtkachenko">
+        <sql>
+            CREATE TYPE module_type AS ENUM ('BACKEND', 'UI');
+        </sql>
+    </changeSet>
+
+    <changeSet id="add-module-type-to-module" author="dmtkachenko">
+        <addColumn tableName="module">
+            <column name="type" type="module_type"/>
+        </addColumn>
+    </changeSet>
+    
+    <changeSet id="set-backend-module-type" author="dmtkachenko">
+        <update tableName="module">
+            <column name="type" value="BACKEND"/>
+        </update>
+
+        <addNotNullConstraint tableName="module" columnName="type" />
+    </changeSet>
+
+    <changeSet id="copy-data-from-ui-module-to-module" author="dmtkachenko">
+        <sql>
+            INSERT INTO module (id, name, version, descriptor, type)
+              SELECT id, name, version, descriptor, 'UI'::module_type
+              FROM ui_module;
+        </sql>
+    </changeSet>
+
+    <changeSet id="copy-data-from-application-ui-module-to-application-module" author="dmtkachenko">
+        <sql>
+            INSERT INTO application_module (application_id, module_id)
+              SELECT application_id, ui_module_id
+              FROM application_ui_module;
+        </sql>
+    </changeSet>
+
+    <changeSet id="remove-obsolete-ui-module-tables" author="dmtkachenko">
+        <dropTable tableName="application_ui_module" />
+        <dropTable tableName="ui_module" />
+    </changeSet>
+
+    <changeSet id="add-backend-condition-to-module-bootstrap-view" author="dmtkachenko">
+        <createView viewName="module_bootstrap" replaceIfExists="true">
+            SELECT m.id,
+                   m.name,
+                   m.version,
+                   m.descriptor,
+                   m.discovery_url,
+                   am.application_id,
+                   COALESCE(m.descriptor, '{}'::jsonb) @> '{"metadata": {"user": {"type": "system"}}}'
+                       AS system_user_required
+              FROM module m
+                INNER JOIN application_module am ON m.id = am.module_id
+              WHERE m.type = 'BACKEND'
+        </createView>
+    </changeSet>
+
+</databaseChangeLog>

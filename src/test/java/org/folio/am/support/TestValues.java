@@ -18,6 +18,10 @@ import static org.folio.am.support.TestConstants.MODULE_URL;
 import static org.folio.am.support.TestConstants.SERVICE_ID;
 import static org.folio.am.support.TestConstants.SERVICE_NAME;
 import static org.folio.am.support.TestConstants.SERVICE_VERSION;
+import static org.folio.am.support.TestConstants.UI_MODULE_ID;
+import static org.folio.am.support.TestConstants.UI_MODULE_NAME;
+import static org.folio.am.support.TestConstants.UI_MODULE_URL;
+import static org.folio.am.support.TestConstants.UI_MODULE_VERSION;
 import static org.folio.am.support.TestConstants.id;
 
 import java.util.Arrays;
@@ -44,7 +48,7 @@ import org.folio.am.domain.entity.InterfaceReferenceEntity;
 import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.folio.am.domain.entity.ModuleDiscoveryEntity;
 import org.folio.am.domain.entity.ModuleEntity;
-import org.folio.am.domain.entity.UiModuleEntity;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.service.validator.ValidationMode;
 import org.folio.common.domain.model.AnyDescriptor;
@@ -100,6 +104,7 @@ public class TestValues {
       moduleEntity.setId(module.getId());
       moduleEntity.setName(module.getName());
       moduleEntity.setVersion(module.getVersion());
+      moduleEntity.setType(ModuleType.BACKEND);
 
       var moduleDescriptor = mds.stream()
         .filter(md -> Objects.equals(module.getName() + '-' + module.getVersion(), md.getId()))
@@ -111,11 +116,12 @@ public class TestValues {
     });
 
     emptyIfNull(descriptor.getUiModules()).forEach(module -> {
-      var uiModuleEntity = new UiModuleEntity();
+      var uiModuleEntity = new ModuleEntity();
 
       uiModuleEntity.setId(module.getId());
       uiModuleEntity.setName(module.getName());
       uiModuleEntity.setVersion(module.getVersion());
+      uiModuleEntity.setType(ModuleType.UI);
 
       var moduleDescriptor = uimds.stream()
         .filter(md -> Objects.equals(module.getName() + '-' + module.getVersion(), md.getId()))
@@ -123,7 +129,7 @@ public class TestValues {
 
       uiModuleEntity.setDescriptor(moduleDescriptor);
 
-      entity.addUiModule(uiModuleEntity);
+      entity.addModule(uiModuleEntity);
     });
 
     return entity;
@@ -288,6 +294,14 @@ public class TestValues {
       .location(MODULE_BAR_URL);
   }
 
+  public static ModuleDiscovery uiModuleDiscovery() {
+    return new ModuleDiscovery()
+      .id(UI_MODULE_ID)
+      .name(UI_MODULE_NAME)
+      .version(UI_MODULE_VERSION)
+      .location(UI_MODULE_URL);
+  }
+
   public static ModuleEntity moduleEntity() {
     return moduleEntity(null);
   }
@@ -298,6 +312,25 @@ public class TestValues {
     entity.setId(MODULE_ID);
     entity.setName(SERVICE_NAME);
     entity.setDiscoveryUrl(discoveryUrl);
+    entity.setType(ModuleType.BACKEND);
+
+    var application = applicationDescriptorEntity();
+    application.addModule(entity);
+
+    return entity;
+  }
+
+  public static ModuleEntity uiModuleEntity() {
+    return uiModuleEntity(null);
+  }
+
+  public static ModuleEntity uiModuleEntity(String discoveryUrl) {
+    var entity = new ModuleEntity();
+
+    entity.setId(UI_MODULE_ID);
+    entity.setName(UI_MODULE_NAME);
+    entity.setDiscoveryUrl(discoveryUrl);
+    entity.setType(ModuleType.UI);
 
     var application = applicationDescriptorEntity();
     application.addModule(entity);

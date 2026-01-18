@@ -8,6 +8,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.folio.am.service.validator.ValidationMode.ON_CREATE;
+import static org.folio.am.utils.CollectionUtils.filterAndMap;
 import static org.folio.common.utils.CollectionUtils.mapItems;
 import static org.folio.common.utils.CollectionUtils.toStream;
 
@@ -30,13 +31,11 @@ import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.entity.ApplicationArtifact;
 import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.am.domain.entity.ModuleEntity;
-import org.folio.am.domain.entity.UiModuleEntity;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.integration.mte.EntitlementService;
 import org.folio.am.mapper.ApplicationDescriptorMapper;
 import org.folio.am.repository.ApplicationRepository;
 import org.folio.am.repository.ModuleRepository;
-import org.folio.am.repository.UiModuleRepository;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.common.domain.model.OffsetRequest;
 import org.folio.common.domain.model.SearchResult;
@@ -54,7 +53,6 @@ public class ApplicationService {
 
   private final ApplicationRepository appRepository;
   private final ModuleRepository moduleRepository;
-  private final UiModuleRepository uiModuleRepository;
   private final ApplicationDescriptorMapper mapper;
   private final ApplicationEventPublisher eventPublisher;
   private final ModuleDiscoveryService discoveryService;
@@ -245,8 +243,8 @@ public class ApplicationService {
 
   private ApplicationDescriptor getAppDescriptorWithModDescriptors(ApplicationEntity entity) {
     return entity.getApplicationDescriptor()
-      .moduleDescriptors(mapItems(entity.getModules(), ModuleEntity::getDescriptor))
-      .uiModuleDescriptors(mapItems(entity.getUiModules(), UiModuleEntity::getDescriptor));
+      .moduleDescriptors(filterAndMap(entity.getModules(), ModuleEntity::isBackendModule, ModuleEntity::getDescriptor))
+      .uiModuleDescriptors(filterAndMap(entity.getModules(), ModuleEntity::isUiModule, ModuleEntity::getDescriptor));
   }
 
   private ApplicationDescriptor createApplication(ApplicationDescriptor descriptor, String token) {
@@ -288,7 +286,6 @@ public class ApplicationService {
 
   private void removeModulesFromApplication(ApplicationEntity application, String token) {
     application.removeAllModules(onModuleRemovedFromApplication(application, token));
-    application.removeAllUiModules(onUiModuleRemovedFromApplication(application));
   }
 
   private Consumer<ModuleEntity> onModuleRemovedFromApplication(ApplicationEntity application, String token) {
@@ -303,23 +300,8 @@ public class ApplicationService {
     };
   }
 
-  private Consumer<UiModuleEntity> onUiModuleRemovedFromApplication(ApplicationEntity application) {
-    return uiModule -> {
-      if (!isAnotherAppRelatedToUiModule(application, uiModule)) {
-        uiModuleRepository.delete(uiModule);
-        log.debug("UI module removed: id = {}", uiModule.getId());
-      } else {
-        log.debug("UI module is included in other application(s) and cannot be delete: id = {}", uiModule.getId());
-      }
-    };
-  }
-
   private boolean isAnotherAppRelatedToModule(ApplicationEntity application, ModuleEntity module) {
     return appRepository.existsByNotIdAndModuleId(application.getId(), module.getId());
-  }
-
-  private boolean isAnotherAppRelatedToUiModule(ApplicationEntity application, UiModuleEntity uiModule) {
-    return appRepository.existsByNotIdAndUiModuleId(application.getId(), uiModule.getId());
   }
 
   private List<ApplicationDescriptor> streamByNameWithModules(String appName,

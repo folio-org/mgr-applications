@@ -8,7 +8,7 @@ import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.am.domain.entity.ModuleEntity;
-import org.folio.am.domain.entity.UiModuleEntity;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
@@ -20,20 +20,17 @@ class ApplicationEntityMapperTest {
 
   @Test
   void convert() {
-    var applicationEntity = new ApplicationEntity();
-    applicationEntity.setName("app1");
-    applicationEntity.setVersion("1.0.0");
-    applicationEntity.setId("app1-1.0.0");
+    var applicationEntity = createApplication("app1-1.0.0", "app1", "1.0.0");
+
     var beModuleDescriptor = new ModuleDescriptor();
     beModuleDescriptor.setId("be-module-descriptor-id");
-    var beModule = new ModuleEntity();
-    beModule.setDescriptor(beModuleDescriptor);
+    var beModule = createModule(ModuleType.BACKEND, beModuleDescriptor);
+
     var uiModuleDescriptor = new ModuleDescriptor();
     uiModuleDescriptor.setId("ui-module-descriptor-id");
-    var uiModule = new UiModuleEntity();
-    uiModule.setDescriptor(uiModuleDescriptor);
-    applicationEntity.setModules(Set.of(beModule));
-    applicationEntity.setUiModules(List.of(uiModule));
+    var uiModule = createModule(ModuleType.UI, uiModuleDescriptor);
+
+    applicationEntity.setModules(Set.of(beModule, uiModule));
 
     var applicationDescriptor = new ApplicationDescriptor();
     applicationDescriptor.setName("app1");
@@ -49,5 +46,19 @@ class ApplicationEntityMapperTest {
     assertThat(actualApplicationDescriptor.getDependencies()).containsOnly(dependency);
     assertThat(actualApplicationDescriptor.getModuleDescriptors()).contains(beModuleDescriptor);
     assertThat(actualApplicationDescriptor.getUiModuleDescriptors()).contains(uiModuleDescriptor);
+  }
+
+  private static ApplicationEntity createApplication(String id, String name, String version) {
+    var applicationEntity = new ApplicationEntity();
+    applicationEntity.setName(name);
+    applicationEntity.setVersion(version);
+    applicationEntity.setId(id);
+    return applicationEntity;
+  }
+
+  private static ModuleEntity createModule(ModuleType type, ModuleDescriptor md) {
+    var moduleEntity = ModuleEntity.of(md.getId(), type);
+    moduleEntity.setDescriptor(md);
+    return moduleEntity;
   }
 }

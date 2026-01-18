@@ -14,7 +14,7 @@ import org.folio.am.domain.dto.ApplicationReferences;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.am.domain.entity.ModuleEntity;
-import org.folio.am.domain.entity.UiModuleEntity;
+import org.folio.am.domain.entity.ModuleType;
 import org.folio.am.exception.RequestValidationException;
 import org.folio.am.mapper.ApplicationEntityMapper;
 import org.folio.common.domain.model.InterfaceDescriptor;
@@ -39,39 +39,33 @@ class ApplicationReferencesValidationServiceTest {
 
   @Test
   void validate_positive() {
-    var applicationEntity1 = new ApplicationEntity();
-    applicationEntity1.setName("app1");
-    applicationEntity1.setVersion("1.0.0");
-    applicationEntity1.setId("app1-1.0.0");
+    var applicationEntity1 = createApplication("app1-1.0.0", "app1", "1.0.0");
+
     var beModuleDescriptor = new ModuleDescriptor()
       .requires(List.of(new InterfaceReference().id("configuration").version("1.0.0 2.0.0")));
-    var beModule = new ModuleEntity();
-    beModule.setDescriptor(beModuleDescriptor);
+    var beModule = createModule(ModuleType.BACKEND, beModuleDescriptor);
+
     var uiModuleDescriptor = new ModuleDescriptor()
       .requires(List.of(new InterfaceReference().id("ui-settings").version("1.0.0")));
-    var uiModule = new UiModuleEntity();
-    uiModule.setDescriptor(uiModuleDescriptor);
-    applicationEntity1.setModules(Set.of(beModule));
-    applicationEntity1.setUiModules(List.of(uiModule));
+    var uiModule = createModule(ModuleType.UI, uiModuleDescriptor);
+
+    applicationEntity1.setModules(Set.of(beModule, uiModule));
+
     var applicationDescriptorDependency = new Dependency().name("app2").version("^2.0.1");
     var applicationDescriptor1 = new ApplicationDescriptor().dependencies(List.of(applicationDescriptorDependency));
     applicationEntity1.setApplicationDescriptor(applicationDescriptor1);
 
-    var applicationEntity2 = new ApplicationEntity();
-    applicationEntity2.setName("app2");
-    applicationEntity2.setVersion("2.0.1");
-    applicationEntity2.setId("app2-2.0.1");
+    var applicationEntity2 = createApplication("app2-2.0.1", "app2", "2.0.1");
     var beModuleDescriptor2 = new ModuleDescriptor()
       .provides(List.of(new InterfaceDescriptor().id("configuration").version("1.0.0")));
-    var beModule2 = new ModuleEntity();
-    beModule2.setDescriptor(beModuleDescriptor2);
-    var uiModule2 = new UiModuleEntity();
+    var beModule2 = createModule(ModuleType.BACKEND, beModuleDescriptor2);
+
     var uiModuleDescriptor2 = new ModuleDescriptor()
       .provides(List.of(new InterfaceDescriptor().id("ui-settings").version("1.0.0")));
-    uiModule2.setDescriptor(uiModuleDescriptor2);
+    var uiModule2 = createModule(ModuleType.UI, uiModuleDescriptor2);
+
     applicationEntity2.setApplicationDescriptor(new ApplicationDescriptor());
-    applicationEntity2.setModules(Set.of(beModule2));
-    applicationEntity1.setUiModules(List.of(uiModule2));
+    applicationEntity2.setModules(Set.of(beModule2, uiModule2));
 
     var apps = List.of("app1-1.0.0", "app2-2.0.1");
     var applicationReferences = new ApplicationReferences().applicationIds(new LinkedHashSet<>(apps));
@@ -86,14 +80,10 @@ class ApplicationReferencesValidationServiceTest {
 
   @Test
   void validate_negative_applicationIdNotExist() {
-    var applicationEntity1 = new ApplicationEntity();
-    applicationEntity1.setId("app1-1.0.0");
-    applicationEntity1.setName("app1");
-    applicationEntity1.setVersion("1.0.0");
-    var applicationEntity2 = new ApplicationEntity();
-    applicationEntity2.setId("app1-2.0.1");
-    applicationEntity2.setName("app1");
-    applicationEntity2.setVersion("2.0.1");
+    var applicationEntity1 = createApplication("app1-1.0.0", "app1", "1.0.0");
+
+    var applicationEntity2 = createApplication("app1-2.0.1", "app1", "2.0.1");
+
     applicationEntity2.setApplicationDescriptor(new ApplicationDescriptor());
     var apps = List.of("app1-1.0.0", "app1-2.0.1");
     var applicationReferences = new ApplicationReferences().applicationIds(new LinkedHashSet<>(apps));
@@ -103,5 +93,20 @@ class ApplicationReferencesValidationServiceTest {
     assertThatThrownBy(() -> applicationReferencesValidationService.validateReferences(applicationReferences))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Applications not exist: ids = app1-2.0.1");
+  }
+
+  private static ApplicationEntity createApplication(String id, String name, String version) {
+    var applicationEntity = new ApplicationEntity();
+    applicationEntity.setName(name);
+    applicationEntity.setVersion(version);
+    applicationEntity.setId(id);
+    return applicationEntity;
+  }
+
+  private static ModuleEntity createModule(ModuleType backend, ModuleDescriptor beModuleDescriptor) {
+    var moduleEntity = new ModuleEntity();
+    moduleEntity.setType(backend);
+    moduleEntity.setDescriptor(beModuleDescriptor);
+    return moduleEntity;
   }
 }

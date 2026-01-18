@@ -15,12 +15,17 @@ import static org.folio.am.support.TestConstants.MODULE_FOO_NAME;
 import static org.folio.am.support.TestConstants.MODULE_FOO_URL;
 import static org.folio.am.support.TestConstants.MODULE_FOO_VERSION;
 import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
+import static org.folio.am.support.TestConstants.UI_MODULE_ID;
+import static org.folio.am.support.TestValues.moduleDiscoveries;
+import static org.folio.am.support.TestValues.moduleFooDiscovery;
+import static org.folio.am.support.TestValues.uiModuleDiscovery;
 import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.MERGE;
+import static org.springframework.test.json.JsonCompareMode.STRICT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -74,7 +79,7 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   @Sql(scripts = "classpath:/sql/module-discoveries.sql")
   void get_positive() throws Exception {
     doGet("/modules/{id}/discovery", MODULE_FOO_ID)
-      .andExpect(content().json(asJsonString(TestValues.moduleFooDiscovery()), true));
+      .andExpect(content().json(asJsonString(TestValues.moduleFooDiscovery()), STRICT));
   }
 
   @Test
@@ -103,13 +108,13 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
         .content(asJsonString(moduleDiscovery)))
       .andExpect(status().isCreated())
-      .andExpect(content().json(asJsonString(moduleDiscovery), true));
+      .andExpect(content().json(asJsonString(moduleDiscovery), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(TestValues.moduleDiscoveries(moduleDiscovery)), true));
+      .andExpect(content().json(asJsonString(TestValues.moduleDiscoveries(moduleDiscovery)), STRICT));
 
     assertThatKongHasServiceWithUrl(MODULE_BAR_ID, MODULE_BAR_URL);
 
@@ -154,13 +159,13 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
         .content(asJsonString(moduleDiscoveries)))
       .andExpect(status().isCreated())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     assertThatKongHasServiceWithUrl(MODULE_BAR_ID, MODULE_BAR_URL);
     assertThatKongHasServiceWithUrl(MODULE_FOO_ID, MODULE_FOO_URL);
@@ -211,7 +216,7 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscovery), true));
+      .andExpect(content().json(asJsonString(moduleDiscovery), STRICT));
 
     assertThatKongHasServiceWithUrl(MODULE_FOO_ID, newModuleDiscoveryUrl);
     assertDiscoveryEvents(MODULE_FOO_ID);
@@ -294,13 +299,13 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     assertThat(kongAdminClient.getService(MODULE_BAR_ID)).isNotNull();
     assertThatThrownBy(() -> kongAdminClient.getService(MODULE_FOO_ID)).isInstanceOf(NotFound.class);
@@ -324,13 +329,13 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(moduleDiscoveries), true));
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
     assertDiscoveryEvents(MODULE_FOO_ID);
   }
@@ -343,6 +348,91 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
       .header(TOKEN, OKAPI_AUTH_TOKEN));
     assertThatThrownBy(() -> kongAdminClient.getService(MODULE_FOO_ID)).isInstanceOf(NotFound.class);
     KafkaEventAssertions.assertNoDiscoveryEvents();
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-ui-it.sql")
+  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-create-module-discovery.json")
+  void create_positive_uiModule() throws Exception {
+    var uiModuleDiscovery = uiModuleDiscovery();
+
+    // No Okapi stubs needed - UI modules skip Okapi
+    mockMvc.perform(post("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(uiModuleDiscovery)))
+      .andExpect(status().isCreated())
+      .andExpect(content().json(asJsonString(uiModuleDiscovery), STRICT));
+
+    mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(moduleDiscoveries(uiModuleDiscovery)), STRICT));
+
+    // Verify NO Kong service created for UI module
+    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
+      .isInstanceOf(NotFound.class);
+
+    assertDiscoveryEvents(UI_MODULE_ID);
+  }
+
+  @Test
+  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-update-module-discovery.json")
+  @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
+  void update_positive_uiModule() throws Exception {
+    var newModuleDiscoveryUrl = "http://test-ui-module-updated:8080";
+
+    // Verify no Kong service exists before update
+    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
+      .isInstanceOf(NotFound.class);
+
+    var uiModuleDiscovery = uiModuleDiscovery().location(newModuleDiscoveryUrl);
+
+    // No Okapi stubs needed - UI modules skip Okapi
+    mockMvc.perform(put("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(uiModuleDiscovery)))
+      .andExpect(status().isNoContent());
+
+    mockMvc.perform(get("/modules/{id}/discovery", UI_MODULE_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(uiModuleDiscovery), STRICT));
+
+    // Verify still no Kong service after update
+    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
+      .isInstanceOf(NotFound.class);
+
+    assertDiscoveryEvents(UI_MODULE_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
+  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json")
+  void delete_positive_uiModule() throws Exception {
+    // Verify no Kong service exists before deletion
+    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
+      .isInstanceOf(NotFound.class);
+
+    // No Okapi stubs needed - UI modules skip Okapi
+    mockMvc.perform(delete("/modules/{id}/discovery", UI_MODULE_ID)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNoContent());
+
+    mockMvc.perform(get("/modules/discovery")
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(moduleDiscoveries(moduleFooDiscovery())), STRICT));
+
+    // Verify still no Kong service after deletion
+    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
+      .isInstanceOf(NotFound.class);
+
+    assertDiscoveryEvents(UI_MODULE_ID);
   }
 
   @SneakyThrows
