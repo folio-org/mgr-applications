@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.folio.am.domain.dto.ApplicationDescriptor;
+import org.folio.am.domain.dto.ApplicationDiscoveries;
+import org.folio.am.domain.dto.ApplicationDiscovery;
 import org.folio.am.domain.dto.ApplicationReferences;
 import org.folio.am.domain.dto.DeploymentDescriptor;
 import org.folio.am.domain.dto.Module;
@@ -270,6 +272,14 @@ public class TestValues {
       .location(MODULE_URL);
   }
 
+  public static ModuleDiscovery moduleDiscovery(String id) {
+    return new ModuleDiscovery()
+      .id(id)
+      .name("test-module")
+      .version("1.0.0")
+      .location("http://test-module:8080");
+  }
+
   public static ModuleDiscovery moduleDiscovery(String name, String version, String location) {
     return new ModuleDiscovery()
       .id(name + "-" + version)
@@ -398,5 +408,23 @@ public class TestValues {
 
   public static ApplicationReferences applicationReferences() {
     return new ApplicationReferences().applicationIds(Set.of("test-application-1.0.0"));
+  }
+
+  public static ApplicationDiscovery applicationDiscovery(String appId, ModuleDiscovery... discoveries) {
+    return new ApplicationDiscovery()
+      .applicationId(appId)
+      .discovery(List.of(discoveries));
+  }
+
+  public static ApplicationDiscoveries applicationDiscoveries(ApplicationDiscovery... items) {
+    return new ApplicationDiscoveries()
+      .applicationDiscoveries(List.of(items))
+      .totalRecords(items.length);
+  }
+
+  public static ApplicationDiscoveries emptyApplicationDiscoveries() {
+    return new ApplicationDiscoveries()
+      .applicationDiscoveries(emptyList())
+      .totalRecords(0);
   }
 }
