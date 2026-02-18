@@ -18,35 +18,31 @@ import org.folio.am.domain.entity.ApplicationModuleDiscoveryEntity;
 import org.folio.am.mapper.ModuleDiscoveryMapper;
 import org.folio.am.repository.ApplicationRepository;
 import org.folio.am.repository.ModuleDiscoveryRepository;
-import org.folio.am.repository.ModuleRepository;
 import org.folio.common.domain.model.OffsetRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Log4j2
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ApplicationDiscoveryService {
 
-  private final ModuleRepository repository;
-  private final ModuleDiscoveryMapper mapper;
-  private final ApplicationRepository applicationRepository;
   private final ModuleDiscoveryRepository discoveryRepository;
+  private final ApplicationRepository applicationRepository;
+  private final ModuleDiscoveryMapper mapper;
 
-  @Transactional(readOnly = true)
   public ModuleDiscoveries get(String appId, Integer offset, Integer limit) {
     log.debug("Getting paged module discoveries for application: appId = {}, offset = {}, limit = {}",
       appId, offset, limit);
 
     var pageable = OffsetRequest.of(offset, limit);
-    var mdEntities = repository.findAllByHasDiscoveryAndApplicationIdsIn(List.of(appId), pageable);
-    var discoveries = mapItems(mdEntities.toList(), mapper::convert);
+    var mdEntities = discoveryRepository.findAllByApplicationIdsIn(List.of(appId), pageable);
+    var discoveries = mapper.convert(mdEntities.getContent());
 
     return new ModuleDiscoveries().discovery(discoveries).totalRecords(mdEntities.getTotalElements());
   }
 
-  @Transactional(readOnly = true)
   public ApplicationDiscoveries search(String query, Integer offset, Integer limit) {
     log.debug("Searching application discoveries: query = {}, offset = {}, limit = {}", query, offset, limit);
 

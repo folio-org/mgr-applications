@@ -57,6 +57,7 @@ import org.folio.common.domain.model.AnyDescriptor;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.common.domain.model.RoutingEntry;
+import org.folio.common.utils.SemverUtils;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestValues {
@@ -273,11 +274,12 @@ public class TestValues {
   }
 
   public static ModuleDiscovery moduleDiscovery(String id) {
+    var name = SemverUtils.getName(id);
     return new ModuleDiscovery()
       .id(id)
-      .name("test-module")
-      .version("1.0.0")
-      .location("http://test-module:8080");
+      .name(name)
+      .version(SemverUtils.getVersion(id))
+      .location("http://" + name + ":8080");
   }
 
   public static ModuleDiscovery moduleDiscovery(String name, String version, String location) {
@@ -355,6 +357,17 @@ public class TestValues {
     entity.setName(SERVICE_NAME);
     entity.setVersion(SERVICE_VERSION);
     entity.setLocation(MODULE_URL);
+
+    return entity;
+  }
+
+  public static ModuleDiscoveryEntity uiModuleDiscoveryEntity() {
+    var entity = new ModuleDiscoveryEntity();
+
+    entity.setId(UI_MODULE_ID);
+    entity.setName(UI_MODULE_NAME);
+    entity.setVersion(UI_MODULE_VERSION);
+    entity.setLocation(UI_MODULE_URL);
 
     return entity;
   }

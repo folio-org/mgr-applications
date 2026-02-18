@@ -6,13 +6,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.am.support.TestConstants.MODULE_ID;
 import static org.folio.am.support.TestConstants.MODULE_URL;
 import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
-import static org.folio.am.support.TestConstants.SERVICE_ID;
 import static org.folio.am.support.TestConstants.UI_MODULE_ID;
 import static org.folio.am.support.TestConstants.UI_MODULE_URL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -58,7 +56,7 @@ class ModuleDiscoveryServiceTest {
 
   @AfterEach
   void tearDown() {
-    verifyNoMoreInteractions(repository, mapper, eventPublisher);
+    verifyNoMoreInteractions(repository, mapper, moduleDiscoveryRepository, eventPublisher);
   }
 
   @Nested
@@ -67,8 +65,9 @@ class ModuleDiscoveryServiceTest {
 
     @Test
     void positive() {
-      when(repository.findByHasDiscoveryAndId(MODULE_ID)).thenReturn(Optional.of(TestValues.moduleEntity()));
-      when(mapper.convert(TestValues.moduleEntity())).thenReturn(TestValues.moduleDiscovery());
+      var moduleDiscoveryEntity = TestValues.moduleDiscoveryEntity();
+      when(moduleDiscoveryRepository.findById(MODULE_ID)).thenReturn(Optional.of(moduleDiscoveryEntity));
+      when(mapper.convert(moduleDiscoveryEntity)).thenReturn(TestValues.moduleDiscovery());
 
       var actual = service.get(MODULE_ID);
 
@@ -77,7 +76,7 @@ class ModuleDiscoveryServiceTest {
 
     @Test
     void negative_discoveryNotFound() {
-      when(repository.findByHasDiscoveryAndId(MODULE_ID)).thenReturn(Optional.empty());
+      when(moduleDiscoveryRepository.findById(MODULE_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> service.get(MODULE_ID))
         .isInstanceOf(EntityNotFoundException.class);
@@ -85,9 +84,9 @@ class ModuleDiscoveryServiceTest {
 
     @Test
     void positive_uiModule() {
-      var uiModule = TestValues.uiModuleEntity(UI_MODULE_URL);
-      when(repository.findByHasDiscoveryAndId(UI_MODULE_ID)).thenReturn(Optional.of(uiModule));
-      when(mapper.convert(uiModule)).thenReturn(TestValues.uiModuleDiscovery());
+      var uiModuleDiscoveryEntity = TestValues.uiModuleDiscoveryEntity();
+      when(moduleDiscoveryRepository.findById(UI_MODULE_ID)).thenReturn(Optional.of(uiModuleDiscoveryEntity));
+      when(mapper.convert(uiModuleDiscoveryEntity)).thenReturn(TestValues.uiModuleDiscovery());
 
       var actual = service.get(UI_MODULE_ID);
 
@@ -96,7 +95,7 @@ class ModuleDiscoveryServiceTest {
 
     @Test
     void negative_uiModuleDiscoveryNotFound() {
-      when(repository.findByHasDiscoveryAndId(UI_MODULE_ID)).thenReturn(Optional.empty());
+      when(moduleDiscoveryRepository.findById(UI_MODULE_ID)).thenReturn(Optional.empty());
 
       assertThatThrownBy(() -> service.get(UI_MODULE_ID))
         .isInstanceOf(EntityNotFoundException.class);
@@ -290,9 +289,6 @@ class ModuleDiscoveryServiceTest {
 
       service.update(MODULE_ID, discovery, OKAPI_AUTH_TOKEN);
 
-      verify(eventPublisher).publishDiscoveryUpdate(any(ModuleDiscovery.class), eq(ModuleType.BACKEND),
-        eq(OKAPI_AUTH_TOKEN));
-
       var capturedValue = moduleDiscoveryCaptor.getValue();
       assertThat(capturedValue).usingRecursiveComparison().ignoringFields("instId").isEqualTo(discovery);
     }
@@ -338,9 +334,6 @@ class ModuleDiscoveryServiceTest {
 
       service.update(UI_MODULE_ID, uiDiscovery, OKAPI_AUTH_TOKEN);
 
-      verify(eventPublisher).publishDiscoveryUpdate(any(ModuleDiscovery.class), eq(ModuleType.UI),
-        eq(OKAPI_AUTH_TOKEN));
-
       var capturedValue = moduleDiscoveryCaptor.getValue();
       assertThat(capturedValue).usingRecursiveComparison().ignoringFields("instId").isEqualTo(uiDiscovery);
     }
@@ -364,13 +357,12 @@ class ModuleDiscoveryServiceTest {
       var entity = TestValues.moduleEntity();
       when(repository.findByHasDiscoveryAndId(MODULE_ID)).thenReturn(Optional.of(entity));
       when(repository.save(entity)).thenReturn(entity);
-
       doNothing().when(eventPublisher).publishDiscoveryDelete(MODULE_ID, MODULE_ID, ModuleType.BACKEND,
         OKAPI_AUTH_TOKEN);
 
       service.delete(MODULE_ID, OKAPI_AUTH_TOKEN);
 
-      verify(eventPublisher).publishDiscoveryDelete(SERVICE_ID, SERVICE_ID, ModuleType.BACKEND, OKAPI_AUTH_TOKEN);
+      verify(repository).save(entity);
     }
 
     @Test
@@ -378,9 +370,6 @@ class ModuleDiscoveryServiceTest {
       when(repository.findByHasDiscoveryAndId(MODULE_ID)).thenReturn(Optional.empty());
 
       service.delete(MODULE_ID, OKAPI_AUTH_TOKEN);
-
-      verify(eventPublisher, times(0)).publishDiscoveryDelete(SERVICE_ID, SERVICE_ID, ModuleType.BACKEND,
-        OKAPI_AUTH_TOKEN);
     }
 
     @Test
@@ -388,13 +377,12 @@ class ModuleDiscoveryServiceTest {
       var uiEntity = TestValues.uiModuleEntity(UI_MODULE_URL);
       when(repository.findByHasDiscoveryAndId(UI_MODULE_ID)).thenReturn(Optional.of(uiEntity));
       when(repository.save(uiEntity)).thenReturn(uiEntity);
-
       doNothing().when(eventPublisher).publishDiscoveryDelete(UI_MODULE_ID, UI_MODULE_ID, ModuleType.UI,
         OKAPI_AUTH_TOKEN);
 
       service.delete(UI_MODULE_ID, OKAPI_AUTH_TOKEN);
 
-      verify(eventPublisher).publishDiscoveryDelete(UI_MODULE_ID, UI_MODULE_ID, ModuleType.UI, OKAPI_AUTH_TOKEN);
+      verify(repository).save(uiEntity);
     }
 
     @Test
@@ -402,9 +390,6 @@ class ModuleDiscoveryServiceTest {
       when(repository.findByHasDiscoveryAndId(UI_MODULE_ID)).thenReturn(Optional.empty());
 
       service.delete(UI_MODULE_ID, OKAPI_AUTH_TOKEN);
-
-      verify(eventPublisher, times(0)).publishDiscoveryDelete(UI_MODULE_ID, UI_MODULE_ID, ModuleType.UI,
-        OKAPI_AUTH_TOKEN);
     }
   }
 }

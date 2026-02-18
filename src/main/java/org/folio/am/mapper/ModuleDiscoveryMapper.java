@@ -22,6 +22,14 @@ public interface ModuleDiscoveryMapper {
   ModuleDiscovery convert(ModuleEntity entity);
 
   /**
+   * Converts {@link ModuleDiscoveryEntity} to {@link ModuleDiscovery} object.
+   *
+   * @param entity - {@link ModuleDiscoveryEntity} object
+   * @return converted {@link ModuleDiscovery} object
+   */
+  ModuleDiscovery convert(ModuleDiscoveryEntity entity);
+
+  /**
    * Converts {@link ApplicationModuleDiscoveryEntity} projection to {@link ModuleDiscovery} object.
    *
    * @param entity - {@link ApplicationModuleDiscoveryEntity} projection
