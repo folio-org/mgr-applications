@@ -4,7 +4,7 @@ package org.folio.am.domain.entity;
  * Projection interface for module discovery data with associated application ID.
  * Used to fetch minimal discovery data grouped by application without loading full entities.
  */
-public interface ApplicationModuleDiscoveryEntity {
+public interface ApplicationModuleDiscoveryProjection {
 
   /**
    * Gets the application identifier.

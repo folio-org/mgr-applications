@@ -5,7 +5,7 @@ package org.folio.am.domain.entity;
  *
  * <p>Used to fetch minimal application data without loading full entity.
  */
-public interface ApplicationArtifact {
+public interface ApplicationProjection {
 
   String getId();
 

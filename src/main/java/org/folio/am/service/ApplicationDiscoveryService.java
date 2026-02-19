@@ -13,10 +13,10 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.am.domain.dto.ApplicationDiscoveries;
 import org.folio.am.domain.dto.ApplicationDiscovery;
 import org.folio.am.domain.dto.ModuleDiscoveries;
-import org.folio.am.domain.entity.ApplicationEntity;
-import org.folio.am.domain.entity.ApplicationModuleDiscoveryEntity;
+import org.folio.am.domain.entity.ApplicationDiscoveryView;
+import org.folio.am.domain.entity.ApplicationModuleDiscoveryProjection;
 import org.folio.am.mapper.ModuleDiscoveryMapper;
-import org.folio.am.repository.ApplicationRepository;
+import org.folio.am.repository.ApplicationDiscoveryRepository;
 import org.folio.am.repository.ModuleDiscoveryRepository;
 import org.folio.common.domain.model.OffsetRequest;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationDiscoveryService {
 
   private final ModuleDiscoveryRepository discoveryRepository;
-  private final ApplicationRepository applicationRepository;
+  private final ApplicationDiscoveryRepository applicationDiscoveryRepository;
   private final ModuleDiscoveryMapper mapper;
 
   public ModuleDiscoveries get(String appId, Integer offset, Integer limit) {
@@ -50,20 +50,22 @@ public class ApplicationDiscoveryService {
 
     // 1. Query applications by CQL (pagination applies to applications)
     var applicationPage = isBlank(query)
-      ? applicationRepository.findAll(pageable)
-      : applicationRepository.findByCql(query, pageable);
+      ? applicationDiscoveryRepository.findAll(pageable)
+      : applicationDiscoveryRepository.findByCql(query, pageable);
 
     if (applicationPage.isEmpty()) {
       return applicationDiscoveries(emptyList(), 0);
     }
 
     // 2. Get application IDs from the page
-    var appIds = applicationPage.map(ApplicationEntity::getId).getContent();
+    var appIds = applicationPage.map(ApplicationDiscoveryView::getId).getContent();
 
     // 3. Lightweight query: only (application_id, id, name, version, location) -- no ModuleDescriptor
+    //    Note: this query returns multiple rows per application (one per module discovery),
+    //          but it's more efficient than fetching module discoveries per application (N+1 problem)
     // 4. Group by application ID
     var appIdToDiscoveries = discoveryRepository.findAllWithApplicationIdByApplicationIdsIn(appIds).stream()
-      .collect(Collectors.groupingBy(ApplicationModuleDiscoveryEntity::getApplicationId));
+      .collect(Collectors.groupingBy(ApplicationModuleDiscoveryProjection::getApplicationId));
 
     var applicationDiscoveries = mapItems(appIdToDiscoveries.keySet(), toApplicationDiscovery(appIdToDiscoveries));
 
@@ -71,7 +73,7 @@ public class ApplicationDiscoveryService {
   }
 
   private Function<String, ApplicationDiscovery> toApplicationDiscovery(
-    Map<String, List<ApplicationModuleDiscoveryEntity>> appIdToDiscoveries) {
+    Map<String, List<ApplicationModuleDiscoveryProjection>> appIdToDiscoveries) {
     return appId -> {
       var discoveries = mapItems(appIdToDiscoveries.get(appId), mapper::convert);
 

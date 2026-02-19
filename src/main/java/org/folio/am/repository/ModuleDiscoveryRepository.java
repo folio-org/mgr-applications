@@ -1,7 +1,7 @@
 package org.folio.am.repository;
 
 import java.util.List;
-import org.folio.am.domain.entity.ApplicationModuleDiscoveryEntity;
+import org.folio.am.domain.entity.ApplicationModuleDiscoveryProjection;
 import org.folio.am.domain.entity.ModuleDiscoveryEntity;
 import org.folio.spring.cql.JpaCqlRepository;
 import org.springframework.data.domain.Page;
@@ -33,6 +33,6 @@ public interface ModuleDiscoveryRepository extends JpaCqlRepository<ModuleDiscov
         AND am.application_id IN :ids
       ORDER BY am.application_id, m.id
     """, nativeQuery = true)
-  List<ApplicationModuleDiscoveryEntity> findAllWithApplicationIdByApplicationIdsIn(
+  List<ApplicationModuleDiscoveryProjection> findAllWithApplicationIdByApplicationIdsIn(
     @Param("ids") List<String> applicationIds);
 }
