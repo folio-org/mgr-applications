@@ -67,7 +67,7 @@ public class ApplicationDiscoveryService {
     var appIdToDiscoveries = discoveryRepository.findAllWithApplicationIdByApplicationIdsIn(appIds).stream()
       .collect(Collectors.groupingBy(ApplicationModuleDiscoveryProjection::getApplicationId));
 
-    var applicationDiscoveries = mapItems(appIdToDiscoveries.keySet(), toApplicationDiscovery(appIdToDiscoveries));
+    var applicationDiscoveries = mapItems(appIds, toApplicationDiscovery(appIdToDiscoveries));
 
     return applicationDiscoveries(applicationDiscoveries, (int) applicationPage.getTotalElements());
   }

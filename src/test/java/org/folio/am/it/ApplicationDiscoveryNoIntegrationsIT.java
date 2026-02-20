@@ -11,7 +11,6 @@ import static org.folio.am.support.TestConstants.OKAPI_AUTH_TOKEN;
 import static org.folio.am.support.TestConstants.UI_MODULE_ID;
 import static org.folio.am.support.TestValues.applicationDiscoveries;
 import static org.folio.am.support.TestValues.applicationDiscovery;
-import static org.folio.am.support.TestValues.emptyApplicationDiscoveries;
 import static org.folio.am.support.TestValues.moduleBarDiscovery;
 import static org.folio.am.support.TestValues.moduleDiscoveries;
 import static org.folio.am.support.TestValues.moduleDiscovery;
@@ -277,10 +276,11 @@ class ApplicationDiscoveryNoIntegrationsIT extends BaseIntegrationTest {
   }
 
   @Test
-  @Sql(scripts = "classpath:/sql/module-discoveries.sql")
+  @Sql(scripts = "classpath:/sql/application-discoveries.sql")
   void getApplicationsDiscovery_positive() throws Exception {
     var expected = applicationDiscoveries(
-      applicationDiscovery("test-app-1.0.0", moduleBarDiscovery(), moduleFooDiscovery())
+      applicationDiscovery("app-one-1.0.0", moduleDiscovery("mod-a-1.0.0"), moduleDiscovery("mod-b-1.0.0")),
+      applicationDiscovery("app-two-1.0.0", moduleDiscovery("mod-c-1.0.0"))
     );
 
     mockMvc.perform(get("/applications/discovery")
@@ -291,14 +291,14 @@ class ApplicationDiscoveryNoIntegrationsIT extends BaseIntegrationTest {
   }
 
   @Test
-  @Sql(scripts = "classpath:/sql/module-discoveries.sql")
+  @Sql(scripts = "classpath:/sql/application-discoveries.sql")
   void getApplicationsDiscovery_positive_withQuery() throws Exception {
     var expected = applicationDiscoveries(
-      applicationDiscovery("test-app-1.0.0", moduleBarDiscovery(), moduleFooDiscovery())
+      applicationDiscovery("app-one-1.0.0", moduleDiscovery("mod-a-1.0.0"), moduleDiscovery("mod-b-1.0.0"))
     );
 
     mockMvc.perform(get("/applications/discovery")
-        .queryParam("query", "name==test-app")
+        .queryParam("query", "name==app-one")
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
@@ -306,18 +306,19 @@ class ApplicationDiscoveryNoIntegrationsIT extends BaseIntegrationTest {
   }
 
   @Test
-  @Sql(scripts = "classpath:/sql/module-discoveries.sql")
+  @Sql(scripts = "classpath:/sql/application-discoveries.sql")
   void getApplicationsDiscovery_positive_emptyResult() throws Exception {
     mockMvc.perform(get("/applications/discovery")
         .queryParam("query", "name==non-existent")
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(emptyApplicationDiscoveries()), STRICT));
+      .andExpect(jsonPath("$.totalRecords", is(0)))
+      .andExpect(jsonPath("$.applicationDiscoveries.length()", is(0)));
   }
 
   @Test
-  @Sql(scripts = "classpath:/sql/multiple-apps-discoveries.sql")
+  @Sql(scripts = "classpath:/sql/application-discoveries.sql")
   void getApplicationsDiscovery_positive_withPagination() throws Exception {
     mockMvc.perform(get("/applications/discovery")
         .queryParam("limit", "1")
@@ -325,35 +326,20 @@ class ApplicationDiscoveryNoIntegrationsIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.totalRecords", is(3)))
+      .andExpect(jsonPath("$.totalRecords", is(2)))
       .andExpect(jsonPath("$.applicationDiscoveries.length()", is(1)))
       .andExpect(jsonPath("$.applicationDiscoveries[0].applicationId", is("app-one-1.0.0")));
   }
 
   @Test
-  @Sql(scripts = "classpath:/sql/multiple-apps-discoveries.sql")
-  void getApplicationsDiscovery_positive_multipleApps() throws Exception {
-    mockMvc.perform(get("/applications/discovery")
-        .contentType(APPLICATION_JSON)
-        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.totalRecords", is(3)))
-      .andExpect(jsonPath("$.applicationDiscoveries.length()", is(2)))
-      .andExpect(jsonPath("$.applicationDiscoveries[0].applicationId", is("app-one-1.0.0")))
-      .andExpect(jsonPath("$.applicationDiscoveries[0].discovery.length()", is(2)))
-      .andExpect(jsonPath("$.applicationDiscoveries[1].applicationId", is("app-two-1.0.0")))
-      .andExpect(jsonPath("$.applicationDiscoveries[1].discovery.length()", is(1)));
-  }
-
-  @Test
-  @Sql(scripts = "classpath:/sql/multiple-apps-discoveries.sql")
+  @Sql(scripts = "classpath:/sql/application-discoveries.sql")
   void getApplicationsDiscovery_positive_excludesAppsWithNoDiscovery() throws Exception {
     mockMvc.perform(get("/applications/discovery")
         .queryParam("query", "name==app-three")
         .contentType(APPLICATION_JSON)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.totalRecords", is(1)))
+      .andExpect(jsonPath("$.totalRecords", is(0)))
       .andExpect(jsonPath("$.applicationDiscoveries.length()", is(0)));
   }
 }

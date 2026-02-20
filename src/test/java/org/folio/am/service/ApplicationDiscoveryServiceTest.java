@@ -123,23 +123,6 @@ class ApplicationDiscoveryServiceTest {
   }
 
   @Test
-  void search_positive_noDiscoveryModules() {
-    var query = "name==test-app*";
-    var app = applicationDiscoveryView(APPLICATION_ID);
-    var appPage = new PageImpl<>(List.of(app), OffsetRequest.of(0, 10), 1);
-
-    when(applicationDiscoveryRepository.findByCql(query, OffsetRequest.of(0, 10))).thenReturn(appPage);
-    when(moduleDiscoveryRepository.findAllWithApplicationIdByApplicationIdsIn(List.of(APPLICATION_ID)))
-      .thenReturn(emptyList());
-
-    var actual = service.search(query, 0, 10);
-
-    assertThat(actual).isNotNull();
-    assertThat(actual.getApplicationDiscoveries()).isEmpty();
-    assertThat(actual.getTotalRecords()).isEqualTo(1);
-  }
-
-  @Test
   void search_positive_multipleAppsWithDiscovery() {
     var query = "name==test-app*";
     var app1 = applicationDiscoveryView("test-app-1.0.0");
@@ -161,6 +144,36 @@ class ApplicationDiscoveryServiceTest {
     assertThat(actual).isNotNull();
     assertThat(actual.getApplicationDiscoveries()).hasSize(2);
     assertThat(actual.getApplicationDiscoveries()).containsExactlyInAnyOrder(
+      applicationDiscovery("test-app-1.0.0", discoveryDto1),
+      applicationDiscovery("test-app-2.0.0", discoveryDto2)
+    );
+    assertThat(actual.getTotalRecords()).isEqualTo(2);
+  }
+
+  @Test
+  void search_positive_orderedResult() {
+    var query = "name==test-app*";
+    var app1 = applicationDiscoveryView("test-app-1.0.0");
+    var app2 = applicationDiscoveryView("test-app-2.0.0");
+    var appPage = new PageImpl<>(List.of(app1, app2), OffsetRequest.of(0, 10), 2);
+    var discovery1 = applicationModuleDiscoveryProjection("test-app-1.0.0", "mod-1-1.0.0");
+    var discovery2 = applicationModuleDiscoveryProjection("test-app-2.0.0", "mod-2-1.0.0");
+    var discoveryDto1 = TestValues.moduleDiscovery("mod-1-1.0.0");
+    var discoveryDto2 = TestValues.moduleDiscovery("mod-2-1.0.0");
+
+    when(applicationDiscoveryRepository.findByCql(query, OffsetRequest.of(0, 10))).thenReturn(appPage);
+    // Note: the order of discoveries returned by the repository is different from the order of applications in the page
+    // but the service should return discoveries in the same order as applications in the page
+    when(moduleDiscoveryRepository.findAllWithApplicationIdByApplicationIdsIn(
+      List.of("test-app-1.0.0", "test-app-2.0.0"))).thenReturn(List.of(discovery2, discovery1));
+    when(mapper.convert(discovery1)).thenReturn(discoveryDto1);
+    when(mapper.convert(discovery2)).thenReturn(discoveryDto2);
+
+    var actual = service.search(query, 0, 10);
+
+    assertThat(actual).isNotNull();
+    assertThat(actual.getApplicationDiscoveries()).hasSize(2);
+    assertThat(actual.getApplicationDiscoveries()).containsExactly(
       applicationDiscovery("test-app-1.0.0", discoveryDto1),
       applicationDiscovery("test-app-2.0.0", discoveryDto2)
     );
