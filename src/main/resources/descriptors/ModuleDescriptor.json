@@ -59,13 +59,19 @@
     },
     {
       "id": "discoveries",
-      "version": "2.0",
+      "version": "2.1",
       "handlers": [
         {
           "type": "internal",
           "methods": [ "GET" ],
-          "pathPattern": "/applications/{id}/discovery",
+          "pathPattern": "/applications/discovery",
           "permissionsRequired": [ "mgr-applications.app-discoveries.collection.get" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "GET" ],
+          "pathPattern": "/applications/{id}/discovery",
+          "permissionsRequired": [ "mgr-applications.app-discoveries.item.get" ]
         },
         {
           "type": "internal",
@@ -224,8 +230,13 @@
     },
     {
       "description": "Get module discoveries for application",
-      "displayName": "Manager Applications - retrieve discovery information for application",
+      "displayName": "Manager Applications - retrieve discovery information for applications",
       "permissionName": "mgr-applications.app-discoveries.collection.get"
+    },
+    {
+      "description": "Get module discoveries for application",
+      "displayName": "Manager Applications - retrieve discovery information for an application",
+      "permissionName": "mgr-applications.app-discoveries.item.get"
     },
     {
       "description": "Get module bootstrap",
@@ -260,7 +271,8 @@
         "mgr-applications.discoveries.item.delete",
         "mgr-applications.discoveries.collection.post",
         "mgr-applications.discoveries.collection.get",
-        "mgr-applications.app-discoveries.collection.get"
+        "mgr-applications.app-discoveries.collection.get",
+        "mgr-applications.app-discoveries.item.get"
       ]
     },
     {
@@ -274,6 +286,7 @@
         "mgr-applications.discoveries.item.get",
         "mgr-applications.discoveries.collection.get",
         "mgr-applications.app-discoveries.collection.get",
+        "mgr-applications.app-discoveries.item.get",
         "mgr-applications.module-bootstraps.item.get"
       ]
     },
