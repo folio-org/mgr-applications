@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.folio.am.mapper.ModuleBootstrapMapperImpl;
-import org.folio.am.repository.ModuleBootstrapViewRepository;
+import org.folio.am.repository.ModuleBootstrapRepository;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ModuleBootstrapServiceTest {
 
-  @Mock private ModuleBootstrapViewRepository repository;
+  @Mock private ModuleBootstrapRepository repository;
 
   private ModuleBootstrapService service;
 

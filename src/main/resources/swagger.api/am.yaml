@@ -162,6 +162,28 @@ paths:
         '500':
           $ref: '#/components/responses/internal-server-error'
 
+  /applications/discovery:
+    get:
+      operationId: searchApplicationsDiscovery
+      description: Retrieve discovery information for applications matching a CQL query, organized by application.
+      tags:
+        - application-discovery
+      parameters:
+        - $ref: '#/components/parameters/cql-query'
+        - $ref: '#/components/parameters/query-offset'
+        - $ref: '#/components/parameters/query-limit'
+      responses:
+        '200':
+          description: Application discovery information grouped by application
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/applicationDiscoveries'
+        '400':
+          $ref: '#/components/responses/bad-request'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
   /applications/{id}/discovery:
     get:
       operationId: getDiscovery
@@ -344,6 +366,10 @@ components:
       $ref: schemas/applicationDescriptor.json
     applicationDescriptors:
       $ref: schemas/applicationDescriptors.json
+    applicationDiscovery:
+      $ref: schemas/applicationDiscovery.json
+    applicationDiscoveries:
+      $ref: schemas/applicationDiscoveries.json
     moduleDiscovery:
       $ref: schemas/module/moduleDiscovery.json
     moduleDiscoveries:

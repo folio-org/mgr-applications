@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Module;
-import org.folio.am.domain.entity.ApplicationArtifact;
+import org.folio.am.domain.entity.ApplicationProjection;
 import org.folio.am.domain.entity.ArtifactEntity;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.integration.mte.EntitlementService;
@@ -366,8 +366,8 @@ class ApplicationServiceTest {
     return result;
   }
 
-  private static ApplicationArtifact createApplicationSlice(String id, String name, String version) {
-    return new ApplicationArtifact() {
+  private static ApplicationProjection createApplicationSlice(String id, String name, String version) {
+    return new ApplicationProjection() {
       @Override
       public String getId() {
         return id;

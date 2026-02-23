@@ -16,7 +16,7 @@ import org.folio.am.domain.dto.ModuleBootstrap;
 import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
 import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.folio.am.mapper.ModuleBootstrapMapper;
-import org.folio.am.repository.ModuleBootstrapViewRepository;
+import org.folio.am.repository.ModuleBootstrapRepository;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ModuleBootstrapService {
 
-  private final ModuleBootstrapViewRepository repository;
+  private final ModuleBootstrapRepository repository;
   private final ModuleBootstrapMapper mapper;
 
   /**

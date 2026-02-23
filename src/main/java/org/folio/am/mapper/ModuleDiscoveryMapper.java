@@ -2,6 +2,7 @@ package org.folio.am.mapper;
 
 import java.util.List;
 import org.folio.am.domain.dto.ModuleDiscovery;
+import org.folio.am.domain.entity.ApplicationModuleDiscoveryProjection;
 import org.folio.am.domain.entity.ModuleDiscoveryEntity;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.mapstruct.InjectionStrategy;
@@ -19,6 +20,22 @@ public interface ModuleDiscoveryMapper {
    */
   @Mapping(target = "location", source = "entity.discoveryUrl")
   ModuleDiscovery convert(ModuleEntity entity);
+
+  /**
+   * Converts {@link ModuleDiscoveryEntity} to {@link ModuleDiscovery} object.
+   *
+   * @param entity - {@link ModuleDiscoveryEntity} object
+   * @return converted {@link ModuleDiscovery} object
+   */
+  ModuleDiscovery convert(ModuleDiscoveryEntity entity);
+
+  /**
+   * Converts {@link ApplicationModuleDiscoveryProjection} projection to {@link ModuleDiscovery} object.
+   *
+   * @param entity - {@link ApplicationModuleDiscoveryProjection} projection
+   * @return converted {@link ModuleDiscovery} object
+   */
+  ModuleDiscovery convert(ApplicationModuleDiscoveryProjection entity);
 
   /**
    * Converts a {@link List} with {@link ModuleEntity} to a {@link List} with {@link ModuleDiscovery} objects.

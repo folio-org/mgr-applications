@@ -1,6 +1,7 @@
 package org.folio.am.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.folio.am.domain.dto.ApplicationDiscoveries;
 import org.folio.am.domain.dto.ModuleDiscoveries;
 import org.folio.am.rest.resource.ApplicationDiscoveryApi;
 import org.folio.am.service.ApplicationDiscoveryService;
@@ -17,5 +18,12 @@ public class ApplicationDiscoveryController extends BaseController implements Ap
   public ResponseEntity<ModuleDiscoveries> getDiscovery(String appId, Integer offset, Integer limit) {
     var moduleDiscoveries = service.get(appId, offset, limit);
     return ResponseEntity.ok(moduleDiscoveries);
+  }
+
+  @Override
+  public ResponseEntity<ApplicationDiscoveries> searchApplicationsDiscovery(String query,
+    Integer offset, Integer limit) {
+    var result = service.search(query, offset, limit);
+    return ResponseEntity.ok(result);
   }
 }
