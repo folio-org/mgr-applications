@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.folio.am.domain.dto.ApplicationDescriptor;
+import org.folio.am.domain.dto.ApplicationDiscoveries;
+import org.folio.am.domain.dto.ApplicationDiscovery;
 import org.folio.am.domain.dto.ApplicationReferences;
 import org.folio.am.domain.dto.DeploymentDescriptor;
 import org.folio.am.domain.dto.Module;
@@ -55,6 +57,7 @@ import org.folio.common.domain.model.AnyDescriptor;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.common.domain.model.RoutingEntry;
+import org.folio.common.utils.SemverUtils;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestValues {
@@ -270,6 +273,15 @@ public class TestValues {
       .location(MODULE_URL);
   }
 
+  public static ModuleDiscovery moduleDiscovery(String id) {
+    var name = SemverUtils.getName(id);
+    return new ModuleDiscovery()
+      .id(id)
+      .name(name)
+      .version(SemverUtils.getVersion(id))
+      .location("http://" + name + ":8080");
+  }
+
   public static ModuleDiscovery moduleDiscovery(String name, String version, String location) {
     return new ModuleDiscovery()
       .id(name + "-" + version)
@@ -349,6 +361,17 @@ public class TestValues {
     return entity;
   }
 
+  public static ModuleDiscoveryEntity uiModuleDiscoveryEntity() {
+    var entity = new ModuleDiscoveryEntity();
+
+    entity.setId(UI_MODULE_ID);
+    entity.setName(UI_MODULE_NAME);
+    entity.setVersion(UI_MODULE_VERSION);
+    entity.setLocation(UI_MODULE_URL);
+
+    return entity;
+  }
+
   private static String interfacePath(String interfaceId) {
     return String.format("/%s", interfaceId);
   }
@@ -398,5 +421,23 @@ public class TestValues {
 
   public static ApplicationReferences applicationReferences() {
     return new ApplicationReferences().applicationIds(Set.of("test-application-1.0.0"));
+  }
+
+  public static ApplicationDiscovery applicationDiscovery(String appId, ModuleDiscovery... discoveries) {
+    return new ApplicationDiscovery()
+      .applicationId(appId)
+      .discovery(List.of(discoveries));
+  }
+
+  public static ApplicationDiscoveries applicationDiscoveries(ApplicationDiscovery... items) {
+    return new ApplicationDiscoveries()
+      .applicationDiscoveries(List.of(items))
+      .totalRecords(items.length);
+  }
+
+  public static ApplicationDiscoveries emptyApplicationDiscoveries() {
+    return new ApplicationDiscoveries()
+      .applicationDiscoveries(emptyList())
+      .totalRecords(0);
   }
 }

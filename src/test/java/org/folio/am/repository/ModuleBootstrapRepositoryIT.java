@@ -22,7 +22,7 @@ import org.springframework.test.context.jdbc.Sql;
   scripts = "classpath:/sql/truncate-tables.sql",
   executionPhase = AFTER_TEST_METHOD
 )
-class ModuleBootstrapViewRepositoryIT extends BaseRepositoryTest {
+class ModuleBootstrapRepositoryIT extends BaseRepositoryTest {
 
   private static final String APP_1_0_0_ID = "test-app-1.0.0";
   private static final String APP_2_0_0_ID = "test-app-2.0.0";
@@ -34,7 +34,7 @@ class ModuleBootstrapViewRepositoryIT extends BaseRepositoryTest {
   private static final String MODULE_BAZ_DISCOVERY_URL = "http://test-module-baz:8080";
 
   @Autowired
-  private ModuleBootstrapViewRepository repository;
+  private ModuleBootstrapRepository repository;
 
   @Autowired
   private ModuleRepository moduleRepository;

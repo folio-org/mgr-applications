@@ -1,27 +1,39 @@
 package org.folio.am.domain.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.proxy.HibernateProxy;
+import org.springframework.data.annotation.Immutable;
 
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name = "module")
-@SQLRestriction("discovery_url IS NOT NULL")
-public class ModuleDiscoveryEntity extends ArtifactEntity {
+@Immutable
+@Table(name = "v_application_with_discovery")
+public class ApplicationDiscoveryView extends ArtifactEntity {
 
-  @Column(name = "discovery_url")
-  private String location;
+  @OrderBy("id")
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "application_module",
+    joinColumns = @JoinColumn(name = "application_id"),
+    inverseJoinColumns = @JoinColumn(name = "module_id")
+  )
+  @ToString.Exclude
+  private Set<ModuleDiscoveryEntity> moduleDiscoveries = new TreeSet<>(idComparator());
 
   @Override
   public final boolean equals(Object o) {
@@ -38,7 +50,7 @@ public class ModuleDiscoveryEntity extends ArtifactEntity {
     if (thisEffectiveClass != otherEffectiveClass) {
       return false;
     }
-    ModuleDiscoveryEntity that = (ModuleDiscoveryEntity) o;
+    ApplicationDiscoveryView that = (ApplicationDiscoveryView) o;
     return getId() != null && Objects.equals(getId(), that.getId());
   }
 

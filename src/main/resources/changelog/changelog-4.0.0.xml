@@ -5,4 +5,5 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
   <include file="changes/v4.0.0/support-ui-module-discovery.xml" relativeToChangelogFile="true"/>
+  <include file="changes/v4.0.0/create-application-with-discovery-view.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

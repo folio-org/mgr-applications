@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Discovery information for a single application",
+  "properties": {
+    "applicationId": {
+      "description": "The application identifier",
+      "type": "string"
+    },
+    "discovery": {
+      "description": "Discovery information for the modules that comprise this application",
+      "type": "array",
+      "items": {
+        "$ref": "module/moduleDiscovery.json"
+      }
+    }
+  },
+  "required": [
+    "applicationId",
+    "discovery"
+  ]
+}

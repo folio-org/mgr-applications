@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Collection of discovery information organized by application",
+  "properties": {
+    "applicationDiscoveries": {
+      "description": "Discovery information grouped by application",
+      "type": "array",
+      "items": {
+        "$ref": "applicationDiscovery.json"
+      }
+    },
+    "totalRecords": {
+      "readOnly": true,
+      "description": "The total number of applications matching the provided criteria",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "applicationDiscoveries"
+  ]
+}

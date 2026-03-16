@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ModuleBootstrapViewRepository extends JpaRepository<ModuleBootstrapView, String> {
+public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrapView, String> {
 
   /**
    * Queries the module and all its dependencies by the given id.

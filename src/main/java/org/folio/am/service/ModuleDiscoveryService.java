@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ModuleDiscoveries;
 import org.folio.am.domain.dto.ModuleDiscovery;
 import org.folio.am.domain.entity.ArtifactEntity;
+import org.folio.am.domain.entity.ModuleDiscoveryEntity;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.exception.RequestValidationException;
 import org.folio.am.mapper.ModuleDiscoveryMapper;
@@ -219,8 +220,8 @@ public class ModuleDiscoveryService {
       () -> new EntityNotFoundException("Unable to find module with id: " + moduleId));
   }
 
-  private ModuleEntity findModuleWithDiscovery(String moduleId) {
-    return repository.findByHasDiscoveryAndId(moduleId)
+  private ModuleDiscoveryEntity findModuleWithDiscovery(String moduleId) {
+    return moduleDiscoveryRepository.findById(moduleId)
       .orElseThrow(() -> new EntityNotFoundException("Unable to find discovery of the module with id: " + moduleId));
   }
 

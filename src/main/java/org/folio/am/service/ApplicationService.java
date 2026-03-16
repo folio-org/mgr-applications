@@ -28,8 +28,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
-import org.folio.am.domain.entity.ApplicationArtifact;
 import org.folio.am.domain.entity.ApplicationEntity;
+import org.folio.am.domain.entity.ApplicationProjection;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.integration.mte.EntitlementService;
@@ -231,7 +231,7 @@ public class ApplicationService {
   }
 
   public List<String> findAllApplicationIdsByName(String applicationName) {
-    return mapItems(appRepository.findAllAppArtifactsByName(applicationName), ApplicationArtifact::getId);
+    return mapItems(appRepository.findAllAppArtifactsByName(applicationName), ApplicationProjection::getId);
   }
 
   private Function<ApplicationEntity, ApplicationDescriptor> descriptorWithModules(

@@ -1,0 +1,38 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="create-application-with-discovery-view" author="dmtkachenko">
+        <createView viewName="v_application_with_discovery" replaceIfExists="true">
+            SELECT app.id, app.name, app.version
+              FROM application app
+              WHERE EXISTS (
+                SELECT 1
+                FROM application_module am
+                  INNER JOIN module m ON am.module_id = m.id
+                WHERE m.discovery_url IS NOT NULL
+                  AND am.application_id = app.id
+              )
+        </createView>
+    </changeSet>
+
+    <changeSet id="create-index-application-module-application-id" author="dmtkachenko">
+        <createIndex tableName="application_module" indexName="idx_application_module_appid">
+            <column name="application_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="create-index-application-module-module-id" author="dmtkachenko">
+        <createIndex tableName="application_module" indexName="idx_application_module_moduleid">
+            <column name="module_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="rename-module-bootstrap-view" author="dmtkachenko">
+        <!-- rename the view to follow naming convention for views -->
+        <renameView oldViewName="module_bootstrap" newViewName="v_module_bootstrap"/>
+    </changeSet>
+
+</databaseChangeLog>
