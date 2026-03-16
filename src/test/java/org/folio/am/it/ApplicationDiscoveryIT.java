@@ -1,6 +1,7 @@
 package org.folio.am.it;
 
 import static org.apache.commons.lang3.StringUtils.stripToNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.am.integration.kafka.DiscoveryPublisher.DISCOVERY_DESTINATION;
 import static org.folio.am.support.KafkaEventAssertions.assertDiscoveryEvents;
