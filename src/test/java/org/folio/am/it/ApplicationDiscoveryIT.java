@@ -39,8 +39,10 @@ import feign.FeignException.NotFound;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
 import org.folio.am.support.KafkaEventAssertions;
 import org.folio.am.support.TestValues;
@@ -58,6 +60,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
@@ -72,6 +75,7 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   private static final String DISCOVERY_TOPIC = getEnvTopicName(DISCOVERY_DESTINATION);
+  private static final AtomicInteger TEST_SEQUENCE = new AtomicInteger();
   private static final String OUTBOX_DESTINATIONS_QUERY = """
     SELECT destination || '=' || count(*)
       FROM trx_outbox
@@ -86,6 +90,9 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Autowired private KongAdminClient kongAdminClient;
   @Autowired private JdbcTemplate jdbcTemplate;
+  @Autowired private KafkaProperties kafkaProperties;
+
+  private int currentTestSequence;
 
   @BeforeAll
   public static void setUp() {
@@ -94,6 +101,7 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @BeforeEach
   void logTestStart(TestInfo testInfo) {
+    currentTestSequence = TEST_SEQUENCE.incrementAndGet();
     log.warn("Discovery diagnostics [{}]: {}", testInfo.getDisplayName(), captureDiscoveryDiagnostics("test-start"));
   }
 
@@ -499,14 +507,20 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   }
 
   private DiscoveryDiagnostics captureDiscoveryDiagnostics(String phase) {
+    var consumerProperties = kafkaProperties.buildConsumerProperties(null);
     var consumerRecords = getEvents(DISCOVERY_TOPIC, DiscoveryEvent.class);
     var moduleIds = consumerRecords.stream().map(record -> record.value().getModuleId()).toList();
     var outboxByDestination = jdbcTemplate.queryForList(OUTBOX_DESTINATIONS_QUERY, String.class);
     var outboxLock = jdbcTemplate.queryForMap(OUTBOX_LOCK_QUERY);
     var outboxRowCount = outboxByDestination.stream().mapToInt(this::extractCount).sum();
+    var consumerGroupId = String.valueOf(consumerProperties.get(ConsumerConfig.GROUP_ID_CONFIG));
+    var autoOffsetReset = String.valueOf(consumerProperties.get(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG));
 
     return new DiscoveryDiagnostics(
+      currentTestSequence,
       phase,
+      consumerGroupId,
+      autoOffsetReset,
       consumerRecords.size(),
       moduleIds,
       outboxRowCount,
@@ -520,7 +534,10 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   }
 
   private record DiscoveryDiagnostics(
+    int testSequence,
     String phase,
+    String consumerGroupId,
+    String autoOffsetReset,
     int kafkaEventCount,
     List<String> kafkaModuleIds,
     int outboxRowCount,
