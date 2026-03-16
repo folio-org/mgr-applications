@@ -21,7 +21,7 @@ import org.folio.am.integration.kafka.model.DiscoveryEvent;
 public final class KafkaEventAssertions {
 
   private static ConditionFactory await() {
-    return Awaitility.await().atMost(ONE_MINUTE).timeout(ONE_SECOND);
+    return Awaitility.await().atMost(ONE_MINUTE).pollInterval(ONE_SECOND);
   }
 
   public static void assertDiscoveryEvents(String... moduleIds) {
