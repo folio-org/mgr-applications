@@ -5,6 +5,8 @@ import static org.folio.am.integration.kafka.DiscoveryPublisher.DISCOVERY_DESTIN
 import static org.folio.common.utils.CollectionUtils.mapItems;
 import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
 import static org.folio.test.FakeKafkaConsumer.getEvents;
+import static org.testcontainers.shaded.org.awaitility.Durations.ONE_MINUTE;
+import static org.testcontainers.shaded.org.awaitility.Durations.ONE_SECOND;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -14,13 +16,12 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
-import org.testcontainers.shaded.org.awaitility.Durations;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class KafkaEventAssertions {
 
   private static ConditionFactory await() {
-    return Awaitility.await().atMost(Durations.FIVE_SECONDS);
+    return Awaitility.await().atMost(ONE_MINUTE).timeout(ONE_SECOND);
   }
 
   public static void assertDiscoveryEvents(String... moduleIds) {
