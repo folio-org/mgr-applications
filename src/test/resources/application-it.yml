@@ -12,7 +12,7 @@ spring:
     show-sql: true
   kafka:
     consumer:
-      auto-offset-reset: earliest
+      auto-offset-reset: latest
       group-id: testing
 
 application:
