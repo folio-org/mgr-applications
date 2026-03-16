@@ -20,6 +20,7 @@ import static org.folio.am.support.TestValues.moduleDiscoveries;
 import static org.folio.am.support.TestValues.moduleFooDiscovery;
 import static org.folio.am.support.TestValues.uiModuleDiscovery;
 import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
+import static org.folio.test.FakeKafkaConsumer.getEvents;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -36,7 +37,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import feign.FeignException.NotFound;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
 import org.folio.am.support.KafkaEventAssertions;
 import org.folio.am.support.TestValues;
@@ -50,12 +54,16 @@ import org.folio.tools.kong.client.KongAdminClient;
 import org.folio.tools.kong.model.Service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 
+@Log4j2
 @IntegrationTest
 @SqlMergeMode(MERGE)
 @EnableOkapiSecurity
@@ -63,15 +71,35 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 @TestPropertySource(properties = {"application.okapi.enabled=true", "application.kong.enabled=true"})
 class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
+  private static final String DISCOVERY_TOPIC = getEnvTopicName(DISCOVERY_DESTINATION);
+  private static final String OUTBOX_DESTINATIONS_QUERY = """
+    SELECT destination || '=' || count(*)
+      FROM trx_outbox
+     GROUP BY destination
+     ORDER BY destination
+    """;
+  private static final String OUTBOX_LOCK_QUERY = """
+    SELECT locked, locked_by, locked_time
+      FROM trx_outbox_lock
+     WHERE id = 1
+    """;
+
   @Autowired private KongAdminClient kongAdminClient;
+  @Autowired private JdbcTemplate jdbcTemplate;
 
   @BeforeAll
   public static void setUp() {
-    fakeKafkaConsumer.registerTopic(getEnvTopicName(DISCOVERY_DESTINATION), DiscoveryEvent.class);
+    fakeKafkaConsumer.registerTopic(DISCOVERY_TOPIC, DiscoveryEvent.class);
+  }
+
+  @BeforeEach
+  void logTestStart(TestInfo testInfo) {
+    log.warn("Discovery diagnostics [{}]: {}", testInfo.getDisplayName(), captureDiscoveryDiagnostics("test-start"));
   }
 
   @AfterEach
-  void tearDown() {
+  void tearDown(TestInfo testInfo) {
+    log.warn("Discovery diagnostics [{}]: {}", testInfo.getDisplayName(), captureDiscoveryDiagnostics("test-end"));
     deleteService(MODULE_FOO_ID);
   }
 
@@ -263,6 +291,7 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   @Test
   @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-update-module-discovery.json")
   void update_negative_moduleIdDiffersFromArtifactId() throws Exception {
+    assertDiagnosticStateCleanAtTestStart();
     var id = "another-id";
 
     mockMvc.perform(put("/modules/{id}/discovery", MODULE_FOO_ID)
@@ -277,6 +306,8 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
       .andExpect(jsonPath("$.errors[0].code", is("validation_error")))
       .andExpect(jsonPath("$.errors[0].type", is("RequestValidationException")));
 
+    log.warn("Discovery diagnostics [{}]: {}", "before-assertNoDiscoveryEvents",
+      captureDiscoveryDiagnostics("before-assertNoDiscoveryEvents"));
     KafkaEventAssertions.assertNoDiscoveryEvents();
   }
 
@@ -455,5 +486,46 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
       // Do nothing
     }
     kongAdminClient.deleteService(serviceId);
+  }
+
+  private void assertDiagnosticStateCleanAtTestStart() {
+    var diagnostics = captureDiscoveryDiagnostics("flaky-test-start");
+    assertThat(diagnostics.kafkaModuleIds())
+      .withFailMessage("Kafka topic is not clean at flaky test start: %s", diagnostics)
+      .isEmpty();
+    assertThat(diagnostics.outboxRowCount())
+      .withFailMessage("Transactional outbox is not clean at flaky test start: %s", diagnostics)
+      .isZero();
+  }
+
+  private DiscoveryDiagnostics captureDiscoveryDiagnostics(String phase) {
+    var consumerRecords = getEvents(DISCOVERY_TOPIC, DiscoveryEvent.class);
+    var moduleIds = consumerRecords.stream().map(record -> record.value().getModuleId()).toList();
+    var outboxByDestination = jdbcTemplate.queryForList(OUTBOX_DESTINATIONS_QUERY, String.class);
+    var outboxLock = jdbcTemplate.queryForMap(OUTBOX_LOCK_QUERY);
+    var outboxRowCount = outboxByDestination.stream().mapToInt(this::extractCount).sum();
+
+    return new DiscoveryDiagnostics(
+      phase,
+      consumerRecords.size(),
+      moduleIds,
+      outboxRowCount,
+      outboxByDestination,
+      outboxLock);
+  }
+
+  private int extractCount(String destinationStats) {
+    var delimiterIndex = destinationStats.lastIndexOf('=');
+    return Integer.parseInt(destinationStats.substring(delimiterIndex + 1));
+  }
+
+  private record DiscoveryDiagnostics(
+    String phase,
+    int kafkaEventCount,
+    List<String> kafkaModuleIds,
+    int outboxRowCount,
+    List<String> outboxByDestination,
+    Map<String, Object> outboxLock
+  ) {
   }
 }
