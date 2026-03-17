@@ -12,8 +12,8 @@ spring:
     show-sql: true
   kafka:
     consumer:
-      auto-offset-reset: earliest
-      group-id: testing
+      auto-offset-reset: latest
+      group-id: testing-${random.uuid}
 
 application:
   environment: it
