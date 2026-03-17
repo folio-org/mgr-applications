@@ -13,6 +13,8 @@
 * Review and clean up logs in mgr-apllications (MGRAPPS-84)
 * Allow discovery information to be specified for UI modules (MGRAPPS-92)
 * Add API endpoint: Get Application Discovery By Query (MGRAPPS-98)
+* Migrate CI from Jenkins to GitHub Actions Maven central workflow (MGRAPPS-96)
+
 ---
 
 ## Version `v3.0.0` (12.03.2025)
