@@ -16,8 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.FixedBackOff;
 
@@ -32,7 +32,7 @@ class EntitlementConsumerConfigurationTest {
 
   @BeforeEach
   void setUp() {
-    lenient().when(kafkaProperties.buildConsumerProperties(null))
+    lenient().when(kafkaProperties.buildConsumerProperties())
       .thenReturn(defaultKafkaConsumerProperties());
     lenient().when(retryConfiguration.getRetryDelay()).thenReturn(Duration.ofMillis(250));
     lenient().when(retryConfiguration.getRetryAttempts()).thenReturn(5L);
@@ -53,7 +53,7 @@ class EntitlementConsumerConfigurationTest {
       .containsEntry(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
       .containsEntry(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
     assertThat(configMap.get(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG))
-      .isInstanceOf(JsonDeserializer.class);
+      .isInstanceOf(JacksonJsonDeserializer.class);
   }
 
   @Test

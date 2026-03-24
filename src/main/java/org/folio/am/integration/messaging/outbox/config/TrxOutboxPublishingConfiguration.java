@@ -7,6 +7,7 @@ import static org.springframework.transaction.TransactionDefinition.PROPAGATION_
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -70,7 +71,7 @@ public class TrxOutboxPublishingConfiguration {
     map.from(pool.getKeepAlive().getSeconds()).as(Long::intValue).to(executor::setKeepAliveSeconds);
     map.from(pool.isAllowCoreThreadTimeout()).to(executor::setAllowCoreThreadTimeOut);
 
-    map.from(properties.getShutdown().getAwaitTerminationPeriod()).whenNonNull().as(Duration::toMillis)
+    map.from(properties.getShutdown().getAwaitTerminationPeriod()).when(Objects::nonNull).as(Duration::toMillis)
       .to(executor::setAwaitTerminationMillis);
 
     return executor;
@@ -133,7 +134,7 @@ public class TrxOutboxPublishingConfiguration {
 
       var shutdown = taskScheduling.getShutdown();
       map.from(shutdown.isAwaitTermination()).to(executor::setWaitForTasksToCompleteOnShutdown);
-      map.from(shutdown.getAwaitTerminationPeriod()).whenNonNull().as(Duration::toMillis)
+      map.from(shutdown.getAwaitTerminationPeriod()).when(Objects::nonNull).as(Duration::toMillis)
         .to(executor::setAwaitTerminationMillis);
 
       return executor;

@@ -4,7 +4,6 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.folio.common.utils.CollectionUtils.mapItems;
 import static org.folio.common.utils.CollectionUtils.mapItemsToSet;
 
-import feign.FeignException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -20,6 +19,7 @@ import org.folio.am.repository.ModuleRepository;
 import org.folio.am.service.ApplicationDescriptorListener;
 import org.folio.am.service.ApplicationDiscoveryListener;
 import org.folio.common.domain.model.ModuleDescriptor;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -133,7 +133,7 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
       }
 
       updateDiscovery(moduleDiscovery, token);
-    } catch (FeignException.NotFound e) {
+    } catch (HttpClientErrorException.NotFound e) {
       createDiscovery(moduleDiscovery, token);
     }
   }
@@ -158,7 +158,7 @@ public class OkapiModuleRegisterService implements ApplicationDescriptorListener
     try {
       okapiClient.deleteDiscovery(serviceId, instanceId, token);
       log.debug("Discovery info removed from Okapi: {}", serviceId);
-    } catch (FeignException.NotFound e) {
+    } catch (HttpClientErrorException.NotFound e) {
       log.debug("Discovery info is not found in Okapi: serviceId = {}, instanceId= {}", serviceId, instanceId);
     }
   }

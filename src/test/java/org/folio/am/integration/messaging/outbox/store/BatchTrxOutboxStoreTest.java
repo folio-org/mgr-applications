@@ -15,8 +15,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.folio.am.integration.messaging.outbox.TrxOutboxException;
 import org.folio.am.integration.messaging.outbox.data.TrxOutboxEntity;
@@ -34,6 +32,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @UnitTest
 @ExtendWith(MockitoExtension.class)
@@ -107,9 +107,9 @@ class BatchTrxOutboxStoreTest {
   }
 
   @Test
-  void beforeCommit_negative_jsonSerializationFailed() throws JsonProcessingException {
+  void beforeCommit_negative_jsonSerializationFailed() throws JacksonException {
     store.cachedMessages.add(genericMessage());
-    doThrow(JsonProcessingException.class).when(mapper).writeValueAsString(any());
+    doThrow(JacksonException.class).when(mapper).writeValueAsString(any());
 
     assertThatThrownBy(() -> store.beforeCommit(false))
       .isInstanceOf(TrxOutboxException.class)

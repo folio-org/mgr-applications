@@ -1,7 +1,7 @@
 package org.folio.am.integration.messaging;
 
 import java.util.UUID;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.AlternativeJdkIdGenerator;

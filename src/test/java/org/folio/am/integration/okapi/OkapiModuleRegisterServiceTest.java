@@ -20,7 +20,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import feign.FeignException;
 import java.util.ArrayList;
 import org.folio.am.domain.entity.ArtifactEntity;
 import org.folio.am.domain.entity.ModuleType;
@@ -32,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.client.HttpClientErrorException;
 
 @UnitTest
 @ExtendWith(MockitoExtension.class)
@@ -106,7 +106,8 @@ class OkapiModuleRegisterServiceTest {
 
   @Test
   void onDiscoveryCreate_positive() {
-    when(okapiClient.getDiscovery(MODULE_ID, MODULE_ID, OKAPI_AUTH_TOKEN)).thenThrow(FeignException.NotFound.class);
+    when(okapiClient.getDiscovery(MODULE_ID, MODULE_ID, OKAPI_AUTH_TOKEN))
+      .thenThrow(HttpClientErrorException.NotFound.class);
 
     service.onDiscoveryCreate(moduleDiscovery(), ModuleType.BACKEND, OKAPI_AUTH_TOKEN);
 

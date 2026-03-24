@@ -6,7 +6,7 @@ import static org.folio.am.support.TestValues.moduleDiscoveries;
 import static org.folio.am.support.TestValues.moduleDiscovery;
 import static org.folio.common.utils.OkapiHeaders.TOKEN;
 import static org.folio.test.TestUtils.asJsonString;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -27,15 +27,19 @@ import org.folio.security.integration.keycloak.model.TokenResponse;
 import org.folio.test.extensions.EnableKeycloakSecurity;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.MultiValueMap;
 
 @UnitTest
+@ExtendWith(MockitoExtension.class)
 @EnableKeycloakSecurity
 @WebMvcTest(ModuleDiscoveryController.class)
 @TestPropertySource(properties = "application.router.path-prefix=/")
@@ -93,7 +97,7 @@ class ModuleDiscoveryControllerTest {
   @Test
   void createModuleDiscovery_positive_singleValueRequest() throws Exception {
     var request = moduleDiscovery().id(null);
-    when(keycloakAuthClient.evaluatePermissions(anyMap(), anyString())).thenReturn(new TokenResponse());
+    when(keycloakAuthClient.evaluatePermissions(any(MultiValueMap.class), anyString())).thenReturn(new TokenResponse());
     when(moduleDiscoveryService.create(MODULE_ID, request, OKAPI_AUTH_TOKEN)).thenReturn(moduleDiscovery());
     when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
     when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
@@ -111,7 +115,7 @@ class ModuleDiscoveryControllerTest {
   @Test
   void createModuleDiscovery_positive_batchRequest() throws Exception {
     var request = moduleDiscoveries(moduleDiscovery().id(null));
-    when(keycloakAuthClient.evaluatePermissions(anyMap(), anyString())).thenReturn(new TokenResponse());
+    when(keycloakAuthClient.evaluatePermissions(any(MultiValueMap.class), anyString())).thenReturn(new TokenResponse());
     when(moduleDiscoveryService.create(request, OKAPI_AUTH_TOKEN)).thenReturn(moduleDiscoveries(moduleDiscovery()));
     when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
     when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
@@ -129,7 +133,7 @@ class ModuleDiscoveryControllerTest {
   @Test
   void updateModuleDiscovery_positive() throws Exception {
     var request = moduleDiscovery();
-    when(keycloakAuthClient.evaluatePermissions(anyMap(), anyString())).thenReturn(new TokenResponse());
+    when(keycloakAuthClient.evaluatePermissions(any(MultiValueMap.class), anyString())).thenReturn(new TokenResponse());
     doNothing().when(moduleDiscoveryService).update(MODULE_ID, request, OKAPI_AUTH_TOKEN);
     when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
     when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
@@ -144,7 +148,7 @@ class ModuleDiscoveryControllerTest {
 
   @Test
   void deleteModuleDiscovery_positive() throws Exception {
-    when(keycloakAuthClient.evaluatePermissions(anyMap(), anyString())).thenReturn(new TokenResponse());
+    when(keycloakAuthClient.evaluatePermissions(any(MultiValueMap.class), anyString())).thenReturn(new TokenResponse());
     doNothing().when(moduleDiscoveryService).delete(MODULE_ID, OKAPI_AUTH_TOKEN);
     when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
     when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);

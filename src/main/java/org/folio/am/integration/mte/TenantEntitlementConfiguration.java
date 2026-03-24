@@ -1,22 +1,16 @@
 package org.folio.am.integration.mte;
 
-import feign.Contract;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
 import lombok.Data;
-import okhttp3.OkHttpClient;
 import org.folio.am.utils.ConditionalOnFarModeDisabled;
 import org.folio.common.configuration.properties.TlsProperties;
-import org.folio.common.utils.tls.FeignClientTlsUtils;
+import org.folio.common.utils.tls.HttpClientTlsUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.openfeign.FeignClientsConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.web.client.RestClient;
 
 @Data
 @Configuration
-@Import(FeignClientsConfiguration.class)
 @ConfigurationProperties(prefix = "tenant.entitlement")
 @ConditionalOnFarModeDisabled
 public class TenantEntitlementConfiguration {
@@ -26,10 +20,8 @@ public class TenantEntitlementConfiguration {
   private TlsProperties tls;
 
   @Bean
-  public TenantEntitlementClient tenantEntitlementClient(OkHttpClient okHttpClient, Contract contract, Encoder encoder,
-    Decoder decoder) {
-    return FeignClientTlsUtils.buildTargetFeignClient(okHttpClient, contract, encoder, decoder, tls, url,
-      TenantEntitlementClient.class);
+  public TenantEntitlementClient tenantEntitlementClient() {
+    return HttpClientTlsUtils.buildHttpServiceClient(RestClient.builder(), tls, url, TenantEntitlementClient.class);
   }
 
   @Bean
