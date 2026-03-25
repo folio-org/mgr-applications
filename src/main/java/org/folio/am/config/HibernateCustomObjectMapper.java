@@ -4,7 +4,6 @@ import io.hypersistence.utils.hibernate.type.util.ObjectMapperSupplier;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 
-
 public class HibernateCustomObjectMapper implements ObjectMapperSupplier {
 
   @Override

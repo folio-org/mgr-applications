@@ -551,7 +551,7 @@
                 <interfaceOnly>true</interfaceOnly>
                 <serializableModel>true</serializableModel>
                 <useTags>true</useTags>
-                <useSpringBoot4>true</useSpringBoot4>
+                <useSpringBoot3>true</useSpringBoot3>
               </configOptions>
             </configuration>
           </execution>
