@@ -6,13 +6,15 @@ import tools.jackson.databind.ObjectMapper;
 
 public class HibernateCustomObjectMapper implements ObjectMapperSupplier {
 
+  private static final ObjectMapper INSTANCE = new ObjectMapper()
+    .rebuild()
+    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+    .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+    .findAndAddModules()
+    .build();
+
   @Override
   public ObjectMapper get() {
-    return new ObjectMapper()
-      .rebuild()
-      .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-      .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-      .findAndAddModules()
-      .build();
+    return INSTANCE;
   }
 }
