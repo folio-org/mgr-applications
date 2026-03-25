@@ -6,7 +6,6 @@ import org.folio.am.support.base.BaseIntegrationTest;
 import org.folio.test.extensions.EnableOkapiSecurity;
 import org.folio.test.types.IntegrationTest;
 import org.folio.tools.kong.client.KongAdminClient;
-import org.folio.tools.kong.configuration.KongConfigurationProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
