@@ -32,7 +32,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
     <hypersistence-utils.version>3.15.2</hypersistence-utils.version>
     <swagger-annotations.version>2.2.45</swagger-annotations.version>
-    <apache-commons-lang3.version>3.17.0</apache-commons-lang3.version>
+    <apache-commons-lang3.version>3.20.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.5.0</apache-commons-collections4.version>
     <openapi-tools.jackson-databind-nullable.version>0.2.9</openapi-tools.jackson-databind-nullable.version>
     <cql2pgjson.version>35.4.2</cql2pgjson.version>
