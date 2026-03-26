@@ -1,6 +1,6 @@
 create database am_it;
 
-create user app_manager_admin with password 'folio123';
+create user app_manager_admin with password 'folio123' superuser;
 grant connect on database am_it to app_manager_admin;
 grant all privileges on database am_it to app_manager_admin;
 

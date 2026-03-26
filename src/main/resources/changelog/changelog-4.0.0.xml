@@ -6,4 +6,5 @@
 
   <include file="changes/v4.0.0/support-ui-module-discovery.xml" relativeToChangelogFile="true"/>
   <include file="changes/v4.0.0/create-application-with-discovery-view.xml" relativeToChangelogFile="true"/>
+  <include file="changes/v4.0.0/create-f-unaccent-function.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
