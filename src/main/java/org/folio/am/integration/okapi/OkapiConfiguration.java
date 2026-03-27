@@ -6,9 +6,11 @@ import org.folio.am.utils.ConditionalOnFarModeDisabled;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 @Log4j2
 @Configuration
@@ -17,8 +19,12 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 public class OkapiConfiguration {
 
   @Bean
-  public OkapiClient okapiClient(OkapiConfigurationProperties configuration) {
-    var restClient = RestClient.builder().baseUrl(configuration.getUrl()).build();
+  public OkapiClient okapiClient(OkapiConfigurationProperties configuration, JsonMapper jsonMapper) {
+    var restClientBuilder = RestClient.builder()
+      .configureMessageConverters(converters -> converters
+        .registerDefaults()
+        .withJsonConverter(new JacksonJsonHttpMessageConverter(jsonMapper)));
+    var restClient = restClientBuilder.baseUrl(configuration.getUrl()).build();
     var factory = HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient)).build();
     return factory.createClient(OkapiClient.class);
   }
