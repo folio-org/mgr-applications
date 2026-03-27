@@ -7,7 +7,9 @@ import org.folio.common.utils.tls.HttpClientTlsUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.json.JsonMapper;
 
 @Data
 @Configuration
@@ -20,8 +22,12 @@ public class TenantEntitlementConfiguration {
   private TlsProperties tls;
 
   @Bean
-  public TenantEntitlementClient tenantEntitlementClient() {
-    return HttpClientTlsUtils.buildHttpServiceClient(RestClient.builder(), tls, url, TenantEntitlementClient.class);
+  public TenantEntitlementClient tenantEntitlementClient(JsonMapper jsonMapper) {
+    var restClientBuilder = RestClient.builder()
+      .configureMessageConverters(converters -> converters
+        .registerDefaults()
+        .withJsonConverter(new JacksonJsonHttpMessageConverter(jsonMapper)));
+    return HttpClientTlsUtils.buildHttpServiceClient(restClientBuilder, tls, url, TenantEntitlementClient.class);
   }
 
   @Bean
