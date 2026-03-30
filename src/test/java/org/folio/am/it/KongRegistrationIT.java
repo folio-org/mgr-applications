@@ -17,10 +17,6 @@ import org.springframework.test.context.TestPropertySource;
   "application.okapi.enabled=false",
   "application.kong.module-self-url=https://test-mgr-applications:443",
   "application.kong.register-module=true",
-  "application.kong.tls.enabled=true",
-  "application.kong.tls.trust-store-path=classpath:certificates/test.truststore.jks",
-  "application.kong.tls.trust-store-password=secretpassword",
-  "application.kong.tls.trust-store-type=JKS"
 })
 class KongRegistrationIT extends BaseIntegrationTest {
 
