@@ -1,13 +1,13 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to agents when working with code in this repository.
 
 ## Project Overview
 
 `mgr-applications` is a Spring Boot application that serves as the Application Manager for the FOLIO library management platform. It provides functionality for managing application and module lifecycles, including registration, discovery, deployment, validation, and integration with external services.
 
 **Technology Stack:**
-- Java 21 with Spring Boot 3.5.7
+- Java 21 with Spring Boot 4.0.3
 - PostgreSQL database with JPA/Hibernate
 - Liquibase for database migrations
 - Kafka for event streaming
