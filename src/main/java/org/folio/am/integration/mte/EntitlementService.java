@@ -1,6 +1,5 @@
 package org.folio.am.integration.mte;
 
-import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import java.util.Collections;
