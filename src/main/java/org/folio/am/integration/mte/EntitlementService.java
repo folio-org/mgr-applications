@@ -26,7 +26,7 @@ public class EntitlementService {
       if (isNotEmpty(result.getRecords())) {
         return result.getRecords()
           .stream().map(Entitlement::getTenantId)
-          .collect(toList());
+          .toList();
       } else {
         return Collections.emptyList();
       }
