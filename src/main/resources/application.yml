@@ -12,6 +12,7 @@ spring:
     url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_DATABASE:okapi_modules}
   liquibase:
     change-log: classpath:changelog/changelog-master.xml
+    enabled: true
   jpa:
     open-in-view: false
     properties:
@@ -29,7 +30,7 @@ spring:
     producer:
       acks: all
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
       properties:
         enable.idempotence: true
         max.in.flight.requests.per.connection: 5
@@ -38,14 +39,9 @@ spring:
     consumer:
       group-id: ${KAFKA_CONSUMER_GROUP_ID:${application.environment}-mgr-applications-group}
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
     topics:
       entitlement: ${KAFKA_ENTITLEMENT_TOPIC:${application.environment}.entitlement}
-  cloud:
-    openfeign:
-      okhttp:
-        enabled: true
-
 application:
   router:
     path-prefix: ${ROUTER_PATH_PREFIX:}
@@ -147,6 +143,8 @@ folio:
   jpa:
     repository:
       base-packages: org.folio.am.*
+  exchange:
+    enabled: true
 
 server:
   port: ${SERVER_PORT:8081}
@@ -166,14 +164,7 @@ management:
   endpoints.web:
     base-path: /admin
     exposure:
-      include: info,health,liquibase,threaddump,heapdump,httptrace,loggers
-
-feign:
-  client:
-    config:
-      okapi:
-        connectTimeout: 30000
-        readTimeout: 300000
+      include: info,health,liquibase,threaddump,heapdump,httpexchanges,loggers
 
 messaging:
   trx-outbox:

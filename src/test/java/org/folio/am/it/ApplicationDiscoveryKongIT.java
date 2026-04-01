@@ -36,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import feign.FeignException.NotFound;
 import java.net.URL;
 import lombok.SneakyThrows;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
@@ -54,6 +53,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
+import org.springframework.web.client.HttpClientErrorException;
 
 @IntegrationTest
 @SqlMergeMode(MERGE)
@@ -248,7 +248,8 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
       .andExpect(content().json(asJsonString(moduleDiscoveries), true));
 
     assertThat(kongAdminClient.getService(MODULE_BAR_ID)).isNotNull();
-    assertThatThrownBy(() -> kongAdminClient.getService(MODULE_FOO_ID)).isInstanceOf(NotFound.class);
+    assertThatThrownBy(() -> kongAdminClient.getService(MODULE_FOO_ID))
+      .isInstanceOf(HttpClientErrorException.NotFound.class);
     assertDiscoveryEvents(MODULE_FOO_ID);
   }
 
@@ -272,7 +273,8 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(moduleDiscoveries), true));
 
-    assertThatThrownBy(() -> kongAdminClient.getService(MODULE_FOO_ID)).isInstanceOf(NotFound.class);
+    assertThatThrownBy(() -> kongAdminClient.getService(MODULE_FOO_ID))
+      .isInstanceOf(HttpClientErrorException.NotFound.class);
     assertDiscoveryEvents(MODULE_FOO_ID);
   }
 
@@ -290,7 +292,7 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
 
     // Verify NO Kong service created for UI module
     assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
-      .isInstanceOf(NotFound.class);
+      .isInstanceOf(HttpClientErrorException.NotFound.class);
 
     assertDiscoveryEvents(UI_MODULE_ID);
   }
@@ -300,7 +302,7 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
   void delete_positive_uiModuleSkipsKong() throws Exception {
     // Verify no Kong service exists before deletion
     assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
-      .isInstanceOf(NotFound.class);
+      .isInstanceOf(HttpClientErrorException.NotFound.class);
 
     mockMvc.perform(delete("/modules/{id}/discovery", UI_MODULE_ID)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
@@ -308,7 +310,7 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
 
     // Still no Kong service after deletion
     assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
-      .isInstanceOf(NotFound.class);
+      .isInstanceOf(HttpClientErrorException.NotFound.class);
 
     assertDiscoveryEvents(UI_MODULE_ID);
   }
@@ -329,7 +331,7 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
     try {
       kongAdminClient.getServiceRoutes(serviceId, null)
         .forEach(route -> kongAdminClient.deleteRoute(serviceId, route.getId()));
-    } catch (NotFound nf) {
+    } catch (HttpClientErrorException.NotFound nf) {
       // Do nothing
     }
     kongAdminClient.deleteService(serviceId);

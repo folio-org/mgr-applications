@@ -1,31 +1,32 @@
 package org.folio.am.integration.okapi;
 
-import feign.Contract;
-import feign.Feign;
-import feign.codec.Decoder;
-import feign.codec.Encoder;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.repository.ModuleRepository;
 import org.folio.am.utils.ConditionalOnFarModeDisabled;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.openfeign.FeignClientsConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 @Log4j2
 @Configuration
-@Import(FeignClientsConfiguration.class)
 @ConditionalOnFarModeDisabled
 @ConditionalOnProperty("application.okapi.enabled")
 public class OkapiConfiguration {
 
   @Bean
-  public OkapiClient okapiClient(OkapiConfigurationProperties configuration,
-    Contract contract, Encoder encoder, Decoder decoder) {
-    return Feign.builder()
-      .contract(contract).encoder(encoder).decoder(decoder)
-      .target(OkapiClient.class, configuration.getUrl());
+  public OkapiClient okapiClient(OkapiConfigurationProperties configuration, JsonMapper jsonMapper) {
+    var restClientBuilder = RestClient.builder()
+      .configureMessageConverters(converters -> converters
+        .registerDefaults()
+        .withJsonConverter(new JacksonJsonHttpMessageConverter(jsonMapper)));
+    var restClient = restClientBuilder.baseUrl(configuration.getUrl()).build();
+    var factory = HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient)).build();
+    return factory.createClient(OkapiClient.class);
   }
 
   @Bean

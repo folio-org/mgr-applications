@@ -1,17 +1,20 @@
 package org.folio.am.config;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.hypersistence.utils.hibernate.type.util.ObjectMapperSupplier;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
 
 public class HibernateCustomObjectMapper implements ObjectMapperSupplier {
 
+  private static final ObjectMapper INSTANCE = new ObjectMapper()
+    .rebuild()
+    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+    .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+    .findAndAddModules()
+    .build();
+
   @Override
   public ObjectMapper get() {
-    var objectMapper = new ObjectMapper();
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-    objectMapper.findAndRegisterModules();
-    return objectMapper;
+    return INSTANCE;
   }
 }

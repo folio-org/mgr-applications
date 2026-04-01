@@ -15,7 +15,6 @@ import static org.folio.test.TestUtils.parseResponse;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -53,17 +52,21 @@ import org.folio.spring.cql.CqlQueryValidationException;
 import org.folio.test.extensions.EnableKeycloakSecurity;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.MultiValueMap;
 import org.z3950.zing.cql.CQLParseException;
 
 @Log4j2
 @UnitTest
+@ExtendWith(MockitoExtension.class)
 @EnableKeycloakSecurity
 @WebMvcTest(ApplicationController.class)
 @TestPropertySource(properties = "application.router.path-prefix=/")
@@ -316,7 +319,7 @@ class ApplicationControllerTest {
     when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
 
     var errorMsgSubstring = "JSON parse error: Unexpected character ('[' (code 91)): "
-      + "was expecting double-quote to start field name";
+      + "was expecting double-quote to start property name";
     mockMvc.perform(post("/applications")
         .content("{[..]")
         .contentType(APPLICATION_JSON)
@@ -366,10 +369,8 @@ class ApplicationControllerTest {
   @Test
   void delete_negative_forbidden() throws Exception {
     doNothing().when(applicationService).delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
-    when(authClient.evaluatePermissions(anyMap(), anyString())).thenThrow(new ForbiddenException("test"));
-    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
-    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
-    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+    when(authClient.evaluatePermissions(any(MultiValueMap.class), anyString()))
+      .thenThrow(new ForbiddenException("test"));
 
     mockMvc.perform(delete("/applications/{id}", APPLICATION_ID)
         .contentType(APPLICATION_JSON)
@@ -380,7 +381,8 @@ class ApplicationControllerTest {
   @Test
   void delete_negative_unauthorized() throws Exception {
     doNothing().when(applicationService).delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
-    when(authClient.evaluatePermissions(anyMap(), anyString())).thenThrow(new NotAuthorizedException("test"));
+    when(authClient.evaluatePermissions(any(MultiValueMap.class), anyString()))
+      .thenThrow(new NotAuthorizedException("test"));
 
     mockMvc.perform(delete("/applications/{id}", APPLICATION_ID)
         .contentType(APPLICATION_JSON)

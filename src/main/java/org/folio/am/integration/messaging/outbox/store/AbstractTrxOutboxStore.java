@@ -5,8 +5,6 @@ import static org.folio.am.integration.messaging.GenericMessageHeaderAccessor.DE
 import static org.folio.am.integration.messaging.GenericMessageHeaderAccessor.PRIMARY_ID_HEADER;
 import static org.folio.am.integration.messaging.MessageUtils.messageId;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -23,6 +21,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -111,7 +111,7 @@ abstract class AbstractTrxOutboxStore implements TrxOutboxStore, TransactionSync
     String jsonString;
     try {
       jsonString = mapper.writeValueAsString(o);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new TrxOutboxException("Failed to serialize object to a json string: " + e.getMessage());
     }
     return jsonString;

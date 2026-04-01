@@ -7,7 +7,6 @@ import static java.time.Duration.ofMillis;
 import static java.util.stream.Collectors.toList;
 import static org.folio.common.utils.CollectionUtils.toStream;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -21,6 +20,7 @@ import org.folio.am.domain.dto.Module;
 import org.folio.am.exception.ServiceException;
 import org.folio.common.domain.model.ModuleDescriptor;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Log4j2

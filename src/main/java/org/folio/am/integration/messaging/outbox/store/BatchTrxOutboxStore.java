@@ -3,13 +3,13 @@ package org.folio.am.integration.messaging.outbox.store;
 import static org.folio.am.integration.messaging.MessageUtils.messageId;
 import static org.folio.common.utils.CollectionUtils.mapItems;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.integration.messaging.outbox.data.TrxOutboxRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
+import tools.jackson.databind.ObjectMapper;
 
 @Log4j2
 public class BatchTrxOutboxStore extends AbstractTrxOutboxStore {
