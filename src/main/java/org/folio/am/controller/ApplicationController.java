@@ -5,6 +5,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.folio.am.domain.dto.ApplicationCleanupResult;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.dto.ApplicationDescriptorsValidation;
@@ -12,6 +13,7 @@ import org.folio.am.domain.dto.ApplicationReferences;
 import org.folio.am.domain.dto.ValidationMode;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.rest.resource.ApplicationsApi;
+import org.folio.am.service.ApplicationCleanupService;
 import org.folio.am.service.ApplicationDescriptorsValidationService;
 import org.folio.am.service.ApplicationReferencesValidationService;
 import org.folio.am.service.ApplicationService;
@@ -27,6 +29,7 @@ public class ApplicationController extends BaseController implements Application
   private final ApplicationValidatorService applicationValidatorService;
   private final ApplicationReferencesValidationService applicationReferencesValidationService;
   private final ApplicationDescriptorsValidationService applicationDescriptorsValidationService;
+  private final ApplicationCleanupService applicationCleanupService;
   private final ApplicationService applicationService;
 
   @Override
@@ -62,6 +65,11 @@ public class ApplicationController extends BaseController implements Application
   public ResponseEntity<Void> deregisterApplicationById(String id, String token) {
     applicationService.delete(id, token);
     return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<ApplicationCleanupResult> cleanupApplications(String token) {
+    return ResponseEntity.ok(applicationCleanupService.cleanup(token));
   }
 
   @Override

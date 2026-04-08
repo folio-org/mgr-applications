@@ -32,6 +32,7 @@ import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.entity.ApplicationProjection;
 import org.folio.am.domain.entity.ArtifactEntity;
 import org.folio.am.domain.entity.ModuleEntity;
+import org.folio.am.exception.ApplicationInstalledException;
 import org.folio.am.integration.mte.EntitlementService;
 import org.folio.am.mapper.ApplicationDescriptorMapper;
 import org.folio.am.repository.ApplicationRepository;
@@ -65,12 +66,12 @@ class ApplicationServiceTest {
   @Mock private ApplicationDescriptorMapper mapper;
   @Mock private ApplicationEventPublisher eventPublisher;
   @Mock private ModuleDiscoveryService discoveryService;
-  @Mock private EntitlementService entitlementService;
   @Mock private ApplicationValidatorService applicationValidatorService;
   @Mock private ModuleDescriptorLoader moduleDescriptorLoader;
+  @Mock private EntitlementService entitlementService;
 
   @BeforeEach
-  public void init() {
+  void setUp() {
     service.setEntitlementService(entitlementService);
   }
 
@@ -230,10 +231,9 @@ class ApplicationServiceTest {
   }
 
   @Test
-  void delete_positive() {
+  void delete_positive_applicationAndModulesAreRemoved() {
     var expectedEntityToDelete = TestValues.applicationDescriptorEntity(descriptorWithSeveralModules());
     when(repository.findById(APPLICATION_ID)).thenReturn(Optional.of(expectedEntityToDelete));
-
     when(entitlementService.getTenants(APPLICATION_ID, OKAPI_AUTH_TOKEN)).thenReturn(List.of());
     expectedEntityToDelete.getModules().forEach(module -> {
       when(repository.existsByNotIdAndModuleId(expectedEntityToDelete.getId(), module.getId())).thenReturn(false);
@@ -244,16 +244,18 @@ class ApplicationServiceTest {
     service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
 
     verify(repository).delete(expectedEntityToDelete);
-
+    expectedEntityToDelete.getModules().forEach(module -> {
+      verify(discoveryService).delete(module.getId(), OKAPI_AUTH_TOKEN);
+      verify(moduleRepository).delete(module);
+    });
     verify(eventPublisher).publishDescriptorDelete(expectedEntityToDelete.getApplicationDescriptor(), OKAPI_AUTH_TOKEN);
   }
 
   @Test
-  void delete_positive_teIntegrationDisabled() {
+  void delete_positive_tenantEntitlementsIntegrationDisabled() {
     service.setEntitlementService(null);
     var expectedEntityToDelete = TestValues.applicationDescriptorEntity(descriptorWithSeveralModules());
     when(repository.findById(APPLICATION_ID)).thenReturn(Optional.of(expectedEntityToDelete));
-
     expectedEntityToDelete.getModules().forEach(module -> {
       when(repository.existsByNotIdAndModuleId(expectedEntityToDelete.getId(), module.getId())).thenReturn(false);
       doNothing().when(discoveryService).delete(module.getId(), OKAPI_AUTH_TOKEN);
@@ -263,16 +265,14 @@ class ApplicationServiceTest {
     service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
 
     verify(repository).delete(expectedEntityToDelete);
-
     verify(eventPublisher).publishDescriptorDelete(expectedEntityToDelete.getApplicationDescriptor(), OKAPI_AUTH_TOKEN);
     verifyNoInteractions(entitlementService);
   }
 
   @Test
-  void delete_positive_modulesBelongToOtherApp() {
+  void delete_positive_relatedModulesArePreserved() {
     var expectedEntityToDelete = TestValues.applicationDescriptorEntity(descriptorWithSeveralModules());
     when(repository.findById(APPLICATION_ID)).thenReturn(Optional.of(expectedEntityToDelete));
-
     when(entitlementService.getTenants(APPLICATION_ID, OKAPI_AUTH_TOKEN)).thenReturn(List.of());
     expectedEntityToDelete.getModules().forEach(module ->
       when(repository.existsByNotIdAndModuleId(expectedEntityToDelete.getId(), module.getId())).thenReturn(true));
@@ -280,49 +280,27 @@ class ApplicationServiceTest {
     service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
 
     verify(repository).delete(expectedEntityToDelete);
-
     verify(eventPublisher).publishDescriptorDelete(expectedEntityToDelete.getApplicationDescriptor(), OKAPI_AUTH_TOKEN);
+    verifyNoInteractions(discoveryService, moduleRepository);
   }
 
   @Test
-  void delete_positive_uiModulesBelongToOtherApp() {
-    var expectedEntityToDelete = TestValues.applicationDescriptorEntity(descriptorWithSeveralModules());
-    when(repository.findById(APPLICATION_ID)).thenReturn(Optional.of(expectedEntityToDelete));
-
-    when(entitlementService.getTenants(APPLICATION_ID, OKAPI_AUTH_TOKEN)).thenReturn(List.of());
-    expectedEntityToDelete.getModules().forEach(module -> {
-      when(repository.existsByNotIdAndModuleId(expectedEntityToDelete.getId(), module.getId()))
-        .thenReturn(false);
-      doNothing().when(discoveryService).delete(module.getId(), OKAPI_AUTH_TOKEN);
-      doNothing().when(moduleRepository).delete(module);
-    });
-
-    service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
-
-    verify(repository).delete(expectedEntityToDelete);
-
-    verify(eventPublisher).publishDescriptorDelete(expectedEntityToDelete.getApplicationDescriptor(), OKAPI_AUTH_TOKEN);
-  }
-
-  @Test
-  void delete_negative_entityNotFound() {
-    assertThatThrownBy(() -> service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN))
-      .isInstanceOf(EntityNotFoundException.class)
-      .hasMessage("Unable to find application descriptor with id " + APPLICATION_ID);
-  }
-
-  @Test
-  void delete_negative_entityExistInTe() {
+  void delete_negative_applicationIsInstalledForTenant() {
     var expectedEntityToDelete = TestValues.applicationDescriptorEntity();
     var tenants = List.of(TENANT_ID);
     when(repository.findById(APPLICATION_ID)).thenReturn(Optional.of(expectedEntityToDelete));
-
     when(entitlementService.getTenants(APPLICATION_ID, OKAPI_AUTH_TOKEN)).thenReturn(tenants);
 
     assertThatThrownBy(() -> service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN))
-      .isInstanceOf(EntityExistsException.class)
-      .hasMessage("Application Descriptor cannot be removed "
-        + "because it is installed for tenants: " + tenants);
+      .isInstanceOf(ApplicationInstalledException.class)
+      .hasMessage("Application Descriptor cannot be removed because it is installed for tenants: " + tenants);
+  }
+
+  @Test
+  void delete_negative_applicationIsNotFound() {
+    assertThatThrownBy(() -> service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN))
+      .isInstanceOf(EntityNotFoundException.class)
+      .hasMessage("Unable to find application descriptor with id " + APPLICATION_ID);
   }
 
   @Test

@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "inspected": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cleaned": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "skipped": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cleanedIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "skippedIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "failedIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "inspected",
+    "cleaned",
+    "skipped",
+    "failed",
+    "cleanedIds",
+    "skippedIds",
+    "failedIds"
+  ]
+}

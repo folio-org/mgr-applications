@@ -32,6 +32,7 @@ import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.am.domain.entity.ApplicationProjection;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.model.ValidationContext;
+import org.folio.am.exception.ApplicationInstalledException;
 import org.folio.am.integration.mte.EntitlementService;
 import org.folio.am.mapper.ApplicationDescriptorMapper;
 import org.folio.am.repository.ApplicationRepository;
@@ -278,7 +279,7 @@ public class ApplicationService {
     if (entitlementService != null) {
       var tenants = entitlementService.getTenants(id, token);
       if (isNotEmpty(tenants)) {
-        throw new EntityExistsException("Application Descriptor cannot be removed "
+        throw new ApplicationInstalledException("Application Descriptor cannot be removed "
           + "because it is installed for tenants: " + tenants);
       }
     }

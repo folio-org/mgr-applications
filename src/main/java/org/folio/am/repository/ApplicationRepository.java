@@ -56,4 +56,7 @@ public interface ApplicationRepository extends JpaCqlRepository<ApplicationEntit
 
   @Query(value = "SELECT a.id, a.name, a.version FROM application a WHERE a.name = :name", nativeQuery = true)
   List<ApplicationProjection> findAllAppArtifactsByName(String name);
+
+  @Query(value = "SELECT a.id FROM application a", nativeQuery = true)
+  List<String> findAllApplicationIds();
 }

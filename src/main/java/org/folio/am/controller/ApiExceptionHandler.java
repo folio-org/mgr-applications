@@ -24,6 +24,7 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
+import org.folio.am.exception.ApplicationInstalledException;
 import org.folio.am.exception.RequestValidationException;
 import org.folio.am.exception.ServiceException;
 import org.folio.common.domain.model.error.Error;
@@ -125,6 +126,12 @@ public class ApiExceptionHandler {
    */
   @ExceptionHandler(EntityExistsException.class)
   public ResponseEntity<ErrorResponse> handleEntityExistsException(EntityExistsException exception) {
+    return buildResponseEntity(exception, CONFLICT, FOUND_ERROR);
+  }
+
+  @ExceptionHandler(ApplicationInstalledException.class)
+  public ResponseEntity<ErrorResponse> handleApplicationInstalledException(
+    ApplicationInstalledException exception) {
     return buildResponseEntity(exception, CONFLICT, FOUND_ERROR);
   }
 

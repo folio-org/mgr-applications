@@ -34,6 +34,13 @@
         {
           "type": "internal",
           "methods": [ "POST" ],
+          "pathPattern": "/applications/cleanup",
+          "permissionsRequired": [ "mgr-applications.applications.collection.cleanup" ],
+          "modulePermissions": [ "mgr-tenant-entitlements.entitlements.collection.get" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "POST" ],
           "pathPattern": "/applications/validate",
           "permissionsRequired": [ "mgr-applications.applications.item.validate" ]
         },
@@ -173,6 +180,14 @@
       "permissionName": "mgr-applications.applications.collection.get"
     },
     {
+      "description": "Cleanup unused application descriptors",
+      "displayName": "Manager Applications - cleanup applications",
+      "permissionName": "mgr-applications.applications.collection.cleanup",
+      "subPermissions": [
+        "mgr-tenant-entitlements.entitlements.collection.get"
+      ]
+    },
+    {
       "description": "Register new module discoveries for application",
       "displayName": "Manager Applications - create discoveries",
       "permissionName": "mgr-applications.discoveries.collection.post",
@@ -256,7 +271,8 @@
         "mgr-applications.applications.collection.validate-dependencies",
         "mgr-applications.applications.item.get",
         "mgr-applications.applications.item.delete",
-        "mgr-applications.applications.collection.get"
+        "mgr-applications.applications.collection.get",
+        "mgr-applications.applications.collection.cleanup"
       ]
     },
     {

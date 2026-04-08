@@ -63,6 +63,30 @@ paths:
         '500':
           $ref: '#/components/responses/internal-server-error'
 
+  /applications/cleanup:
+    post:
+      operationId: cleanupApplications
+      description: Remove unused application descriptors and return a best-effort cleanup summary.
+      tags:
+        - applications
+      parameters:
+        - $ref: '#/components/parameters/x-okapi-token'
+      responses:
+        '200':
+          description: Applications cleanup summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/applicationCleanupResult'
+        '501':
+          description: Applications cleanup is not supported in FAR mode
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
   /applications/{id}:
     get:
       operationId: getApplicationById
@@ -364,6 +388,8 @@ components:
       $ref: schemas/applicationDescriptorsValidation.json
     applicationDescriptor:
       $ref: schemas/applicationDescriptor.json
+    applicationCleanupResult:
+      $ref: schemas/applicationCleanupResult.json
     applicationDescriptors:
       $ref: schemas/applicationDescriptors.json
     applicationDiscovery:
@@ -520,4 +546,3 @@ components:
         enum: [ id, version ]
         default: version
       example: version
-
