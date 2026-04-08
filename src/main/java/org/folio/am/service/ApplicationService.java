@@ -2,7 +2,6 @@ package org.folio.am.service;
 
 import static java.util.Objects.isNull;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -88,7 +87,7 @@ public class ApplicationService {
   public List<ApplicationDescriptor> findByIds(List<String> ids, boolean includeModuleDescriptors) {
     return appRepository.findByIds(ids).stream()
       .map(descriptorWithModules(includeModuleDescriptors))
-      .collect(toList());
+      .toList();
   }
 
   /**
@@ -228,7 +227,7 @@ public class ApplicationService {
   public List<ApplicationDescriptor> findApplicationsByModuleIds(List<String> moduleIds) {
     return appRepository.findApplicationsByModuleIds(moduleIds).stream()
       .map(ApplicationEntity::getApplicationDescriptor)
-      .collect(toList());
+      .toList();
   }
 
   public List<String> findAllApplicationIdsByName(String applicationName) {

@@ -3,7 +3,6 @@ package org.folio.am.service;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.domain.dto.ApplicationCleanupResult;
 import org.folio.am.exception.ApplicationInstalledException;
@@ -20,7 +19,7 @@ public class ApplicationCleanupService {
   private final ApplicationRepository applicationRepository;
   private final ApplicationService applicationService;
 
-  @Setter(onMethod_ = @Autowired(required = false))
+  @Autowired(required = false)
   private EntitlementService entitlementService;
 
   public ApplicationCleanupResult cleanup(String token) {
