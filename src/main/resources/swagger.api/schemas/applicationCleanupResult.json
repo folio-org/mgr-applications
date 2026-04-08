@@ -1,36 +1,44 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "description": "Summary of the application cleanup execution",
   "properties": {
     "inspected": {
+      "description": "The total number of application descriptors inspected for cleanup",
       "type": "integer",
       "minimum": 0
     },
     "cleaned": {
+      "description": "The number of application descriptors removed successfully",
       "type": "integer",
       "minimum": 0
     },
     "skipped": {
+      "description": "The number of application descriptors skipped because they are still installed",
       "type": "integer",
       "minimum": 0
     },
     "failed": {
+      "description": "The number of application descriptors that could not be removed due to errors",
       "type": "integer",
       "minimum": 0
     },
     "cleanedIds": {
+      "description": "The identifiers of application descriptors removed successfully",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
     "skippedIds": {
+      "description": "The identifiers of application descriptors skipped because they are still installed",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
     "failedIds": {
+      "description": "The identifiers of application descriptors that failed cleanup",
       "type": "array",
       "items": {
         "type": "string"
