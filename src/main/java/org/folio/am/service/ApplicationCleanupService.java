@@ -8,6 +8,7 @@ import org.folio.am.domain.dto.ApplicationCleanupResult;
 import org.folio.am.exception.ApplicationInstalledException;
 import org.folio.am.integration.mte.EntitlementService;
 import org.folio.am.repository.ApplicationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -17,7 +18,9 @@ public class ApplicationCleanupService {
 
   private final ApplicationRepository applicationRepository;
   private final ApplicationService applicationService;
-  private final EntitlementService entitlementService;
+
+  @Autowired(required = false)
+  private EntitlementService entitlementService;
 
   public ApplicationCleanupResult cleanup(String token) {
     ensureCleanupSupported();
@@ -37,8 +40,8 @@ public class ApplicationCleanupService {
     return applicationRepository.findAllApplicationIds();
   }
 
-  private void cleanupApplication(String id, String token, ArrayList<String> cleanedIds,
-    ArrayList<String> skippedIds, ArrayList<String> failedIds) {
+  private void cleanupApplication(String id, String token, List<String> cleanedIds, List<String> skippedIds,
+    List<String> failedIds) {
     try {
       applicationService.delete(id, token);
       cleanedIds.add(id);
@@ -51,8 +54,8 @@ public class ApplicationCleanupService {
     }
   }
 
-  private static ApplicationCleanupResult buildResult(int inspected, ArrayList<String> cleanedIds,
-    ArrayList<String> skippedIds, ArrayList<String> failedIds) {
+  private static ApplicationCleanupResult buildResult(int inspected, List<String> cleanedIds, List<String> skippedIds,
+    List<String> failedIds) {
     return new ApplicationCleanupResult()
       .inspected(inspected)
       .cleaned(cleanedIds.size())
