@@ -15,6 +15,7 @@
 * Add API endpoint: Get Application Discovery By Query (MGRAPPS-98)
 * Migrate CI from Jenkins to GitHub Actions Maven central workflow (MGRAPPS-96)
 * Upgrade module to SpringBoot4.0 and Spring7.0 (MGRAPPS-102)
+* Add `cleanup` endpoint for unused Applications (MGRAPPS-100)
 ---
 
 ## Version `v3.0.0` (12.03.2025)

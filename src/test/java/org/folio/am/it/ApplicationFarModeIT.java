@@ -9,7 +9,9 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 import org.folio.am.domain.dto.ApplicationDescriptor;
@@ -41,6 +43,17 @@ class ApplicationFarModeIT extends BaseIntegrationTest {
     doDelete("/applications/{id}", APPLICATION_ID);
     doGet(get("/applications").queryParam("query", "cql.allRecords=1"))
       .andExpect(jsonPath("$.totalRecords", is(3)));
+  }
+
+  @Test
+  void cleanup_negative_farModeIsNotSupported() throws Exception {
+    mockMvc.perform(post("/applications/cleanup"))
+      .andExpect(status().isNotImplemented())
+      .andExpect(jsonPath("$.total_records", is(1)))
+      .andExpect(jsonPath("$.errors[0].message",
+        is("Applications cleanup is not supported: entitlement service is not available")))
+      .andExpect(jsonPath("$.errors[0].type", is("UnsupportedOperationException")))
+      .andExpect(jsonPath("$.errors[0].code", is("service_error")));
   }
 
   @Test
