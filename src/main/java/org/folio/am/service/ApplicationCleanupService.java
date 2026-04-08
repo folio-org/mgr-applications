@@ -8,7 +8,6 @@ import org.folio.am.domain.dto.ApplicationCleanupResult;
 import org.folio.am.exception.ApplicationInstalledException;
 import org.folio.am.integration.mte.EntitlementService;
 import org.folio.am.repository.ApplicationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -18,9 +17,7 @@ public class ApplicationCleanupService {
 
   private final ApplicationRepository applicationRepository;
   private final ApplicationService applicationService;
-
-  @Autowired(required = false)
-  private EntitlementService entitlementService;
+  private final EntitlementService entitlementService;
 
   public ApplicationCleanupResult cleanup(String token) {
     ensureCleanupSupported();
