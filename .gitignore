@@ -40,3 +40,4 @@ build/
 ### AI tools ###
 .claude/
 .codemie/
+CLAUDE.md

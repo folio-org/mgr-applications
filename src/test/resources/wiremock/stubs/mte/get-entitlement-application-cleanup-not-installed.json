@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/entitlements?query=applicationId%3Dtest-app-1.0.0",
+    "headers": {
+      "X-Okapi-Token": {
+        "matches": ".*"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Location": "/entitlements?query=applicationId%3Dtest-app-1.0.0"
+    },
+    "jsonBody": {
+      "totalRecords": 0,
+      "entitlements": []
+    }
+  }
+}

@@ -32,10 +32,12 @@ import java.util.List;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.folio.am.domain.dto.ApplicationCleanupResult;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.dto.ApplicationDescriptorsValidation;
 import org.folio.am.domain.dto.Dependency;
+import org.folio.am.service.ApplicationCleanupService;
 import org.folio.am.service.ApplicationDescriptorsValidationService;
 import org.folio.am.service.ApplicationReferencesValidationService;
 import org.folio.am.service.ApplicationService;
@@ -81,6 +83,7 @@ class ApplicationControllerTest {
   @Mock private JsonWebToken jsonWebToken;
   @MockitoBean private KeycloakAuthClient authClient;
   @MockitoBean private JsonWebTokenParser jsonWebTokenParser;
+  @MockitoBean private ApplicationCleanupService applicationCleanupService;
   @MockitoBean private ApplicationValidatorService applicationValidatorService;
   @MockitoBean private ApplicationService applicationService;
   @MockitoBean private ApplicationReferencesValidationService applicationReferencesValidationService;
@@ -397,6 +400,55 @@ class ApplicationControllerTest {
     mockMvc.perform(delete("/applications/{id}", APPLICATION_ID)
         .contentType(APPLICATION_JSON))
       .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void cleanup_positive_returnsBestEffortSummary() throws Exception {
+    var cleanupResult = new ApplicationCleanupResult()
+      .inspected(2)
+      .cleaned(1)
+      .skipped(1)
+      .failed(0)
+      .cleanedIds(List.of("app-a-1.0.0"))
+      .skippedIds(List.of("app-b-1.0.0"))
+      .failedIds(emptyList());
+
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+    when(applicationCleanupService.cleanup(OKAPI_AUTH_TOKEN)).thenReturn(cleanupResult);
+
+    mockMvc.perform(post("/applications/cleanup")
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.inspected", is(2)))
+      .andExpect(jsonPath("$.cleaned", is(1)))
+      .andExpect(jsonPath("$.skipped", is(1)))
+      .andExpect(jsonPath("$.failed", is(0)))
+      .andExpect(jsonPath("$.cleanedIds[0]", is("app-a-1.0.0")))
+      .andExpect(jsonPath("$.skippedIds[0]", is("app-b-1.0.0")))
+      .andExpect(jsonPath("$.failedIds", is(emptyList())));
+  }
+
+  @Test
+  void cleanup_negative_farModeIsNotSupported() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+    when(applicationCleanupService.cleanup(OKAPI_AUTH_TOKEN))
+      .thenThrow(new UnsupportedOperationException(
+        "Applications cleanup is not supported: entitlement service is not available"));
+
+    mockMvc.perform(post("/applications/cleanup")
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNotImplemented())
+      .andExpect(jsonPath("$.total_records", is(1)))
+      .andExpect(jsonPath("$.errors[0].message",
+        is("Applications cleanup is not supported: entitlement service is not available")))
+      .andExpect(jsonPath("$.errors[0].type", is("UnsupportedOperationException")))
+      .andExpect(jsonPath("$.errors[0].code", is("service_error")));
   }
 
   @Test
