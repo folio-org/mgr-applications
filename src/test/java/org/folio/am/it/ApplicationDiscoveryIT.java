@@ -19,7 +19,7 @@ import static org.folio.am.support.TestConstants.UI_MODULE_ID;
 import static org.folio.am.support.TestValues.moduleDiscoveries;
 import static org.folio.am.support.TestValues.moduleFooDiscovery;
 import static org.folio.am.support.TestValues.uiModuleDiscovery;
-import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
+import static org.folio.integration.kafka.producer.KafkaUtils.getEnvTopicName;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;

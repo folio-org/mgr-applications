@@ -74,10 +74,11 @@ application:
     mod-authtoken-url: ${MOD_AUTHTOKEN_URL}
   environment: ${ENV:folio}
   kafka:
-    topics:
-      - name: discovery
-        numPartitions: ${KAFKA_DISCOVERY_TOPIC_PARTITIONS:1}
-        replicationFactor: ${KAFKA_DISCOVERY_TOPIC_REPLICATION_FACTOR:}
+    producer:
+      topics:
+        - name: discovery
+          numPartitions: ${KAFKA_DISCOVERY_TOPIC_PARTITIONS:1}
+          replicationFactor: ${KAFKA_DISCOVERY_TOPIC_REPLICATION_FACTOR:}
   retry:
     tenant-routes:
       retry-delay: ${TENANT_ROUTES_RETRY_DELAY:500ms}
