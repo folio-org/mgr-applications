@@ -2,7 +2,6 @@ package org.folio.am.service;
 
 import static java.util.Objects.isNull;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -32,6 +31,7 @@ import org.folio.am.domain.entity.ApplicationEntity;
 import org.folio.am.domain.entity.ApplicationProjection;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.model.ValidationContext;
+import org.folio.am.exception.ApplicationInstalledException;
 import org.folio.am.integration.mte.EntitlementService;
 import org.folio.am.mapper.ApplicationDescriptorMapper;
 import org.folio.am.repository.ApplicationRepository;
@@ -87,7 +87,7 @@ public class ApplicationService {
   public List<ApplicationDescriptor> findByIds(List<String> ids, boolean includeModuleDescriptors) {
     return appRepository.findByIds(ids).stream()
       .map(descriptorWithModules(includeModuleDescriptors))
-      .collect(toList());
+      .toList();
   }
 
   /**
@@ -227,7 +227,7 @@ public class ApplicationService {
   public List<ApplicationDescriptor> findApplicationsByModuleIds(List<String> moduleIds) {
     return appRepository.findApplicationsByModuleIds(moduleIds).stream()
       .map(ApplicationEntity::getApplicationDescriptor)
-      .collect(toList());
+      .toList();
   }
 
   public List<String> findAllApplicationIdsByName(String applicationName) {
@@ -278,7 +278,7 @@ public class ApplicationService {
     if (entitlementService != null) {
       var tenants = entitlementService.getTenants(id, token);
       if (isNotEmpty(tenants)) {
-        throw new EntityExistsException("Application Descriptor cannot be removed "
+        throw new ApplicationInstalledException("Application Descriptor cannot be removed "
           + "because it is installed for tenants: " + tenants);
       }
     }
