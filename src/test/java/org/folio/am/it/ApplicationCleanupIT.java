@@ -3,7 +3,7 @@ package org.folio.am.it;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.am.integration.kafka.DiscoveryPublisher.DISCOVERY_DESTINATION;
 import static org.folio.am.support.TestUtils.generateAccessToken;
-import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
+import static org.folio.integration.kafka.producer.KafkaUtils.getEnvTopicName;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;

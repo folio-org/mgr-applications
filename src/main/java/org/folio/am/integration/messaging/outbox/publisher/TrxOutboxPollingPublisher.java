@@ -1,7 +1,7 @@
 package org.folio.am.integration.messaging.outbox.publisher;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
+import static org.folio.integration.kafka.producer.KafkaUtils.getEnvTopicName;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;

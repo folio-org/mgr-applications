@@ -8,14 +8,14 @@ import org.folio.am.integration.messaging.config.MessagingConfiguration;
 import org.folio.am.integration.messaging.outbox.config.TrxOutboxConfiguration;
 import org.folio.am.integration.messaging.outbox.config.TrxOutboxPublishingConfiguration;
 import org.folio.am.utils.ConditionalOnFarModeDisabled;
-import org.folio.integration.kafka.EnableKafka;
+import org.folio.integration.kafka.producer.EnableKafkaProducer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.core.GenericMessagingTemplate;
 
 @Configuration
-@EnableKafka
+@EnableKafkaProducer
 @Import({TrxOutboxPublishingConfiguration.class, TrxOutboxConfiguration.class, MessagingConfiguration.class})
 @ConditionalOnFarModeDisabled
 public class DiscoveryPublisherConfiguration {

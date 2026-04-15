@@ -5,7 +5,7 @@ import static org.folio.am.integration.messaging.MessagingTestValues.DESTINATION
 import static org.folio.am.integration.messaging.MessagingTestValues.PAYLOAD;
 import static org.folio.am.integration.messaging.MessagingTestValues.genericMessage;
 import static org.folio.am.integration.messaging.MessagingTestValues.genericMessageWithDestination;
-import static org.folio.integration.kafka.KafkaUtils.getEnvTopicName;
+import static org.folio.integration.kafka.producer.KafkaUtils.getEnvTopicName;
 import static org.mockito.Mockito.when;
 
 import org.folio.am.integration.messaging.MessagingTestValues.Payload;
