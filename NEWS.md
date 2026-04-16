@@ -1,4 +1,4 @@
-## Version `v4.x.x` (TBD)
+## Version `v4.0.0` (16.04.2026)
 * Provide "System User required" attribute as part of module bootstrap data (MGRAPPS-54)
 * Introduce optional application dependencies (MGRAPPS-57)
 * Adjust APIs in support of generator plugin application descriptor verification (MGRAPPS-58)
