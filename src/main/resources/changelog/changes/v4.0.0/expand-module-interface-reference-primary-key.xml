@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <changeSet id="expand-module-interface-reference-primary-key" author="PK Jacob">
+    <dropPrimaryKey tableName="module_interface_reference"
+                    constraintName="pk_module_interface_reference"/>
+
+    <addPrimaryKey tableName="module_interface_reference"
+                   columnNames="module_id, id, type"
+                   constraintName="pk_module_interface_reference"/>
+  </changeSet>
+</databaseChangeLog>

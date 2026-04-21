@@ -16,7 +16,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
+import org.folio.am.domain.dto.Module;
 import org.folio.am.support.base.BaseIntegrationTest;
+import org.folio.common.domain.model.InterfaceDescriptor;
+import org.folio.common.domain.model.InterfaceReference;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
@@ -36,6 +40,38 @@ class ApplicationFarModeIT extends BaseIntegrationTest {
       .andExpect(jsonPath("$.id", is("test-0.1.1")))
       .andExpect(jsonPath("$.name", is("test")))
       .andExpect(jsonPath("$.version", is("0.1.1")));
+  }
+
+  @Test
+  void create_positive_moduleProvidesAndRequiresSameInterface() throws Exception {
+    var appWithSameInterfaceRefs = new ApplicationDescriptor()
+      .name("app-same-interface")
+      .version("1.0.0")
+      .modules(List.of(new Module()
+        .name("mod-same-interface")
+        .version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id("mod-same-interface-1.0.0")
+        .requires(List.of(new InterfaceReference().id("configuration").version("2.0")))
+        .optional(List.of(new InterfaceReference().id("configuration").version("2.0")))
+        .provides(List.of(new InterfaceDescriptor().id("configuration").version("2.0").interfaceType("multiple")))));
+
+    doPost("/applications", appWithSameInterfaceRefs)
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.id", is(appWithSameInterfaceRefs.getArtifactId())))
+      .andExpect(jsonPath("$.name", is(appWithSameInterfaceRefs.getName())))
+      .andExpect(jsonPath("$.version", is(appWithSameInterfaceRefs.getVersion())));
+
+    doGet(get("/applications/{id}", appWithSameInterfaceRefs.getArtifactId()).queryParam("full", "true"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.moduleDescriptors[0].id", is("mod-same-interface-1.0.0")))
+      .andExpect(jsonPath("$.moduleDescriptors[0].provides[0].id", is("configuration")))
+      .andExpect(jsonPath("$.moduleDescriptors[0].provides[0].interfaceType", is("multiple")))
+      .andExpect(jsonPath("$.moduleDescriptors[0].provides[0].version", is("2.0")))
+      .andExpect(jsonPath("$.moduleDescriptors[0].requires[0].id", is("configuration")))
+      .andExpect(jsonPath("$.moduleDescriptors[0].requires[0].version", is("2.0")))
+      .andExpect(jsonPath("$.moduleDescriptors[0].optional[0].id", is("configuration")))
+      .andExpect(jsonPath("$.moduleDescriptors[0].optional[0].version", is("2.0")));
   }
 
   @Test
