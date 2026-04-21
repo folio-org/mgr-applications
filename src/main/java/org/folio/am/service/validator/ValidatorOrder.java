@@ -11,4 +11,5 @@ public class ValidatorOrder {
   public static final int UI_MODULE_DESCRIPTOR_VALIDATOR = 11;
   public static final int APPLICATION_DESCRIPTOR_VALIDATOR = 20;
   public static final int INTERFACE_NAME_VALIDATOR = 29;
+  public static final int REQUIRED_OPTIONAL_INTERFACE_VALIDATOR = 30;
 }

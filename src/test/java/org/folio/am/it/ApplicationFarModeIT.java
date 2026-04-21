@@ -3,9 +3,11 @@ package org.folio.am.it;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.am.support.TestConstants.APPLICATION_ID;
 import static org.folio.am.support.TestValues.getApplicationDescriptor;
+import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.parseResponse;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,7 +45,7 @@ class ApplicationFarModeIT extends BaseIntegrationTest {
   }
 
   @Test
-  void create_positive_moduleProvidesAndRequiresSameInterface() throws Exception {
+  void create_positive_sameInterfaceInProvidesAndRequiresIsAllowed() throws Exception {
     var appWithSameInterfaceRefs = new ApplicationDescriptor()
       .name("app-same-interface")
       .version("1.0.0")
@@ -53,10 +55,12 @@ class ApplicationFarModeIT extends BaseIntegrationTest {
       .moduleDescriptors(List.of(new ModuleDescriptor()
         .id("mod-same-interface-1.0.0")
         .requires(List.of(new InterfaceReference().id("configuration").version("2.0")))
-        .optional(List.of(new InterfaceReference().id("configuration").version("2.0")))
         .provides(List.of(new InterfaceDescriptor().id("configuration").version("2.0").interfaceType("multiple")))));
 
-    doPost("/applications", appWithSameInterfaceRefs)
+    mockMvc.perform(post("/applications")
+        .queryParam("check", "true")
+        .content(asJsonString(appWithSameInterfaceRefs))
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.id", is(appWithSameInterfaceRefs.getArtifactId())))
       .andExpect(jsonPath("$.name", is(appWithSameInterfaceRefs.getName())))
@@ -69,9 +73,33 @@ class ApplicationFarModeIT extends BaseIntegrationTest {
       .andExpect(jsonPath("$.moduleDescriptors[0].provides[0].interfaceType", is("multiple")))
       .andExpect(jsonPath("$.moduleDescriptors[0].provides[0].version", is("2.0")))
       .andExpect(jsonPath("$.moduleDescriptors[0].requires[0].id", is("configuration")))
-      .andExpect(jsonPath("$.moduleDescriptors[0].requires[0].version", is("2.0")))
-      .andExpect(jsonPath("$.moduleDescriptors[0].optional[0].id", is("configuration")))
-      .andExpect(jsonPath("$.moduleDescriptors[0].optional[0].version", is("2.0")));
+      .andExpect(jsonPath("$.moduleDescriptors[0].requires[0].version", is("2.0")));
+  }
+
+  @Test
+  void create_negative_sameInterfaceInRequiredAndOptionalIsRejected() throws Exception {
+    var appWithSameInterfaceRefs = new ApplicationDescriptor()
+      .name("app-same-interface")
+      .version("1.0.0")
+      .modules(List.of(new Module()
+        .name("mod-same-interface")
+        .version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id("mod-same-interface-1.0.0")
+        .requires(List.of(new InterfaceReference().id("configuration").version("2.0")))
+        .optional(List.of(new InterfaceReference().id("configuration").version("2.0")))));
+
+    mockMvc.perform(post("/applications")
+        .queryParam("check", "true")
+        .content(asJsonString(appWithSameInterfaceRefs))
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.total_records", is(1)))
+      .andExpect(jsonPath("$.errors[0].message", is("Interface cannot be both required and optional")))
+      .andExpect(jsonPath("$.errors[0].type", is("RequestValidationException")))
+      .andExpect(jsonPath("$.errors[0].code", is("validation_error")))
+      .andExpect(jsonPath("$.errors[0].parameters[0].key", is("mod-same-interface-1.0.0")))
+      .andExpect(jsonPath("$.errors[0].parameters[0].value", is("[configuration]")));
   }
 
   @Test

@@ -1,12 +1,15 @@
 package org.folio.am.it;
 
 import static java.lang.String.format;
+import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.copy;
 import static org.folio.test.TestUtils.parse;
 import static org.folio.test.TestUtils.readString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -14,8 +17,11 @@ import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptorsValidation;
+import org.folio.am.domain.dto.Module;
 import org.folio.am.exception.RequestValidationException;
 import org.folio.am.support.extensions.EnablePostgres;
+import org.folio.common.domain.model.InterfaceReference;
+import org.folio.common.domain.model.ModuleDescriptor;
 import org.folio.test.base.BaseBackendIntegrationTest;
 import org.folio.test.extensions.EnableKafka;
 import org.folio.test.types.IntegrationTest;
@@ -92,6 +98,29 @@ class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
       .andExpect(jsonPath("$.[1]", is(APP_INN_REACH.getId())))
       .andExpect(jsonPath("$.[2]", is(APP_PLATFORM_COMPLETE.getId())))
       .andExpect(jsonPath("$.[3]", is(APP_PLATFORM_MINIMAL.getId())));
+  }
+
+  @Test
+  void validate_negative_sameInterfaceInRequiredAndOptional() throws Exception {
+    var descriptor = new ApplicationDescriptor()
+      .name("app-same-interface")
+      .version("1.0.0")
+      .modules(List.of(new Module().name("mod-same-interface").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id("mod-same-interface-1.0.0")
+        .requires(List.of(new InterfaceReference().id("configuration").version("2.0")))
+        .optional(List.of(new InterfaceReference().id("configuration").version("2.0")))));
+
+    mockMvc.perform(post("/applications/validate")
+        .content(asJsonString(descriptor))
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.total_records", is(1)))
+      .andExpect(jsonPath("$.errors[0].message", is("Interface cannot be both required and optional")))
+      .andExpect(jsonPath("$.errors[0].type", is(RequestValidationException.class.getSimpleName())))
+      .andExpect(jsonPath("$.errors[0].code", is("validation_error")))
+      .andExpect(jsonPath("$.errors[0].parameters[0].key", is("mod-same-interface-1.0.0")))
+      .andExpect(jsonPath("$.errors[0].parameters[0].value", is("[configuration]")));
   }
 
   @Test
