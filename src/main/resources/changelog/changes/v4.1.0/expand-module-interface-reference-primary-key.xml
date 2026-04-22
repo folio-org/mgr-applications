@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
-  <changeSet id="expand-module-interface-reference-primary-key" author="PK Jacob">
+  <changeSet id="expand-module-interface-reference-primary-key" author="pkjacob">
     <dropPrimaryKey tableName="module_interface_reference"
                     constraintName="pk_module_interface_reference"/>
 

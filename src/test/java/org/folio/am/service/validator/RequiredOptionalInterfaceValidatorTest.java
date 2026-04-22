@@ -32,10 +32,21 @@ class RequiredOptionalInterfaceValidatorTest {
   }
 
   @Test
+  void validate_positive_sameInterfaceInOptionalAndProvides() {
+    var descriptor = moduleDescriptor("test-module", "1.0.0")
+      .addOptionalItem(new InterfaceReference().id("configuration").version("2.0"))
+      .addProvidesItem(interfaceDescriptor("configuration", "2.0"));
+    var applicationDescriptor = applicationDescriptor("test-app", "1.0.0").addModuleDescriptorsItem(descriptor);
+    var validationContext = TestValues.validationContext(applicationDescriptor);
+
+    validator.validate(validationContext);
+  }
+
+  @Test
   void validate_negative_sameInterfaceInRequiresAndOptional() {
     var descriptor = moduleDescriptor("test-module", "1.0.0")
       .addRequiresItem(new InterfaceReference().id("configuration").version("2.0"))
-      .addOptionalItem(new InterfaceReference().id("configuration").version("2.0"));
+      .addOptionalItem(new InterfaceReference().id("configuration").version("1.0"));
     var applicationDescriptor = applicationDescriptor("test-app", "1.0.0").addModuleDescriptorsItem(descriptor);
     var validationContext = TestValues.validationContext(applicationDescriptor);
 
@@ -53,7 +64,7 @@ class RequiredOptionalInterfaceValidatorTest {
     var descriptor = new ModuleDescriptor()
       .id("test-ui-1.0.0")
       .addRequiresItem(new InterfaceReference().id("configuration").version("2.0"))
-      .addOptionalItem(new InterfaceReference().id("configuration").version("2.0"));
+      .addOptionalItem(new InterfaceReference().id("configuration").version("1.0"));
     var applicationDescriptor = applicationDescriptor("test-app", "1.0.0").addUiModuleDescriptorsItem(descriptor);
     var validationContext = TestValues.validationContext(applicationDescriptor);
 

@@ -101,7 +101,7 @@ class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
   }
 
   @Test
-  void validate_negative_sameInterfaceInRequiredAndOptional() throws Exception {
+  void validate_negative_sameInterfaceInRequiredAndOptionalIsRejected() throws Exception {
     var descriptor = new ApplicationDescriptor()
       .name("app-same-interface")
       .version("1.0.0")
