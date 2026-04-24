@@ -55,10 +55,7 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
     var fooModule = module("foo-module", "9.9.9", wireMockUrl + "/modules/foo-module-9.9.9");
     var applicationDescriptor = applicationDescriptor("test-app", "1.0.0").addModulesItem(fooModule);
 
-    mockMvc.perform(post("/applications").content(asJsonString(applicationDescriptor))
-        .header(TOKEN, generateAccessToken(keycloakProperties))
-        .contentType(APPLICATION_JSON))
-      .andExpect(status().isCreated());
+    postApplication(applicationDescriptor);
 
     mockMvc.perform(get("/modules/foo-module-9.9.9")
         .header(TOKEN, generateAccessToken(keycloakProperties)))
@@ -75,15 +72,85 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
     var fooModule = module("baz-module", "1.0.0", wireMockUrl + "/modules/baz-module-1.0.0");
     var applicationDescriptor = applicationDescriptor("test-app", "1.0.0").addModulesItem(fooModule);
 
-    mockMvc.perform(post("/applications").content(asJsonString(applicationDescriptor))
-        .header(TOKEN, generateAccessToken(keycloakProperties))
-        .contentType(APPLICATION_JSON))
-      .andExpect(status().isCreated());
+    postApplication(applicationDescriptor);
 
     mockMvc.perform(get("/modules/baz-module-1.0.0")
         .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(status().isOk())
       .andExpect(content().json(readString("json/module-bootstrap/bootstrap-baz-module-1.0.0.json"), STRICT));
+  }
+
+  @Test
+  void moduleBootstrap_positive_sameInterfaceInProvidesAndOptional() throws Exception {
+    var dashboardProviderApp = new ApplicationDescriptor()
+      .name("provider-app")
+      .version("1.0.0")
+      .modules(List.of(new Module().name("mod-provider").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id("mod-provider-1.0.0")
+        .provides(List.of(new InterfaceDescriptor()
+          .id("dashboard")
+          .version("2.0")
+          .interfaceType("multiple")))));
+
+    postApplication(dashboardProviderApp);
+
+    mockMvc.perform(post("/modules/{id}/discovery", "mod-provider-1.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON)
+        .content(asJsonString(moduleDiscovery("mod-provider", "1.0.0", "http://mod-provider:8081"))))
+      .andExpect(status().isCreated());
+
+    var dashboardProviderAndConsumerApp = new ApplicationDescriptor()
+      .name("test-app")
+      .version("1.0.0")
+      .modules(List.of(new Module().name("provider-and-consumer").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id("provider-and-consumer-1.0.0")
+        .optional(List.of(new InterfaceReference().id("dashboard").version("2.0")))
+        .provides(List.of(new InterfaceDescriptor()
+          .id("dashboard")
+          .version("2.0")
+          .interfaceType("multiple")))));
+
+    postApplication(dashboardProviderAndConsumerApp);
+
+    mockMvc.perform(get("/modules/provider-and-consumer-1.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
+      .andExpect(content().json("""
+        {
+          "module": {
+            "moduleId": "provider-and-consumer-1.0.0",
+            "applicationId": "test-app-1.0.0",
+            "systemUserRequired": false,
+            "interfaces": [
+              {
+                "id": "dashboard",
+                "version": "2.0",
+                "interfaceType": "multiple",
+                "endpoints": []
+              }
+            ]
+          },
+          "requiredModules": [
+            {
+              "moduleId": "mod-provider-1.0.0",
+              "applicationId": "provider-app-1.0.0",
+              "location": "http://mod-provider:8081",
+              "systemUserRequired": false,
+              "interfaces": [
+                {
+                  "id": "dashboard",
+                  "version": "2.0",
+                  "interfaceType": "multiple",
+                  "endpoints": []
+                }
+              ]
+            }
+          ]
+        }
+        """, STRICT));
   }
 
   @Test
