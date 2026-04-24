@@ -1,3 +1,8 @@
+## Version `v4.1.0` (IN PROGRESS)
+* Allow interface to be both provided and require / optional in the same module descriptor (MGRAPPS-99)
+
+---
+
 ## Version `v4.0.0` (16.04.2026)
 * Provide "System User required" attribute as part of module bootstrap data (MGRAPPS-54)
 * Introduce optional application dependencies (MGRAPPS-57)
