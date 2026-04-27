@@ -4,5 +4,8 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
+  <!-- Backported from v4.1.0 to v4.0.1, but kept under v4.1.0 to preserve the
+       original Liquibase changeSet file path. Renaming/moving it to v4.0.1 would
+       make later upgrades treat this as a different migration. -->
   <include file="changes/v4.1.0/expand-module-interface-reference-primary-key.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
