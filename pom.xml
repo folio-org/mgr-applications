@@ -12,7 +12,7 @@
   <name>mgr-applications</name>
   <groupId>org.folio</groupId>
   <artifactId>mgr-applications</artifactId>
-  <version>4.0.1</version>
+  <version>4.0.2-SNAPSHOT</version>
   <description>Application Manager</description>
   <packaging>jar</packaging>
 
@@ -614,6 +614,6 @@
     <url>https://github.com/folio-org/mgr-applications</url>
     <connection>scm:git:git://github.com:folio-org/mgr-applications.git</connection>
     <developerConnection>scm:git:git@github.com:folio-org/mgr-applications.git</developerConnection>
-    <tag>v4.0.1</tag>
+    <tag>v4.0.0</tag>
   </scm>
 </project>
