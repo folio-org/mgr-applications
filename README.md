@@ -346,5 +346,6 @@ the integrations with Kafka, Kong, Okapi, mgr-tenant-entitlements is disabled.
 To enable this mode set `FAR_MODE` env variable to `true` and make sure to leave other integration variables unset or
 set to `false`.
 
+
 ## AI Documentation
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/folio-org/mgr-applications)
