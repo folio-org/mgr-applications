@@ -46,7 +46,7 @@
     <mockito.version>5.23.0</mockito.version>
     <testcontainer.version>2.0.5</testcontainer.version>
     <awaitility.version>4.3.0</awaitility.version>
-    <instancio.version>5.5.1</instancio.version>
+    <instancio.version>5.6.0</instancio.version>
 
     <!-- Plugins versions -->
     <maven-checkstyle.version>13.4.2</maven-checkstyle.version>
