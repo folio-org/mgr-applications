@@ -1,0 +1,71 @@
+package org.folio.am.service;
+
+import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.CollectionUtils;
+import org.folio.am.domain.entity.ApplicationEntity;
+import org.folio.am.repository.ApplicationRepository;
+import org.springframework.stereotype.Service;
+
+@Log4j2
+@Service
+@RequiredArgsConstructor
+public class ApplicationClosureResolver {
+
+  private final ApplicationRepository applicationRepository;
+
+  /**
+   * Computes the transitive closure of application dependencies starting from the given IDs.
+   *
+   * @param applicationIds root application IDs
+   * @return set of all application IDs reachable via the dependency graph (including roots)
+   */
+  public Set<String> resolve(Set<String> applicationIds) {
+    var visited = new HashSet<String>();
+    var queue = new ArrayDeque<String>(applicationIds);
+
+    while (!queue.isEmpty()) {
+      var batch = new HashSet<String>();
+      while (!queue.isEmpty()) {
+        var id = queue.poll();
+        if (visited.add(id)) {
+          batch.add(id);
+        }
+      }
+      if (batch.isEmpty()) {
+        continue;
+      }
+
+      var entities = applicationRepository.findAllById(batch);
+      for (var entity : entities) {
+        for (var depId : extractDependencyIds(entity)) {
+          if (!visited.contains(depId)) {
+            queue.add(depId);
+          }
+        }
+      }
+    }
+    return visited;
+  }
+
+  private Set<String> extractDependencyIds(ApplicationEntity entity) {
+    var descriptor = entity.getApplicationDescriptor();
+    if (descriptor == null) {
+      return Set.of();
+    }
+    var deps = descriptor.getDependencies();
+    if (CollectionUtils.isEmpty(deps)) {
+      return Set.of();
+    }
+    var result = new HashSet<String>();
+    for (var dep : deps) {
+      if (dep.getName() != null && dep.getVersion() != null) {
+        result.add(dep.getName() + "-" + dep.getVersion());
+      }
+    }
+    return result;
+  }
+}
