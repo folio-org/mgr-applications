@@ -50,13 +50,13 @@ class ApplicationClosureResolverTest {
   @Test
   void resolve_handlesCyclesWithoutInfiniteLoop() {
     // A-1 depends on B-1, B-1 depends on A-1 — mutual cycle
-    var aDesc = descriptor(new Dependency("B", "1"));
-    var bDesc = descriptor(new Dependency("A", "1"));
+    var descriptorA = descriptor(new Dependency("B", "1"));
+    var descriptorB = descriptor(new Dependency("A", "1"));
 
     when(applicationRepository.findAllById(Set.of("A-1")))
-      .thenReturn(List.of(entity("A-1", aDesc)));
+      .thenReturn(List.of(entity("A-1", descriptorA)));
     when(applicationRepository.findAllById(Set.of("B-1")))
-      .thenReturn(List.of(entity("B-1", bDesc)));
+      .thenReturn(List.of(entity("B-1", descriptorB)));
 
     assertThat(resolver.resolve(Set.of("A-1"))).containsExactlyInAnyOrder("A-1", "B-1");
   }

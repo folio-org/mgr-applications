@@ -26,29 +26,28 @@ public class ApplicationClosureResolver {
   public Set<String> resolve(Set<String> applicationIds) {
     var visited = new HashSet<String>();
     var queue = new ArrayDeque<String>(applicationIds);
-
     while (!queue.isEmpty()) {
-      var batch = new HashSet<String>();
-      while (!queue.isEmpty()) {
-        var id = queue.poll();
-        if (visited.add(id)) {
-          batch.add(id);
-        }
-      }
+      var batch = drainUnvisited(queue, visited);
       if (batch.isEmpty()) {
         continue;
       }
-
-      var entities = applicationRepository.findAllById(batch);
-      for (var entity : entities) {
-        for (var depId : extractDependencyIds(entity)) {
-          if (!visited.contains(depId)) {
-            queue.add(depId);
-          }
-        }
-      }
+      applicationRepository.findAllById(batch).stream()
+        .flatMap(entity -> extractDependencyIds(entity).stream())
+        .filter(depId -> !visited.contains(depId))
+        .forEach(queue::add);
     }
     return visited;
+  }
+
+  private Set<String> drainUnvisited(ArrayDeque<String> queue, Set<String> visited) {
+    var batch = new HashSet<String>();
+    while (!queue.isEmpty()) {
+      var id = queue.poll();
+      if (visited.add(id)) {
+        batch.add(id);
+      }
+    }
+    return batch;
   }
 
   private Set<String> extractDependencyIds(ApplicationEntity entity) {
