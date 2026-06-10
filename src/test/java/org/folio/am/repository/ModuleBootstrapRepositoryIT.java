@@ -79,9 +79,9 @@ class ModuleBootstrapRepositoryIT extends BaseRepositoryTest {
       "mod-users-keycloak-3.0.13", List.of("app-platform-minimal-2.0.53"));
 
     var ids = result.stream().map(ModuleBootstrapView::getId).toList();
-    assertThat(ids).containsExactlyInAnyOrder(
-      "mod-users-keycloak-3.0.13", "mod-users-19.5.4");
-    assertThat(ids).doesNotContain("mod-users-19.6.0");
+    assertThat(ids)
+      .containsExactlyInAnyOrder("mod-users-keycloak-3.0.13", "mod-users-19.5.4")
+      .doesNotContain("mod-users-19.6.0");
   }
 
   private Predicate<ModuleBootstrapView> matchView(String moduleId, String appId, String location) {

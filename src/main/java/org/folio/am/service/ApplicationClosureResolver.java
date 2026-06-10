@@ -61,9 +61,7 @@ public class ApplicationClosureResolver {
     }
     var result = new HashSet<String>();
     for (var dep : deps) {
-      if (dep.getName() != null && dep.getVersion() != null) {
-        result.add(dep.getName() + "-" + dep.getVersion());
-      }
+      result.add(dep.getName() + "-" + dep.getVersion());
     }
     return result;
   }
