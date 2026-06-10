@@ -143,4 +143,39 @@ class ModuleBootstrapServiceTest {
     verify(repository).findAllRequiredByModuleId(MODULE_FOO_ID);
     verifyNoInteractions(applicationClosureResolver);
   }
+
+  @Test
+  void getById_withApplicationId_prefersSameApplicationModuleOverHigherVersion() {
+    var applicationId = "app-platform-minimal-2.0.53";
+    var otherAppId = "app-platform-complete-1.0.0";
+    var closure = Set.of(applicationId, otherAppId);
+
+    when(applicationClosureResolver.resolve(Set.of(applicationId))).thenReturn(closure);
+
+    // mod-users-keycloak-3.0.13 is the module being bootstrapped (in applicationId)
+    var keycloakView = moduleBootstrapView("mod-users-keycloak-3.0.13", "login");
+    keycloakView.setApplicationId(applicationId);
+    keycloakView.getDescriptor().addRequiresItem(new InterfaceReference().id("users"));
+    keycloakView.setLocation(null);
+
+    // mod-users-19.5.4 is in the preferred application (applicationId)
+    var users54View = moduleBootstrapView("mod-users-19.5.4", "users");
+    users54View.setApplicationId(applicationId);
+    users54View.setLocation("http://5-4");
+
+    // mod-users-19.6.0 is in the other application (higher version but not preferred)
+    var users60View = moduleBootstrapView("mod-users-19.6.0", "users");
+    users60View.setApplicationId(otherAppId);
+    users60View.setLocation("http://6-0");
+
+    when(repository.findAllRequiredByModuleIdAndApplicationIds(
+      "mod-users-keycloak-3.0.13", closure))
+      .thenReturn(new ArrayList<>(List.of(keycloakView, users54View, users60View)));
+
+    var result = service.getById("mod-users-keycloak-3.0.13", applicationId);
+
+    assertThat(result.getRequiredModules())
+      .extracting(org.folio.am.domain.dto.ModuleBootstrapDiscovery::getModuleId)
+      .containsExactly("mod-users-19.5.4");
+  }
 }

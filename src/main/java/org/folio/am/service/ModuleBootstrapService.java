@@ -68,34 +68,40 @@ public class ModuleBootstrapService {
     var requiredInterfaces = getRequiredOptionalInterfaces(moduleView);
     var requiredModules = toModuleDiscoveries(requiredInterfaces, views);
 
-    requiredModules = deduplicateRequiredModules(requiredModules);
+    var preferred = applicationId == null ? Set.<String>of() : Set.of(applicationId);
+    requiredModules = deduplicateRequiredModules(requiredModules, preferred);
 
     return new ModuleBootstrap()
       .module(module)
       .requiredModules(requiredModules);
   }
 
-  private List<ModuleBootstrapDiscovery> deduplicateRequiredModules(List<ModuleBootstrapDiscovery> requiredModules) {
+  private List<ModuleBootstrapDiscovery> deduplicateRequiredModules(
+      List<ModuleBootstrapDiscovery> requiredModules,
+      Set<String> preferredApplicationIds) {
     var results = new HashMap<String, ModuleBootstrapDiscovery>();
 
-    for (var moduleBootstrapDiscovery : requiredModules) {
-      var moduleNameAndVersion = getNameAndVersion(moduleBootstrapDiscovery.getModuleId());
-      var moduleName = moduleNameAndVersion.getLeft();
-      var moduleVersion = moduleNameAndVersion.getRight();
-
-      var existingValue = results.get(moduleName);
-      if (existingValue == null) {
-        results.put(moduleName, moduleBootstrapDiscovery);
-      } else {
-        var existingValueVersion = getNameAndVersion(existingValue.getModuleId()).getRight();
-        if (InterfaceComparisonUtils.compare("", moduleVersion,
-          "", existingValueVersion) > 0) {
-          results.put(moduleName, moduleBootstrapDiscovery);
-        }
+    for (var candidate : requiredModules) {
+      var moduleName = getNameAndVersion(candidate.getModuleId()).getLeft();
+      var existing = results.get(moduleName);
+      if (existing == null || isBetterCandidate(candidate, existing, preferredApplicationIds)) {
+        results.put(moduleName, candidate);
       }
     }
 
     return results.values().stream().toList();
+  }
+
+  private boolean isBetterCandidate(ModuleBootstrapDiscovery candidate, ModuleBootstrapDiscovery existing,
+      Set<String> preferredApplicationIds) {
+    var candidatePreferred = preferredApplicationIds.contains(candidate.getApplicationId());
+    var existingPreferred = preferredApplicationIds.contains(existing.getApplicationId());
+    if (candidatePreferred != existingPreferred) {
+      return candidatePreferred;
+    }
+    var candidateVersion = getNameAndVersion(candidate.getModuleId()).getRight();
+    var existingVersion = getNameAndVersion(existing.getModuleId()).getRight();
+    return InterfaceComparisonUtils.compare("", candidateVersion, "", existingVersion) > 0;
   }
 
   private ModuleBootstrapView removeModuleViewById(String moduleId, List<ModuleBootstrapView> result) {
