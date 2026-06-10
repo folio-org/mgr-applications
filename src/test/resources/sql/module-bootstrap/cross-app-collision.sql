@@ -21,11 +21,17 @@ values
 INSERT INTO module(id, name, version, discovery_url, descriptor, type)
 VALUES
   ('mod-users-keycloak-3.0.13', 'mod-users-keycloak', '3.0.13',
-   'http://mod-users-keycloak-3-0-13', '{}', 'BACKEND'),
+   'http://mod-users-keycloak-3-0-13',
+   '{"id":"mod-users-keycloak-3.0.13","requires":[{"id":"users","version":"19.0"}]}',
+   'BACKEND'),
   ('mod-users-19.5.4', 'mod-users', '19.5.4',
-   'http://mod-users-19-5-4', '{}', 'BACKEND'),
+   'http://mod-users-19-5-4',
+   '{"id":"mod-users-19.5.4","provides":[{"id":"users","version":"19.5"}]}',
+   'BACKEND'),
   ('mod-users-19.6.0', 'mod-users', '19.6.0',
-   'http://mod-users-19-6-0', '{}', 'BACKEND');
+   'http://mod-users-19-6-0',
+   '{"id":"mod-users-19.6.0","provides":[{"id":"users","version":"19.6"}]}',
+   'BACKEND');
 
 INSERT INTO application_module(application_id, module_id)
 VALUES
