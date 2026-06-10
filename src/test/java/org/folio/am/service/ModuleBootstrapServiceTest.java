@@ -12,12 +12,16 @@ import static org.folio.am.support.TestConstants.MODULE_FOO_INTERFACE_ID;
 import static org.folio.am.support.TestValues.moduleBootstrap;
 import static org.folio.am.support.TestValues.moduleBootstrapDiscovery;
 import static org.folio.am.support.TestValues.moduleBootstrapView;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.folio.am.mapper.ModuleBootstrapMapperImpl;
 import org.folio.am.repository.ModuleBootstrapRepository;
 import org.folio.common.domain.model.InterfaceReference;
@@ -33,12 +37,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ModuleBootstrapServiceTest {
 
   @Mock private ModuleBootstrapRepository repository;
+  @Mock private ApplicationClosureResolver applicationClosureResolver;
 
   private ModuleBootstrapService service;
 
   @BeforeEach
   void setUp() {
-    service = new ModuleBootstrapService(repository, new ModuleBootstrapMapperImpl());
+    service = new ModuleBootstrapService(repository, new ModuleBootstrapMapperImpl(), applicationClosureResolver);
   }
 
   @Test
@@ -99,5 +104,43 @@ class ModuleBootstrapServiceTest {
 
     assertThatThrownBy(() -> service.getById(MODULE_FOO_ID)).isInstanceOf(EntityNotFoundException.class)
       .hasMessage("Module not found by id: " + MODULE_FOO_ID);
+  }
+
+  @Test
+  void getById_withApplicationId_resolvesClosureAndCallsScopedQuery() {
+    var applicationId = "app-platform-minimal-2.0.53";
+    var depAppId = "app-platform-base-0.5.0";
+    var closure = Set.of(applicationId, depAppId);
+
+    var moduleView = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
+    moduleView.getDescriptor().addRequiresItem(new InterfaceReference().id(MODULE_BAR_INTERFACE_ID));
+    var depView = moduleBootstrapView(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID);
+    var views = new ArrayList<>(asList(moduleView, depView));
+
+    when(applicationClosureResolver.resolve(Set.of(applicationId))).thenReturn(closure);
+    when(repository.findAllRequiredByModuleIdAndApplicationIds(MODULE_FOO_ID, closure)).thenReturn(views);
+
+    var result = service.getById(MODULE_FOO_ID, applicationId);
+
+    assertThat(result.getModule().getModuleId()).isEqualTo(MODULE_FOO_ID);
+    assertThat(result.getRequiredModules())
+      .extracting(org.folio.am.domain.dto.ModuleBootstrapDiscovery::getModuleId)
+      .containsExactly(MODULE_BAR_ID);
+
+    verify(applicationClosureResolver).resolve(Set.of(applicationId));
+    verify(repository).findAllRequiredByModuleIdAndApplicationIds(MODULE_FOO_ID, closure);
+    verifyNoMoreInteractions(repository);
+  }
+
+  @Test
+  void getById_withoutApplicationId_fallsBackToLegacyQuery() {
+    var moduleView = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
+    when(repository.findAllRequiredByModuleId(MODULE_FOO_ID)).thenReturn(new ArrayList<>(List.of(moduleView)));
+
+    var result = service.getById(MODULE_FOO_ID, null);
+
+    assertThat(result.getModule().getModuleId()).isEqualTo(MODULE_FOO_ID);
+    verify(repository).findAllRequiredByModuleId(MODULE_FOO_ID);
+    verifyNoInteractions(applicationClosureResolver);
   }
 }

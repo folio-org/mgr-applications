@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,6 +31,7 @@ public class ModuleBootstrapService {
 
   private final ModuleBootstrapRepository repository;
   private final ModuleBootstrapMapper mapper;
+  private final ApplicationClosureResolver applicationClosureResolver;
 
   /**
    * Retrieves a module bootstrap data including information for the modules that provides interfaces listed in
@@ -41,7 +43,24 @@ public class ModuleBootstrapService {
    */
   @Transactional(readOnly = true)
   public ModuleBootstrap getById(String moduleId) {
-    var views = repository.findAllRequiredByModuleId(moduleId);
+    return getById(moduleId, null);
+  }
+
+  /**
+   * Retrieves a module bootstrap data scoped to an application closure when {@code applicationId} is provided,
+   * or falls back to the legacy all-applications query when it is {@code null}.
+   *
+   * @param moduleId      - the module identifier
+   * @param applicationId - optional application identifier; when non-null, providers are restricted to the
+   *                        transitive closure of the application's dependencies
+   * @return Module bootstrap data
+   */
+  @Transactional(readOnly = true)
+  public ModuleBootstrap getById(String moduleId, String applicationId) {
+    var views = applicationId == null
+      ? repository.findAllRequiredByModuleId(moduleId)
+      : repository.findAllRequiredByModuleIdAndApplicationIds(
+          moduleId, applicationClosureResolver.resolve(Set.of(applicationId)));
 
     var moduleView = removeModuleViewById(moduleId, views);
     var module = mapper.convert(moduleView);
