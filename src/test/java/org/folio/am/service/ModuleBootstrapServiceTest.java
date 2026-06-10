@@ -95,7 +95,7 @@ class ModuleBootstrapServiceTest {
 
     var actual = service.getById(MODULE_BAR_ID);
     assertThat(actual.getRequiredModules()).hasSize(1);
-    assertThat(actual.getRequiredModules().get(0).getModuleId()).isEqualTo(MODULE_FOO1_1_ID);
+    assertThat(actual.getRequiredModules().getFirst().getModuleId()).isEqualTo(MODULE_FOO1_1_ID);
   }
 
   @Test
@@ -142,6 +142,47 @@ class ModuleBootstrapServiceTest {
     assertThat(result.getModule().getModuleId()).isEqualTo(MODULE_FOO_ID);
     verify(repository).findAllRequiredByModuleId(MODULE_FOO_ID);
     verifyNoInteractions(applicationClosureResolver);
+  }
+
+  @Test
+  void getById_withEmptyApplicationId_fallsBackToLegacyQuery() {
+    var moduleView = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
+    when(repository.findAllRequiredByModuleId(MODULE_FOO_ID)).thenReturn(new ArrayList<>(List.of(moduleView)));
+
+    var result = service.getById(MODULE_FOO_ID, "");
+
+    assertThat(result.getModule().getModuleId()).isEqualTo(MODULE_FOO_ID);
+    verify(repository).findAllRequiredByModuleId(MODULE_FOO_ID);
+    verifyNoInteractions(applicationClosureResolver);
+  }
+
+  @Test
+  void getById_withBlankApplicationId_fallsBackToLegacyQuery() {
+    var moduleView = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
+    moduleView.setApplicationId("some-app-1.0.0");
+    when(repository.findAllRequiredByModuleId(MODULE_FOO_ID)).thenReturn(new ArrayList<>(List.of(moduleView)));
+
+    var result = service.getById(MODULE_FOO_ID, "   ");
+
+    assertThat(result.getModule().getModuleId()).isEqualTo(MODULE_FOO_ID);
+    verify(repository).findAllRequiredByModuleId(MODULE_FOO_ID);
+    verifyNoInteractions(applicationClosureResolver);
+  }
+
+  @Test
+  void getById_withApplicationId_emptyClosureFallsBackToLegacyQuery() {
+    var applicationId = "app-platform-minimal-2.0.53";
+    var moduleView = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
+
+    when(applicationClosureResolver.resolve(Set.of(applicationId))).thenReturn(Set.of());
+    when(repository.findAllRequiredByModuleId(MODULE_FOO_ID)).thenReturn(new ArrayList<>(List.of(moduleView)));
+
+    var result = service.getById(MODULE_FOO_ID, applicationId);
+
+    assertThat(result.getModule().getModuleId()).isEqualTo(MODULE_FOO_ID);
+    verify(applicationClosureResolver).resolve(Set.of(applicationId));
+    verify(repository).findAllRequiredByModuleId(MODULE_FOO_ID);
+    verifyNoMoreInteractions(repository);
   }
 
   @Test

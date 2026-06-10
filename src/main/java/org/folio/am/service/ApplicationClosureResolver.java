@@ -25,7 +25,7 @@ public class ApplicationClosureResolver {
    */
   public Set<String> resolve(Set<String> applicationIds) {
     var visited = new HashSet<String>();
-    var queue = new ArrayDeque<String>(applicationIds);
+    var queue = new ArrayDeque<>(applicationIds);
     while (!queue.isEmpty()) {
       var batch = drainUnvisited(queue, visited);
       if (batch.isEmpty()) {
@@ -53,10 +53,12 @@ public class ApplicationClosureResolver {
   private Set<String> extractDependencyIds(ApplicationEntity entity) {
     var descriptor = entity.getApplicationDescriptor();
     if (descriptor == null) {
+      log.debug("Application {} has null descriptor or no dependencies; closure narrows here", entity.getId());
       return Set.of();
     }
     var deps = descriptor.getDependencies();
     if (CollectionUtils.isEmpty(deps)) {
+      log.debug("Application {} has null descriptor or no dependencies; closure narrows here", entity.getId());
       return Set.of();
     }
     var result = new HashSet<String>();

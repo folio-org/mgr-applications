@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.am.domain.dto.ModuleBootstrap;
 import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
 import org.folio.am.domain.entity.ModuleBootstrapView;
@@ -24,6 +26,7 @@ import org.folio.common.utils.InterfaceComparisonUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class ModuleBootstrapService {
@@ -60,10 +63,8 @@ public class ModuleBootstrapService {
   }
 
   private ModuleBootstrap doGetById(String moduleId, String applicationId) {
-    var views = applicationId == null
-      ? repository.findAllRequiredByModuleId(moduleId)
-      : repository.findAllRequiredByModuleIdAndApplicationIds(
-          moduleId, applicationClosureResolver.resolve(Set.of(applicationId)));
+    var loadResult = loadModuleViews(moduleId, applicationId);
+    var views = loadResult.views();
 
     var moduleView = removeModuleViewById(moduleId, views);
     var module = mapper.convert(moduleView);
@@ -71,12 +72,30 @@ public class ModuleBootstrapService {
     var requiredInterfaces = getRequiredOptionalInterfaces(moduleView);
     var requiredModules = toModuleDiscoveries(requiredInterfaces, views);
 
-    var preferred = applicationId == null ? Set.<String>of() : Set.of(applicationId);
+    var preferred = loadResult.preferredApplicationId() == null
+      ? Set.<String>of()
+      : Set.of(loadResult.preferredApplicationId());
     requiredModules = deduplicateRequiredModules(requiredModules, preferred);
 
     return new ModuleBootstrap()
       .module(module)
       .requiredModules(requiredModules);
+  }
+
+  private LoadResult loadModuleViews(String moduleId, String applicationId) {
+    var appId = StringUtils.isBlank(applicationId) ? null : applicationId;
+    if (appId == null) {
+      return new LoadResult(repository.findAllRequiredByModuleId(moduleId), null);
+    }
+
+    var closure = applicationClosureResolver.resolve(Set.of(appId));
+    if (closure.isEmpty()) {
+      log.warn("Empty application closure for applicationId={}, falling back to unscoped bootstrap", appId);
+      return new LoadResult(repository.findAllRequiredByModuleId(moduleId), null);
+    }
+
+    var views = repository.findAllRequiredByModuleIdAndApplicationIds(moduleId, closure);
+    return new LoadResult(views, appId);
   }
 
   private List<ModuleBootstrapDiscovery> deduplicateRequiredModules(
@@ -144,5 +163,8 @@ public class ModuleBootstrapService {
 
   private static Predicate<InterfaceDescriptor> notRequiredInterface(List<String> requiredInterfaces) {
     return i -> !requiredInterfaces.contains(i.getId());
+  }
+
+  private record LoadResult(List<ModuleBootstrapView> views, String preferredApplicationId) {
   }
 }
