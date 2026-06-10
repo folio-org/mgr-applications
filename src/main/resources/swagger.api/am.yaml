@@ -238,6 +238,12 @@ paths:
         - module-bootstrap
       parameters:
         - $ref: '#/components/parameters/path-entity-id'
+        - name: applicationId
+          in: query
+          required: false
+          description: "Scope module bootstrap resolution to the transitive closure of this application."
+          schema:
+            type: string
       responses:
         '200':
           description: A module bootstrap info

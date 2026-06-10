@@ -47,7 +47,7 @@ class ModuleBootstrapControllerTest {
     var requiredModules = moduleBootstrapDiscovery(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID);
     var expectedModuleBootstrap = moduleBootstrap(module, requiredModules);
 
-    when(service.getById(MODULE_FOO_ID)).thenReturn(expectedModuleBootstrap);
+    when(service.getById(MODULE_FOO_ID, null)).thenReturn(expectedModuleBootstrap);
 
     var mvcResult = mockMvc.perform(get(ENDPOINT_PATH, MODULE_FOO_ID)
         .contentType(APPLICATION_JSON))
@@ -61,7 +61,7 @@ class ModuleBootstrapControllerTest {
   @Test
   void get_negative() throws Exception {
     var errorMessage = "Module not found by id: " + MODULE_FOO_ID;
-    when(service.getById(MODULE_FOO_ID)).thenThrow(new EntityNotFoundException(errorMessage));
+    when(service.getById(MODULE_FOO_ID, null)).thenThrow(new EntityNotFoundException(errorMessage));
     mockMvc.perform(get(ENDPOINT_PATH, MODULE_FOO_ID)
         .contentType(APPLICATION_JSON))
       .andExpect(status().isNotFound())

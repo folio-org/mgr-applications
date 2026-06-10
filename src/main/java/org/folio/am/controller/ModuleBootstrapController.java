@@ -14,9 +14,7 @@ public class ModuleBootstrapController extends BaseController implements ModuleB
   private final ModuleBootstrapService service;
 
   @Override
-  public ResponseEntity<ModuleBootstrap> getModuleBootstrap(String id) {
-    var moduleBootstrap = service.getById(id);
-
-    return ResponseEntity.ok(moduleBootstrap);
+  public ResponseEntity<ModuleBootstrap> getModuleBootstrap(String id, String applicationId) {
+    return ResponseEntity.ok(service.getById(id, applicationId));
   }
 }
