@@ -1,5 +1,6 @@
 package org.folio.am.repository;
 
+import java.util.Collection;
 import java.util.List;
 import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,23 @@ public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrap
     + "p.id IN (SELECT r.id FROM InterfaceReferenceEntity r WHERE r.moduleId = :moduleId AND "
     + "(r.type = 'REQUIRES' OR r.type = 'OPTIONAL')))) and (view.location is not null OR view.id = :moduleId)")
   List<ModuleBootstrapView> findAllRequiredByModuleId(@Param("moduleId") String moduleId);
+
+  /**
+   * Queries the module and all its dependencies by the given id, filtered to specified applications.
+   *
+   * @param moduleId the module identifier
+   * @param applicationIds the application identifiers to filter by
+   * @return List of module views belonging to specified applications
+   */
+  @Query(value = "SELECT DISTINCT view FROM ModuleBootstrapView view WHERE "
+    + "(view.id = :moduleId OR view.id IN ("
+    + "  SELECT p.moduleId FROM InterfaceReferenceEntity p WHERE p.type = 'PROVIDES' AND "
+    + "  p.id IN (SELECT r.id FROM InterfaceReferenceEntity r WHERE r.moduleId = :moduleId AND "
+    + "  (r.type = 'REQUIRES' OR r.type = 'OPTIONAL'))"
+    + ")) "
+    + "AND (view.location IS NOT NULL OR view.id = :moduleId) "
+    + "AND view.applicationId IN :applicationIds")
+  List<ModuleBootstrapView> findAllRequiredByModuleIdAndApplicationIds(
+    @Param("moduleId") String moduleId,
+    @Param("applicationIds") Collection<String> applicationIds);
 }
