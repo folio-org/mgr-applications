@@ -6,12 +6,16 @@ import static org.folio.am.support.TestValues.module;
 import static org.folio.am.support.TestValues.moduleDiscovery;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.readString;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 import static org.springframework.test.json.JsonCompareMode.STRICT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
@@ -34,6 +38,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlMergeMode;
+import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 
 @IntegrationTest
 @EnableKeycloakSecurity
@@ -139,6 +145,35 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
         .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(expectedBootstrapResponse), STRICT));
+  }
+
+  @Test
+  @SqlMergeMode(MergeMode.OVERRIDE)
+  @Sql(scripts = "classpath:/sql/module-bootstrap/cross-app-collision.sql",
+    executionPhase = BEFORE_TEST_METHOD)
+  @Sql(scripts = "classpath:/sql/truncate-tables.sql",
+    executionPhase = AFTER_TEST_METHOD)
+  void getModuleBootstrap_withApplicationId_returnsApplicationScopedRequiredModule() throws Exception {
+    mockMvc.perform(get("/modules/{id}", "mod-users-keycloak-3.0.13")
+        .param("applicationId", "app-platform-minimal-2.0.53")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.requiredModules[*].moduleId",
+        containsInAnyOrder("mod-users-19.5.4")));
+  }
+
+  @Test
+  @SqlMergeMode(MergeMode.OVERRIDE)
+  @Sql(scripts = "classpath:/sql/module-bootstrap/cross-app-collision.sql",
+    executionPhase = BEFORE_TEST_METHOD)
+  @Sql(scripts = "classpath:/sql/truncate-tables.sql",
+    executionPhase = AFTER_TEST_METHOD)
+  void getModuleBootstrap_withoutApplicationId_includesHighestVersionModule() throws Exception {
+    mockMvc.perform(get("/modules/{id}", "mod-users-keycloak-3.0.13")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.requiredModules[*].moduleId",
+        hasItem("mod-users-19.6.0")));
   }
 
   private void postApplication(ApplicationDescriptor applicationDescriptor) throws Exception {

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
+import java.util.List;
 import java.util.function.Predicate;
 import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.folio.am.support.base.BaseRepositoryTest;
@@ -11,6 +12,8 @@ import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlMergeMode;
+import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 
 @IntegrationTest
 @Sql(scripts =
@@ -65,6 +68,20 @@ class ModuleBootstrapRepositoryIT extends BaseRepositoryTest {
     assertThat(result)
       .hasSize(1)
       .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL));
+  }
+
+  @Test
+  @SqlMergeMode(MergeMode.OVERRIDE)
+  @Sql(scripts = "classpath:/sql/module-bootstrap/cross-app-collision.sql", executionPhase = BEFORE_TEST_METHOD)
+  @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
+  void findAllRequiredByModuleIdAndApplicationIds_filtersByApplication() {
+    var result = repository.findAllRequiredByModuleIdAndApplicationIds(
+      "mod-users-keycloak-3.0.13", List.of("app-platform-minimal-2.0.53"));
+
+    var ids = result.stream().map(ModuleBootstrapView::getId).toList();
+    assertThat(ids)
+      .containsExactlyInAnyOrder("mod-users-keycloak-3.0.13", "mod-users-19.5.4")
+      .doesNotContain("mod-users-19.6.0");
   }
 
   private Predicate<ModuleBootstrapView> matchView(String moduleId, String appId, String location) {
