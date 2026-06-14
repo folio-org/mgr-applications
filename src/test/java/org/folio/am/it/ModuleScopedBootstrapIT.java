@@ -125,4 +125,48 @@ class ModuleScopedBootstrapIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON))
       .andExpect(status().isCreated());
   }
+
+  @Test
+  void postModuleBootstrap_egress_multiversion_selectsInScopeProviderVersion() throws Exception {
+    postProviderApp("provider-app", "1.0.0", "mod-provider-1.0.0", "http://mod-provider-1:8081");
+    postProviderApp("provider-app", "2.0.0", "mod-provider-2.0.0", "http://mod-provider-2:8081");
+
+    postApplication(new ApplicationDescriptor()
+      .name("consumer-app").version("1.0.0")
+      .modules(List.of(new Module().name("mod-consumer").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id("mod-consumer-1.0.0")
+        .requires(List.of(new InterfaceReference().id("shared-int").version("1.0"))))));
+
+    var request = new ModuleBootstrapRequest()
+      .type(ModuleBootstrapRequest.TypeEnum.EGRESS)
+      .tenants(Map.of(TENANT, List.of("consumer-app-1.0.0", "provider-app-1.0.0")));
+
+    mockMvc.perform(post("/modules/{id}/bootstrap", "mod-consumer-1.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON)
+        .content(asJsonString(request)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.egress." + TENANT + ".found").value(true))
+      .andExpect(jsonPath("$.egress." + TENANT + ".bootstrap.requiredModules[0].moduleId").value("mod-provider-1.0.0"))
+      .andExpect(jsonPath("$.egress." + TENANT + ".bootstrap.requiredModules[0].location")
+        .value("http://mod-provider-1:8081"));
+  }
+
+  private void postProviderApp(String appName, String appVersion, String moduleId, String location) throws Exception {
+    var name = moduleId.substring(0, moduleId.lastIndexOf('-'));
+    var version = moduleId.substring(moduleId.lastIndexOf('-') + 1);
+    postApplication(new ApplicationDescriptor()
+      .name(appName).version(appVersion)
+      .modules(List.of(new Module().name(name).version(version)))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id(moduleId)
+        .provides(List.of(new InterfaceDescriptor().id("shared-int").version("1.0").interfaceType("multiple"))))));
+
+    mockMvc.perform(post("/modules/{id}/discovery", moduleId)
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON)
+        .content(asJsonString(org.folio.am.support.TestValues.moduleDiscovery(name, version, location))))
+      .andExpect(status().isCreated());
+  }
 }
