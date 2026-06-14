@@ -1,10 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "description": "Egress bootstrap result for a single tenant",
+  "description": "Egress bootstrap result for a requested application scope",
   "properties": {
     "found": {
-      "description": "True if the requested module is present in the tenant's supplied application scope",
+      "description": "True if the requested module is present in the supplied application scope",
       "type": "boolean",
       "default": false
     },
