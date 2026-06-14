@@ -7,3 +7,4 @@ This directory contains behavioral feature documentation for the Manager Applica
 - [kong-route-management](features/kong-route-management.md) - Kong Gateway Route Management
 - [Application Discovery](features/application-discovery.md) - Query module deployment locations organized by application
 - [Application Cleanup](features/application-cleanup.md) - Remove unused application descriptors and return a cleanup summary
+- [Module Bootstrap](features/module-bootstrap.md) - `POST /modules/{id}/bootstrap` returning ingress (scope-independent) or application-scoped egress bootstrap
