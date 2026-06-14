@@ -65,39 +65,63 @@ applications" — largely identical across modules. Putting it in the cache key 
 shared list redundantly in every module's entry and inflate entry count to
 O(modules × distinct-appId-sets).
 
-Instead, cache one **app-independent** intermediate per `moduleId` and derive every variant in
-memory:
+**Critical subtlety — the `SELECT DISTINCT` collapse.** `ModuleBootstrapView` is keyed on `@Id id`
+only, and `findAllRequiredByModuleId` is `SELECT DISTINCT view`. A module shared across multiple
+applications (e.g. the same module version bundled in app `v1.0.0` and app `v1.1.0`) therefore
+collapses to **one row with an arbitrary `applicationId`**. The current egress query avoids this by
+filtering `applicationId IN :applicationIds` *before* the collapse. So a naive "cache the unscoped
+entity result, then filter by `applicationId`" is **wrong** for shared modules — the cached row's
+single arbitrary app may not be the in-scope one. The cache must instead keep, per module, its
+**full set of applicationIds**, obtained from a **projection query** that returns one row per
+`(module, application)` without entity-identity collapse:
 
 ```
-findAllRequiredByModuleId(moduleId)        -- app-independent; already what getById runs
-   each resolved provider row carries its applicationId
+rows = projection of (id, applicationId, location, systemUserRequired, descriptor)   -- NO DISTINCT collapse,
+                                                                                        same WHERE as findAllRequiredByModuleId
+group by id -> per module: descriptor / location / systemUserRequired   (module-level: identical across its app-rows)
+               + Set<applicationId>
 ingress(moduleId) = self module, requiredModules = []
-full     (getById) = dedup( all provider rows )
-egress  (appIds)   = dedup( provider rows where applicationId ∈ appIds )   (found=false if self row not in scope)
+full   (getById)  = dedup( all providers )                       applicationId = a deterministic representative app
+egress (appIds)   = dedup( providers whose appId-set ∩ appIds ≠ ∅ )   applicationId = a deterministic in-scope app
+                    found = (self appId-set ∩ appIds) ≠ ∅
 ```
+
+(`descriptor`/`location`/`systemUserRequired` come from the `module` table, so they are identical
+across a module's `(module, application)` rows — only `application_id` varies.)
 
 ### 4.2 Cached value
 
 A single cache named `module-bootstrap`, keyed by **`moduleId` alone**, holding an immutable
-`ModuleBootstrapData` value:
+`ModuleBootstrapData` snapshot of the projection rows grouped by module:
 
-- `module`: the self module's bootstrap discovery (for the `module` field of every response).
-- `selfApplicationIds`: the application ids the module itself belongs to (for the egress
-  `found` check).
-- `providers`: the list of dependency-provider rows, each tagged with its `applicationId`, with
-  **provided interfaces already narrowed** to the interfaces the requesting module
-  requires/optional (this narrowing is `moduleId`-specific but **app-independent**, so it is done
-  once at build time).
+- `self`: the requested module's resolved row group, or **null** if the module has no
+  `v_module_bootstrap` row (does not exist) — `getData` does **not** throw, so the negative result
+  is cacheable and each caller applies its own not-found/`found(false)` rule.
+- `providers`: one `ResolvedModule` per dependency module id (a provider of an interface the
+  requested module requires/optional — already restricted by the query's WHERE clause).
+- each `ResolvedModule` = `{ id, location, systemUserRequired, ModuleDescriptor descriptor (read-only),
+  Set<String> applicationIds }`.
 
-Derivations are pure functions over `ModuleBootstrapData`:
+The cache stores the **DB-query snapshot** (the expensive part). DTO mapping — `mapper.convert`,
+narrowing each provider's `provides` to the requested module's required interfaces, dedup, and
+choosing the representative/in-scope `applicationId` — runs per call in `ModuleBootstrapService` over
+the immutable snapshot, producing **fresh** DTOs each time. This keeps mapping cheap (no DB), avoids
+sharing mutable DTOs across responses, and lets egress stamp an in-scope `applicationId`.
 
-- **ingress** → `ModuleBootstrap(module, requiredModules=[])`.
-- **full** (`getById`) → `ModuleBootstrap(module, deduplicate(providers))`.
-- **egress** (`appIds`) → if no self application id ∈ `appIds` → `EgressBootstrapResult.found(false)`;
-  else `found(true).bootstrap(ModuleBootstrap(module, deduplicate(providers filtered to applicationId ∈ appIds)))`.
+Derivations (pure functions over the snapshot; throw/`found` rules live here, not in `getData`):
 
-`deduplicate` keeps the highest version per module **name**, matching
-`ModuleBootstrapService.deduplicateRequiredModules`.
+- **ingress** → `self == null` ? throw `EntityNotFoundException("Module not found by id: " + moduleId)`
+  : `ModuleBootstrap(map(self))` with `requiredModules = []`.
+- **full** (`getById`) → `self == null` ? throw the same `EntityNotFoundException`
+  : `ModuleBootstrap(map(self), dedup(map(all providers)))`.
+- **egress** (`appIds`) → `appIds` empty **or** `self == null` **or** `(self.applicationIds ∩ appIds) == ∅`
+  → `EgressBootstrapResult.found(false)`; else
+  `found(true).bootstrap(ModuleBootstrap(map(self, inScopeApp), dedup(map(providers whose applicationIds ∩ appIds ≠ ∅, inScopeApp))))`.
+
+`dedup` keeps the highest version per module **name**, matching
+`ModuleBootstrapService.deduplicateRequiredModules`. The representative app for `full` and the
+in-scope app for `egress` are chosen **deterministically** (e.g. the lexicographically smallest
+matching applicationId) so output is stable (today's collapse picks an arbitrary one).
 
 **Avoid Spring self-invocation.** All three public methods must obtain the intermediate through a
 proxied `@Cacheable` call. If that `@Cacheable getData(moduleId)` lived on `ModuleBootstrapService`
@@ -107,16 +131,24 @@ a **dedicated bean** (`ModuleBootstrapDataProvider`) that `ModuleBootstrapServic
 — an external call, so the proxy is honored. `ModuleBootstrapService` keeps the pure derivation
 logic.
 
-### 4.3 Correctness invariants (verified equivalent to current behavior)
+### 4.3 Correctness invariants (must be proven by characterization tests before refactor)
 
+- **Shared modules (multi-application) are the reason for the projection.** Because the projection
+  preserves each module's full `Set<applicationId>`, egress includes a provider iff its app-set
+  intersects `appIds` — reproducing the current pre-collapse SQL filter. A characterization test
+  with the *same module id in two applications* and an `appIds` scope containing only the *second*
+  app MUST pass (this is the case the naive cached-entity approach gets wrong).
 - **Dedup after filter for egress.** Egress dedups among *in-scope* providers; full dedups among
-  all providers. Filtering-then-deduplicating in memory reproduces the current SQL behavior exactly
-  (the current egress filters by `applicationId IN :applicationIds` *before* dedup).
-- **`found(false)` semantics preserved.** Empty `applicationIds`, or a module whose own row is not
-  within `appIds`, yields `found(false)` — same as today.
-- **Interface narrowing is app-independent**, so it is safe to precompute once in the intermediate.
-- A module present in multiple applications appears as multiple provider rows; dedup collapses equal
-  versions, matching current output.
+  all providers. Filter-then-dedup over the snapshot reproduces the current SQL behavior (egress
+  filters `applicationId IN :applicationIds` *before* dedup).
+- **`found(false)` semantics preserved.** Empty `applicationIds`, a non-existent module, or a module
+  whose own app-set does not intersect `appIds`, all yield `found(false)` — and never throw — same
+  as today. (`getById`/ingress still throw `EntityNotFoundException` for a non-existent module.)
+- **Interface narrowing is app-independent** (depends only on the requested module's
+  requires/optional), so it is applied per call over the cached descriptor without mutating it.
+- **Representative `applicationId`** for `full`/`ingress` is deterministic; today's `SELECT DISTINCT`
+  picks an arbitrary one, so no existing test pins a specific value — choosing the smallest matching
+  app is a safe, more-stable behavior.
 
 ### 4.4 Required refactor: make `buildBootstrap` non-destructive
 
@@ -127,15 +159,18 @@ the current build path **mutates shared state** — `removeNotRequiredInterfaces
 
 The refactor:
 
-- Build `ModuleBootstrapData` once from the repository result **without mutating** the JPA entities
-  or their descriptors (construct new interface lists; never `removeIf` on a cached descriptor's
-  `provides`).
+- Replace the destructive build with read-only derivation: narrow a provider's `provides` by
+  **streaming + filtering** the cached `descriptor.getProvides()` into a fresh list per call — never
+  `removeIf` on the cached descriptor; never `list.remove` on a cached list.
 - Derive ingress/full/egress by producing **fresh** DTO instances each call; never hand back a
-  mutable view onto the cached intermediate.
-- Do **not** cache JPA entities directly — `ModuleBootstrapData` is a plain immutable value built
-  from the mapper output, avoiding detached-entity / Hibernate-proxy hazards.
+  mutable view onto the cached snapshot.
+- Cache the **projection snapshot** (`ModuleBootstrapData` of `ResolvedModule` rows), not JPA
+  entities — the only shared object is each `ModuleDescriptor` (read-only), avoiding
+  detached-entity / Hibernate-proxy hazards and DTO-mutation bleed.
 
-Guard test: a repeated cached call returns data equal to the first call (no cross-call corruption).
+Guard test: a repeated cached call returns data equal to the first call (no cross-call corruption),
+and a `getById` immediately followed by an `getEgressBootstrap` for the same module returns
+independent, uncorrupted results.
 
 ## 5. Invalidation
 
@@ -197,7 +232,9 @@ design**. Behavior:
 
 ## 7. Configuration & dependencies
 
-**`pom.xml`** — add (Caffeine version managed at the workspace-standard `3.1.8`):
+**`pom.xml`** — add both. The Spring Boot 4.0.6 parent BOM manages the versions of *both*
+`spring-boot-starter-cache` and `com.github.ben-manes.caffeine:caffeine`, so omit explicit
+`<version>` (the plan verifies the BOM-resolved Caffeine version during the build step):
 
 ```xml
 <dependency>
@@ -207,7 +244,6 @@ design**. Behavior:
 <dependency>
   <groupId>com.github.ben-manes.caffeine</groupId>
   <artifactId>caffeine</artifactId>
-  <version>${caffeine.version}</version>
 </dependency>
 ```
 
@@ -231,18 +267,28 @@ design**. Behavior:
 
 - `pom.xml` — `spring-boot-starter-cache`, Caffeine.
 - `config/properties/BootstrapCacheProperties.java` — new.
-- `config/cache/CacheConfiguration.java` — new (`@EnableCaching`, Caffeine/NoOp `CacheManager`).
+- `config/cache/BootstrapCacheConfiguration.java` — new (`@EnableCaching`, Caffeine/NoOp `CacheManager`,
+  cache-name constant `module-bootstrap`).
+- `repository/ModuleBootstrapRepository.java` — add a **projection** query
+  `findRequiredModuleRows(moduleId)` returning one row per `(module, application)` (the same WHERE
+  clause as `findAllRequiredByModuleId`, projected to `id, applicationId, location,
+  systemUserRequired, descriptor`, **no `DISTINCT`**). `findAllRequiredByModuleIdInApplications` may
+  be deleted once egress derives from the snapshot (confirm no other callers first).
+- `domain/entity/ModuleBootstrapRow.java` — new interface projection for those columns.
+- `service/ModuleBootstrapData.java` + nested `ResolvedModule` — new immutable snapshot value
+  (`self` nullable, `providers` list; each `ResolvedModule = {id, location, systemUserRequired,
+  descriptor, Set<applicationId>}`); includes the grouping factory from `List<ModuleBootstrapRow>`.
 - `service/ModuleBootstrapDataProvider.java` — new bean holding
   `@Cacheable(cacheNames = "module-bootstrap", key = "#moduleId") ModuleBootstrapData getData(String moduleId)`
   (the only DB-touching, cached call; separate bean so the cache proxy is honored — see §4.2).
-- `service/ModuleBootstrapService.java` — refactor: inject `ModuleBootstrapDataProvider`; build the
-  intermediate non-destructively; ingress/full/egress become pure in-memory derivations.
-- `service/ModuleBootstrapData.java` (or `domain/model/`) — new immutable intermediate value.
+- `service/ModuleBootstrapService.java` — refactor: inject `ModuleBootstrapDataProvider` + mapper;
+  ingress/full/egress become pure, non-destructive in-memory derivations over the snapshot.
 - `integration/kafka/BootstrapCacheInvalidationListener.java` — new `@KafkaListener` → evict-all.
 - `integration/kafka/config/BootstrapCacheConsumerConfiguration.java` — new (per-instance group,
-  `JacksonJsonDeserializer<DiscoveryEvent>`, FAR-gated).
+  `JacksonJsonDeserializer<DiscoveryEvent>`, `auto-offset-reset=latest`, FAR-gated).
 - `service/BootstrapCacheInProcessInvalidator.java` — new `ApplicationDiscoveryListener` doing
-  `afterCommit` evict-all.
+  `afterCommit` evict-all (justified: `ModuleDiscoveryService` is `@Transactional` and publishes
+  discovery events pre-commit).
 
 ## 9. Testing strategy
 
