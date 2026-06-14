@@ -23,7 +23,8 @@ public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrap
   List<ModuleBootstrapView> findAllRequiredByModuleId(@Param("moduleId") String moduleId);
 
   /**
-   * Queries the module and all its dependencies by the given id, restricted to modules belonging to the given applications.
+   * Queries the module and all its dependencies by the given id, restricted to modules
+   * belonging to the given applications.
    *
    * @param moduleId       the module identifier
    * @param applicationIds the list of application IDs to restrict the query to
