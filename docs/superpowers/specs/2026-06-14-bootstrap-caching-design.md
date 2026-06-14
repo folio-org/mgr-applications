@@ -76,18 +76,24 @@ single arbitrary app may not be the in-scope one. The cache must instead keep, p
 `(module, application)` without entity-identity collapse:
 
 ```
-rows = projection of (id, applicationId, location, systemUserRequired, descriptor)   -- NO DISTINCT collapse,
-                                                                                        same WHERE as findAllRequiredByModuleId
-group by id -> per module: descriptor / location / systemUserRequired   (module-level: identical across its app-rows)
-               + Set<applicationId>
+descriptors = findAllRequiredByModuleId(moduleId)            -- existing entity query (one row per module id);
+                                                                gives descriptor / location / systemUserRequired
+appIdRows   = projection (id, applicationId)                 -- NEW lightweight projection, same WHERE, one row
+                                                                per (module, application); gives the full app-sets
+group by id -> per module: descriptor / location / systemUserRequired  +  Set<applicationId>
 ingress(moduleId) = self module, requiredModules = []
 full   (getById)  = dedup( all providers )                       applicationId = a deterministic representative app
 egress (appIds)   = dedup( providers whose appId-set ∩ appIds ≠ ∅ )   applicationId = a deterministic in-scope app
                     found = (self appId-set ∩ appIds) ≠ ∅
 ```
 
-(`descriptor`/`location`/`systemUserRequired` come from the `module` table, so they are identical
-across a module's `(module, application)` rows — only `application_id` varies.)
+Two queries (cached together by one `getData` call) rather than one projection, because the
+`descriptor` is a JSONB column: the **entity** query reliably hydrates it (the `@Type` converter
+applies), while a **string** `(id, applicationId)` projection reliably yields the per-app
+multiplicity. `descriptor`/`location`/`systemUserRequired` come from the `module` table, so they are
+identical across a module's `(module, application)` rows — only `application_id` varies, which is why
+the entity query's `SELECT DISTINCT` (one row per id) is fine for them and the projection supplies
+the app-sets.
 
 ### 4.2 Cached value
 
@@ -269,15 +275,16 @@ design**. Behavior:
 - `config/properties/BootstrapCacheProperties.java` — new.
 - `config/cache/BootstrapCacheConfiguration.java` — new (`@EnableCaching`, Caffeine/NoOp `CacheManager`,
   cache-name constant `module-bootstrap`).
-- `repository/ModuleBootstrapRepository.java` — add a **projection** query
-  `findRequiredModuleRows(moduleId)` returning one row per `(module, application)` (the same WHERE
-  clause as `findAllRequiredByModuleId`, projected to `id, applicationId, location,
-  systemUserRequired, descriptor`, **no `DISTINCT`**). `findAllRequiredByModuleIdInApplications` may
-  be deleted once egress derives from the snapshot (confirm no other callers first).
-- `domain/entity/ModuleBootstrapRow.java` — new interface projection for those columns.
+- `repository/ModuleBootstrapRepository.java` — keep `findAllRequiredByModuleId` (entity, descriptors);
+  add a lightweight string projection `findApplicationIdsByModuleId(moduleId)` returning one row per
+  `(module, application)` (same WHERE, projected to `id, applicationId`, **no `DISTINCT`**). Remove
+  `findAllRequiredByModuleIdInApplications` (and its `ModuleBootstrapRepositoryIT` tests) once egress
+  derives from the snapshot — confirm no other callers first (only `getEgressBootstrap` today).
+- `domain/entity/ModuleApplicationId.java` — new `(getId, getApplicationId)` interface projection.
 - `service/ModuleBootstrapData.java` + nested `ResolvedModule` — new immutable snapshot value
   (`self` nullable, `providers` list; each `ResolvedModule = {id, location, systemUserRequired,
-  descriptor, Set<applicationId>}`); includes the grouping factory from `List<ModuleBootstrapRow>`.
+  descriptor, Set<applicationId>}`); built by a factory that joins the entity rows with the
+  `(id → applicationId-set)` map.
 - `service/ModuleBootstrapDataProvider.java` — new bean holding
   `@Cacheable(cacheNames = "module-bootstrap", key = "#moduleId") ModuleBootstrapData getData(String moduleId)`
   (the only DB-touching, cached call; separate bean so the cache proxy is honored — see §4.2).
