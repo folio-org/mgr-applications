@@ -6,9 +6,7 @@ import static org.folio.common.utils.CollectionUtils.toStream;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -68,17 +66,7 @@ public class ModuleBootstrapService {
   }
 
   @Transactional(readOnly = true)
-  public Map<String, EgressBootstrapResult> getEgressBootstraps(String moduleId,
-    Map<String, List<String>> tenantApplications) {
-    var results = new LinkedHashMap<String, EgressBootstrapResult>();
-    if (tenantApplications != null) {
-      tenantApplications.forEach((tenant, applicationIds) ->
-        results.put(tenant, getScopedEgressBootstrap(moduleId, applicationIds)));
-    }
-    return results;
-  }
-
-  private EgressBootstrapResult getScopedEgressBootstrap(String moduleId, List<String> applicationIds) {
+  public EgressBootstrapResult getEgressBootstrap(String moduleId, List<String> applicationIds) {
     if (applicationIds == null || applicationIds.isEmpty()) {
       return new EgressBootstrapResult().found(false);
     }

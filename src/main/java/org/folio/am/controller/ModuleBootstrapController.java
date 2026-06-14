@@ -26,7 +26,7 @@ public class ModuleBootstrapController extends BaseController implements ModuleB
   public ResponseEntity<ModuleBootstrapResponse> postModuleBootstrap(String id, ModuleBootstrapRequest request) {
     var response = new ModuleBootstrapResponse();
     if (request.getType() == ModuleBootstrapRequest.TypeEnum.EGRESS) {
-      response.egress(service.getEgressBootstraps(id, request.getTenants()));
+      response.egress(service.getEgressBootstrap(id, request.getApplicationIds()));
       response.setIngress(null);
     } else {
       response.ingress(service.getIngressBootstrap(id));

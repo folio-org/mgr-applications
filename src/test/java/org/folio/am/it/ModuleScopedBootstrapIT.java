@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
-import java.util.Map;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.dto.ModuleBootstrapRequest;
@@ -36,8 +35,6 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 class ModuleScopedBootstrapIT extends BaseIntegrationTest {
 
-  private static final String TENANT = "test-tenant";
-
   @Autowired KeycloakProperties keycloakProperties;
 
   @Test
@@ -62,21 +59,21 @@ class ModuleScopedBootstrapIT extends BaseIntegrationTest {
   }
 
   @Test
-  void postModuleBootstrap_egress_returnsTenantScopedProviders() throws Exception {
+  void postModuleBootstrap_egress_returnsScopedProviders() throws Exception {
     postProviderAndConsumerApps();
 
     var request = new ModuleBootstrapRequest()
       .type(ModuleBootstrapRequest.TypeEnum.EGRESS)
-      .tenants(Map.of(TENANT, List.of("consumer-app-1.0.0", "provider-app-1.0.0")));
+      .applicationIds(List.of("consumer-app-1.0.0", "provider-app-1.0.0"));
 
     mockMvc.perform(post("/modules/{id}/bootstrap", "mod-consumer-1.0.0")
         .header(TOKEN, generateAccessToken(keycloakProperties))
         .contentType(APPLICATION_JSON)
         .content(asJsonString(request)))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.egress." + TENANT + ".found").value(true))
-      .andExpect(jsonPath("$.egress." + TENANT + ".bootstrap.module.moduleId").value("mod-consumer-1.0.0"))
-      .andExpect(jsonPath("$.egress." + TENANT + ".bootstrap.requiredModules[0].moduleId").value("mod-provider-1.0.0"))
+      .andExpect(jsonPath("$.egress.found").value(true))
+      .andExpect(jsonPath("$.egress.bootstrap.module.moduleId").value("mod-consumer-1.0.0"))
+      .andExpect(jsonPath("$.egress.bootstrap.requiredModules[0].moduleId").value("mod-provider-1.0.0"))
       .andExpect(jsonPath("$.ingress").doesNotExist());
   }
 
@@ -86,15 +83,15 @@ class ModuleScopedBootstrapIT extends BaseIntegrationTest {
 
     var request = new ModuleBootstrapRequest()
       .type(ModuleBootstrapRequest.TypeEnum.EGRESS)
-      .tenants(Map.of(TENANT, List.of("provider-app-1.0.0")));
+      .applicationIds(List.of("provider-app-1.0.0"));
 
     mockMvc.perform(post("/modules/{id}/bootstrap", "mod-consumer-1.0.0")
         .header(TOKEN, generateAccessToken(keycloakProperties))
         .contentType(APPLICATION_JSON)
         .content(asJsonString(request)))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.egress." + TENANT + ".found").value(false))
-      .andExpect(jsonPath("$.egress." + TENANT + ".bootstrap").doesNotExist());
+      .andExpect(jsonPath("$.egress.found").value(false))
+      .andExpect(jsonPath("$.egress.bootstrap").doesNotExist());
   }
 
   private void postProviderAndConsumerApps() throws Exception {
@@ -140,16 +137,16 @@ class ModuleScopedBootstrapIT extends BaseIntegrationTest {
 
     var request = new ModuleBootstrapRequest()
       .type(ModuleBootstrapRequest.TypeEnum.EGRESS)
-      .tenants(Map.of(TENANT, List.of("consumer-app-1.0.0", "provider-app-1.0.0")));
+      .applicationIds(List.of("consumer-app-1.0.0", "provider-app-1.0.0"));
 
     mockMvc.perform(post("/modules/{id}/bootstrap", "mod-consumer-1.0.0")
         .header(TOKEN, generateAccessToken(keycloakProperties))
         .contentType(APPLICATION_JSON)
         .content(asJsonString(request)))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.egress." + TENANT + ".found").value(true))
-      .andExpect(jsonPath("$.egress." + TENANT + ".bootstrap.requiredModules[0].moduleId").value("mod-provider-1.0.0"))
-      .andExpect(jsonPath("$.egress." + TENANT + ".bootstrap.requiredModules[0].location")
+      .andExpect(jsonPath("$.egress.found").value(true))
+      .andExpect(jsonPath("$.egress.bootstrap.requiredModules[0].moduleId").value("mod-provider-1.0.0"))
+      .andExpect(jsonPath("$.egress.bootstrap.requiredModules[0].location")
         .value("http://mod-provider-1:8081"));
   }
 
