@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Request for module bootstrap. type=ingress returns the module's own routes (tenant-independent). type=egress returns tenant-scoped egress bootstrap restricted to each tenant's entitled applications.",
+  "properties": {
+    "type": {
+      "description": "Bootstrap type",
+      "type": "string",
+      "enum": ["ingress", "egress"]
+    },
+    "tenants": {
+      "description": "For type=egress only: map of tenant name to that tenant's entitled application IDs",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  },
+  "required": ["type"]
+}

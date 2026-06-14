@@ -250,6 +250,32 @@ paths:
         '500':
           $ref: '#/components/responses/internal-server-error'
 
+  /modules/{id}/bootstrap:
+    post:
+      operationId: postModuleBootstrap
+      description: Retrieve ingress (tenant-independent) or egress (tenant-scoped) bootstrap information for a module
+      tags:
+        - module-bootstrap
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/moduleBootstrapRequest'
+      responses:
+        '200':
+          description: Module bootstrap info (ingress single object, or egress tenant-keyed map)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moduleBootstrapResponse'
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
   /modules/discovery:
     get:
       operationId: searchModuleDiscovery
@@ -402,6 +428,12 @@ components:
       $ref: schemas/module/moduleDiscoveries.json
     moduleBootstrap:
       $ref: schemas/module/bootstrap/moduleBootstrap.json
+    moduleBootstrapRequest:
+      $ref: schemas/module/bootstrap/moduleBootstrapRequest.json
+    moduleBootstrapResponse:
+      $ref: schemas/module/bootstrap/moduleBootstrapResponse.json
+    egressBootstrapResult:
+      $ref: schemas/module/bootstrap/egressBootstrapResult.json
     errorResponse:
       $ref: schemas/common/errors.json
     deploymentDescriptor:

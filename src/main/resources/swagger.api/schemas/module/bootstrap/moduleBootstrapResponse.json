@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Module bootstrap response. ingress is populated for type=ingress; egress (tenant-keyed) for type=egress.",
+  "properties": {
+    "ingress": {
+      "description": "Present for type=ingress: the module's own static bootstrap (no requiredModules)",
+      "$ref": "moduleBootstrap.json"
+    },
+    "egress": {
+      "description": "Present for type=egress: map of tenant name to egress bootstrap result",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "egressBootstrapResult.json"
+      }
+    }
+  }
+}
