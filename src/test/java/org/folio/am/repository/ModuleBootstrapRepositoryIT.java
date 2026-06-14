@@ -67,6 +67,38 @@ class ModuleBootstrapRepositoryIT extends BaseRepositoryTest {
       .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL));
   }
 
+  @Test
+  void findAllRequiredByModuleIdInApplications_returnsOnlyInScopeModules() {
+    var result = repository.findAllRequiredByModuleIdInApplications(MODULE_FOO_ID, java.util.List.of(APP_1_0_0_ID));
+
+    assertThat(result)
+      .hasSize(1)
+      .anyMatch(matchView(MODULE_FOO_ID, APP_1_0_0_ID, MODULE_FOO_DISCOVERY_URL));
+  }
+
+  @Test
+  void findAllRequiredByModuleIdInApplications_returnsAllWhenAllAppsInScope() {
+    var result = repository.findAllRequiredByModuleIdInApplications(
+      MODULE_FOO_ID, java.util.List.of(APP_1_0_0_ID, APP_2_0_0_ID));
+
+    assertThat(result)
+      .hasSize(3)
+      .anyMatch(matchView(MODULE_FOO_ID, APP_1_0_0_ID, MODULE_FOO_DISCOVERY_URL))
+      .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL))
+      .anyMatch(matchView(MODULE_BAZ_ID, APP_2_0_0_ID, MODULE_BAZ_DISCOVERY_URL));
+  }
+
+  @Test
+  void findAllRequiredByModuleIdInApplications_excludesRequestedModuleWhenOutOfScope() {
+    var result = repository.findAllRequiredByModuleIdInApplications(MODULE_FOO_ID, java.util.List.of(APP_2_0_0_ID));
+
+    assertThat(result)
+      .hasSize(2)
+      .noneMatch(view -> view.getId().equals(MODULE_FOO_ID))
+      .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL))
+      .anyMatch(matchView(MODULE_BAZ_ID, APP_2_0_0_ID, MODULE_BAZ_DISCOVERY_URL));
+  }
+
   private Predicate<ModuleBootstrapView> matchView(String moduleId, String appId, String location) {
     return view ->
       view.getId().equals(moduleId)
