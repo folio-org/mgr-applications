@@ -6,12 +6,15 @@ import static org.folio.common.utils.CollectionUtils.toStream;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.folio.am.domain.dto.EgressBootstrapResult;
 import org.folio.am.domain.dto.ModuleBootstrap;
 import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
 import org.folio.am.domain.entity.ModuleBootstrapView;
@@ -42,18 +45,50 @@ public class ModuleBootstrapService {
   @Transactional(readOnly = true)
   public ModuleBootstrap getById(String moduleId) {
     var views = repository.findAllRequiredByModuleId(moduleId);
-
     var moduleView = removeModuleViewById(moduleId, views);
+    return buildBootstrap(moduleView, views);
+  }
+
+  private ModuleBootstrap buildBootstrap(ModuleBootstrapView moduleView, List<ModuleBootstrapView> views) {
     var module = mapper.convert(moduleView);
-
     var requiredInterfaces = getRequiredOptionalInterfaces(moduleView);
-    var requiredModules = toModuleDiscoveries(requiredInterfaces, views);
-
-    requiredModules = deduplicateRequiredModules(requiredModules);
-
+    var requiredModules = deduplicateRequiredModules(toModuleDiscoveries(requiredInterfaces, views));
     return new ModuleBootstrap()
       .module(module)
       .requiredModules(requiredModules);
+  }
+
+  @Transactional(readOnly = true)
+  public ModuleBootstrap getIngressBootstrap(String moduleId) {
+    var view = repository.findById(moduleId)
+      .orElseThrow(() -> new EntityNotFoundException("Module not found by id: " + moduleId));
+    return new ModuleBootstrap()
+      .module(mapper.convert(view))
+      .requiredModules(List.of());
+  }
+
+  @Transactional(readOnly = true)
+  public Map<String, EgressBootstrapResult> getEgressBootstraps(String moduleId,
+    Map<String, List<String>> tenantApplications) {
+    var results = new LinkedHashMap<String, EgressBootstrapResult>();
+    if (tenantApplications != null) {
+      tenantApplications.forEach((tenant, applicationIds) ->
+        results.put(tenant, getScopedEgressBootstrap(moduleId, applicationIds)));
+    }
+    return results;
+  }
+
+  private EgressBootstrapResult getScopedEgressBootstrap(String moduleId, List<String> applicationIds) {
+    if (applicationIds == null || applicationIds.isEmpty()) {
+      return new EgressBootstrapResult().found(false);
+    }
+    var views = repository.findAllRequiredByModuleIdInApplications(moduleId, applicationIds);
+    var moduleView = views.stream().filter(view -> moduleId.equals(view.getId())).findFirst().orElse(null);
+    if (moduleView == null) {
+      return new EgressBootstrapResult().found(false);
+    }
+    views.remove(moduleView);
+    return new EgressBootstrapResult().found(true).bootstrap(buildBootstrap(moduleView, views));
   }
 
   private List<ModuleBootstrapDiscovery> deduplicateRequiredModules(List<ModuleBootstrapDiscovery> requiredModules) {
