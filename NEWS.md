@@ -1,6 +1,8 @@
 ## Version `v4.1.0` (IN PROGRESS)
 * Allow interface to be both provided and require / optional in the same module descriptor (MGRAPPS-99)
 * Upgrade dependencies for Kafka 4.2 compatibility in mgr-applications (MGRAPPS-110)
+* Add `POST /modules/{id}/bootstrap` returning ingress or application-scoped egress bootstrap (EUREKA-899)
+* Cache module bootstrap resolution per replica with discovery-event-driven invalidation; adds `BOOTSTRAP_CACHE_ENABLED`, `BOOTSTRAP_CACHE_MAX_SIZE`, `BOOTSTRAP_CACHE_TTL`, `KAFKA_BOOTSTRAP_CACHE_GROUP_ID`, and `KAFKA_DISCOVERY_TOPIC` settings (EUREKA-899)
 
 ---
 
