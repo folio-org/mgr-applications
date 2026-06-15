@@ -1,6 +1,7 @@
 package org.folio.am.repository;
 
 import java.util.List;
+import org.folio.am.domain.entity.ModuleApplicationId;
 import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -37,4 +38,19 @@ public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrap
     + "and view.applicationId IN :applicationIds")
   List<ModuleBootstrapView> findAllRequiredByModuleIdInApplications(@Param("moduleId") String moduleId,
     @Param("applicationIds") List<String> applicationIds);
+
+  /**
+   * Returns one (moduleId, applicationId) row per (module, application) pair for the module and all
+   * its required-interface providers — same selection as {@link #findAllRequiredByModuleId(String)},
+   * but WITHOUT the entity {@code DISTINCT} collapse, so shared modules expose their full app-set.
+   *
+   * @param moduleId the module identifier
+   * @return list of (id, applicationId) projections
+   */
+  @Query(value = "SELECT view.id AS id, view.applicationId AS applicationId FROM ModuleBootstrapView view "
+    + "WHERE (view.id = :moduleId OR view.id IN "
+    + "(SELECT p.moduleId FROM InterfaceReferenceEntity p WHERE p.type = 'PROVIDES' AND "
+    + "p.id IN (SELECT r.id FROM InterfaceReferenceEntity r WHERE r.moduleId = :moduleId AND "
+    + "(r.type = 'REQUIRES' OR r.type = 'OPTIONAL')))) and (view.location is not null OR view.id = :moduleId)")
+  List<ModuleApplicationId> findApplicationIdsByModuleId(@Param("moduleId") String moduleId);
 }

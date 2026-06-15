@@ -5,6 +5,7 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TES
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 import java.util.function.Predicate;
+import org.folio.am.domain.entity.ModuleApplicationId;
 import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.folio.am.support.base.BaseRepositoryTest;
 import org.folio.test.types.IntegrationTest;
@@ -97,6 +98,21 @@ class ModuleBootstrapRepositoryIT extends BaseRepositoryTest {
       .noneMatch(view -> view.getId().equals(MODULE_FOO_ID))
       .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL))
       .anyMatch(matchView(MODULE_BAZ_ID, APP_2_0_0_ID, MODULE_BAZ_DISCOVERY_URL));
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-bootstrap-shared-module.sql", executionPhase = BEFORE_TEST_METHOD)
+  void findApplicationIdsByModuleId_returnsAllAppRows_forSharedModule() {
+    var rows = repository.findApplicationIdsByModuleId("mod-foo-1.0.0");
+
+    // mod-foo in app-a; mod-bar shared across app-a and app-b -> 3 (id, applicationId) rows total
+    assertThat(rows).hasSize(3);
+    assertThat(rows).filteredOn(r -> r.getId().equals("mod-bar-1.0.0"))
+      .extracting(ModuleApplicationId::getApplicationId)
+      .containsExactlyInAnyOrder("app-a-1.0.0", "app-b-1.0.0");
+    assertThat(rows).filteredOn(r -> r.getId().equals("mod-foo-1.0.0"))
+      .extracting(ModuleApplicationId::getApplicationId)
+      .containsExactly("app-a-1.0.0");
   }
 
   private Predicate<ModuleBootstrapView> matchView(String moduleId, String appId, String location) {
