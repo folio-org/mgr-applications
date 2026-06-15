@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.folio.am.domain.dto.EgressBootstrapResult;
@@ -115,7 +114,7 @@ public class ModuleBootstrapService {
     var descriptor = moduleView.getDescriptor();
     return Stream.concat(toStream(descriptor.getRequires()), toStream(descriptor.getOptional()))
       .map(InterfaceReference::getId)
-      .collect(Collectors.toList());
+      .toList();
   }
 
   private List<ModuleBootstrapDiscovery> toModuleDiscoveries(List<String> requiredInterfaces,
@@ -126,7 +125,7 @@ public class ModuleBootstrapService {
 
     removeNotRequiredInterfaces(requiredInterfaces, moduleViews);
 
-    return moduleViews.stream().map(mapper::convert).collect(Collectors.toList());
+    return moduleViews.stream().map(mapper::convert).toList();
   }
 
   private static void removeNotRequiredInterfaces(List<String> requiredInterfaces, List<ModuleBootstrapView> views) {
