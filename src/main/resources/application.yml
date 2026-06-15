@@ -135,6 +135,7 @@ application:
     enabled: ${BOOTSTRAP_CACHE_ENABLED:true}
     max-size: ${BOOTSTRAP_CACHE_MAX_SIZE:1000}
     ttl: ${BOOTSTRAP_CACHE_TTL:30m}
+    group-id-prefix: ${KAFKA_BOOTSTRAP_CACHE_GROUP_ID:${application.environment}-mgr-applications-bootstrap-cache}
 
 tenant:
   entitlement:

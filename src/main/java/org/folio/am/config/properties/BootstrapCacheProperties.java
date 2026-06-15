@@ -18,4 +18,11 @@ public class BootstrapCacheProperties {
    * mechanism — invalidation is event-driven.
    */
   private Duration ttl = Duration.ofMinutes(30);
+
+  /**
+   * Base name of the per-instance Kafka consumer group used for broadcast cache invalidation. A
+   * random UUID is appended so every replica forms its own group and receives every event. Override
+   * via {@code KAFKA_BOOTSTRAP_CACHE_GROUP_ID}; the default is environment-prefixed in config.
+   */
+  private String groupIdPrefix = "mgr-applications-bootstrap-cache";
 }

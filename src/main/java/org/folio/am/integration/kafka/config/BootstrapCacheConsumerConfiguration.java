@@ -1,6 +1,7 @@
 package org.folio.am.integration.kafka.config;
 
 import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
@@ -11,6 +12,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.folio.am.config.properties.BootstrapCacheProperties;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
 import org.folio.am.utils.ConditionalOnFarModeDisabled;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -21,6 +23,7 @@ import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
@@ -33,6 +36,7 @@ import org.springframework.util.backoff.FixedBackOff;
 public class BootstrapCacheConsumerConfiguration {
 
   private final KafkaProperties kafkaProperties;
+  private final BootstrapCacheProperties bootstrapCacheProperties;
 
   @Bean
   public ConcurrentKafkaListenerContainerFactory<String, DiscoveryEvent>
@@ -40,6 +44,9 @@ public class BootstrapCacheConsumerConfiguration {
     var factory = new ConcurrentKafkaListenerContainerFactory<String, DiscoveryEvent>();
     factory.setConsumerFactory(consumerFactory);
     factory.setCommonErrorHandler(errorHandler());
+    // Ephemeral broadcast consumer: never commit offsets (the listener never acks), so per-instance
+    // groups leave no lingering offset metadata in __consumer_offsets. Restarts resume from latest.
+    factory.getContainerProperties().setAckMode(AckMode.MANUAL);
     return factory;
   }
 
@@ -49,10 +56,13 @@ public class BootstrapCacheConsumerConfiguration {
     Map<String, Object> config = new HashMap<>(kafkaProperties.buildConsumerProperties());
     config.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
     config.put(VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
-    // Broadcast: a unique group per instance so EVERY replica receives EVERY event.
-    config.put(GROUP_ID_CONFIG, "mgr-applications-bootstrap-cache-" + UUID.randomUUID());
+    // Broadcast: a unique group per instance so EVERY replica receives EVERY event. The prefix is
+    // operator-overridable (KAFKA_BOOTSTRAP_CACHE_GROUP_ID) and environment-namespaced by default.
+    config.put(GROUP_ID_CONFIG, bootstrapCacheProperties.getGroupIdPrefix() + "-" + UUID.randomUUID());
     // A fresh replica starts cold, so consume only events from start-up onward.
     config.put(AUTO_OFFSET_RESET_CONFIG, "latest");
+    // Never persist offsets for these throwaway groups (see container ack-mode above).
+    config.put(ENABLE_AUTO_COMMIT_CONFIG, false);
     return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), deserializer);
   }
 
