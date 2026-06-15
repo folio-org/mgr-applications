@@ -30,7 +30,6 @@ class ModuleBootstrapDataProviderCacheTest {
   void getData_cachesByModuleId_andRefetchesAfterEvict() {
     when(repository.findAllRequiredByModuleId("mod-foo-1.0.0"))
       .thenReturn(List.of(moduleBootstrapView("mod-foo-1.0.0", "foo-int")));
-    when(repository.findApplicationIdsByModuleId("mod-foo-1.0.0")).thenReturn(List.of());
 
     provider.getData("mod-foo-1.0.0");
     provider.getData("mod-foo-1.0.0");

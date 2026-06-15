@@ -4,8 +4,6 @@ import static org.folio.am.utils.ModuleIdUtils.getNameAndVersion;
 import static org.folio.common.utils.CollectionUtils.toStream;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -37,8 +35,8 @@ public class ModuleBootstrapService {
     var data = dataProvider.getData(moduleId);
     var self = requireSelf(data, moduleId);
     return new ModuleBootstrap()
-      .module(toDiscovery(self, self.descriptor().getProvides(), null))
-      .requiredModules(requiredModules(self, data.providers(), null));
+      .module(toDiscovery(self, self.descriptor().getProvides()))
+      .requiredModules(requiredModules(self, data.providers()));
   }
 
   /**
@@ -48,7 +46,7 @@ public class ModuleBootstrapService {
     var data = dataProvider.getData(moduleId);
     var self = requireSelf(data, moduleId);
     return new ModuleBootstrap()
-      .module(toDiscovery(self, self.descriptor().getProvides(), null))
+      .module(toDiscovery(self, self.descriptor().getProvides()))
       .requiredModules(List.of());
   }
 
@@ -62,34 +60,32 @@ public class ModuleBootstrapService {
     var scope = Set.copyOf(applicationIds);
     var data = dataProvider.getData(moduleId);
     var self = data.self();
-    if (self == null || disjoint(self.applicationIds(), scope)) {
+    if (self == null || !scope.contains(self.applicationId())) {
       return new EgressBootstrapResult().found(false);
     }
     var providers = data.providers().stream()
-      .filter(p -> !disjoint(p.applicationIds(), scope))
+      .filter(p -> scope.contains(p.applicationId()))
       .toList();
     return new EgressBootstrapResult().found(true).bootstrap(new ModuleBootstrap()
-      .module(toDiscovery(self, self.descriptor().getProvides(), scope))
-      .requiredModules(requiredModules(self, providers, scope)));
+      .module(toDiscovery(self, self.descriptor().getProvides()))
+      .requiredModules(requiredModules(self, providers)));
   }
 
-  private List<ModuleBootstrapDiscovery> requiredModules(ResolvedModule self, List<ResolvedModule> providers,
-    Set<String> scope) {
+  private List<ModuleBootstrapDiscovery> requiredModules(ResolvedModule self, List<ResolvedModule> providers) {
     var requiredInterfaceIds = requiredInterfaceIds(self);
     if (requiredInterfaceIds.isEmpty()) {
       return List.of();
     }
     var discoveries = providers.stream()
-      .map(p -> toDiscovery(p, narrow(p, requiredInterfaceIds), scope))
+      .map(p -> toDiscovery(p, narrow(p, requiredInterfaceIds)))
       .collect(Collectors.toList());
     return deduplicate(discoveries);
   }
 
-  private ModuleBootstrapDiscovery toDiscovery(ResolvedModule module, List<InterfaceDescriptor> provides,
-    Set<String> scope) {
+  private ModuleBootstrapDiscovery toDiscovery(ResolvedModule module, List<InterfaceDescriptor> provides) {
     return new ModuleBootstrapDiscovery()
       .moduleId(module.id())
-      .applicationId(representativeApp(module, scope))
+      .applicationId(module.applicationId())
       .location(module.location())
       .systemUserRequired(module.systemUserRequired())
       .interfaces(toStream(provides).map(mapper::convert).collect(Collectors.toList()));
@@ -106,17 +102,6 @@ public class ModuleBootstrapService {
     return Stream.concat(toStream(descriptor.getRequires()), toStream(descriptor.getOptional()))
       .map(InterfaceReference::getId)
       .collect(Collectors.toSet());
-  }
-
-  private static String representativeApp(ResolvedModule module, Set<String> scope) {
-    return module.applicationIds().stream()
-      .filter(app -> scope == null || scope.contains(app))
-      .min(Comparator.naturalOrder())
-      .orElse(null);
-  }
-
-  private static boolean disjoint(Set<String> a, Set<String> b) {
-    return Collections.disjoint(a, b);
   }
 
   private static ResolvedModule requireSelf(ModuleBootstrapData data, String moduleId) {

@@ -22,7 +22,6 @@ public class ModuleBootstrapDataProvider {
   @Transactional(readOnly = true)
   public ModuleBootstrapData getData(String moduleId) {
     var rows = repository.findAllRequiredByModuleId(moduleId);
-    var appIdRows = repository.findApplicationIdsByModuleId(moduleId);
-    return ModuleBootstrapData.from(moduleId, rows, appIdRows);
+    return ModuleBootstrapData.from(moduleId, rows);
   }
 }

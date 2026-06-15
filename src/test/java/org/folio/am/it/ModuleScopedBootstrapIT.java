@@ -99,7 +99,7 @@ class ModuleScopedBootstrapIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-bootstrap-shared-provider.sql")
-  void postModuleBootstrap_egress_sharedProviderReachableViaSecondApp_found() throws Exception {
+  void postModuleBootstrap_egress_selectsProviderVersionInScope() throws Exception {
     var request = new ModuleBootstrapRequest()
       .type(ModuleBootstrapRequest.TypeEnum.EGRESS)
       .applicationIds(List.of("app-consumer-1.0.0", "app-prov-b-1.0.0"));
@@ -110,7 +110,7 @@ class ModuleScopedBootstrapIT extends BaseIntegrationTest {
         .content(asJsonString(request)))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.egress.found").value(true))
-      .andExpect(jsonPath("$.egress.bootstrap.requiredModules[0].moduleId").value("mod-provider-1.0.0"));
+      .andExpect(jsonPath("$.egress.bootstrap.requiredModules[0].moduleId").value("mod-provider-2.0.0"));
   }
 
   private void postProviderAndConsumerApps() throws Exception {

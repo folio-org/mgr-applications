@@ -1,14 +1,7 @@
 package org.folio.am.service;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toUnmodifiableSet;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.folio.am.domain.entity.ModuleApplicationId;
 import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.folio.common.domain.model.ModuleDescriptor;
 
@@ -20,19 +13,15 @@ import org.folio.common.domain.model.ModuleDescriptor;
 public record ModuleBootstrapData(ResolvedModule self, List<ResolvedModule> providers) {
 
   /**
-   * Builds the snapshot from the (distinct) entity rows (descriptors) and the (un-collapsed)
-   * (id, applicationId) projection rows (application sets).
+   * Builds the snapshot from the module-bootstrap view rows. Each module id belongs to exactly one
+   * application, so the view yields one row per module id and {@code applicationId} is read directly.
    */
-  public static ModuleBootstrapData from(String moduleId, List<ModuleBootstrapView> rows,
-    List<ModuleApplicationId> appIdRows) {
-    Map<String, Set<String>> appIdsById = appIdRows.stream().collect(groupingBy(
-      ModuleApplicationId::getId, mapping(ModuleApplicationId::getApplicationId, toUnmodifiableSet())));
-
+  public static ModuleBootstrapData from(String moduleId, List<ModuleBootstrapView> rows) {
     ResolvedModule self = null;
     var providers = new ArrayList<ResolvedModule>();
     for (var row : rows) {
       var resolved = new ResolvedModule(row.getId(), row.getLocation(), row.isSystemUserRequired(),
-        row.getDescriptor(), appIdsById.getOrDefault(row.getId(), Set.of()));
+        row.getDescriptor(), row.getApplicationId());
       if (moduleId.equals(row.getId())) {
         self = resolved;
       } else {
@@ -43,9 +32,8 @@ public record ModuleBootstrapData(ResolvedModule self, List<ResolvedModule> prov
   }
 
   /**
-   * A resolved module row group: module-level fields (identical across the module's applications)
-   * plus the full set of applications the module belongs to.
+   * A resolved module row: module-level fields plus the single application the module belongs to.
    */
   public record ResolvedModule(String id, String location, boolean systemUserRequired,
-                               ModuleDescriptor descriptor, Set<String> applicationIds) {}
+                               ModuleDescriptor descriptor, String applicationId) {}
 }

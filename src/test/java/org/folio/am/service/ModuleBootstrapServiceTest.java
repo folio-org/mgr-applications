@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.Set;
 import org.folio.am.mapper.ModuleBootstrapMapperImpl;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
@@ -39,8 +38,8 @@ class ModuleBootstrapServiceTest {
     service = new ModuleBootstrapService(dataProvider, new ModuleBootstrapMapperImpl());
   }
 
-  private static ResolvedModule resolved(String id, Set<String> apps, ModuleDescriptor descriptor) {
-    return new ResolvedModule(id, "http://" + id + ":8080", false, descriptor, apps);
+  private static ResolvedModule resolved(String id, String applicationId, ModuleDescriptor descriptor) {
+    return new ResolvedModule(id, "http://" + id + ":8080", false, descriptor, applicationId);
   }
 
   private static ModuleDescriptor consumerDescriptor() {
@@ -62,8 +61,8 @@ class ModuleBootstrapServiceTest {
 
   @Test
   void getById_returnsModuleAndRequiredProviders() {
-    var self = resolved(FOO, Set.of(APPLICATION_ID), consumerDescriptor());
-    var provider = resolved(BAR, Set.of(APPLICATION_ID), providerDescriptor());
+    var self = resolved(FOO, APPLICATION_ID, consumerDescriptor());
+    var provider = resolved(BAR, APPLICATION_ID, providerDescriptor());
     when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(provider)));
 
     var actual = service.getById(FOO);
@@ -83,7 +82,7 @@ class ModuleBootstrapServiceTest {
 
   @Test
   void getIngressBootstrap_returnsModuleOnly() {
-    var self = resolved(FOO, Set.of(APPLICATION_ID), providerDescriptor());
+    var self = resolved(FOO, APPLICATION_ID, providerDescriptor());
     when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of()));
 
     var actual = service.getIngressBootstrap(FOO);
@@ -99,22 +98,24 @@ class ModuleBootstrapServiceTest {
   }
 
   @Test
-  void getEgressBootstrap_sharedProviderInScopeViaSecondApp_isIncluded() {
-    var self = resolved(FOO, Set.of("app-a-1.0.0"), consumerDescriptor());
-    // shared provider belongs to BOTH apps; scope contains only the second
-    var provider = resolved(BAR, Set.of("app-a-1.0.0", "app-b-1.0.0"), providerDescriptor());
-    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(provider)));
+  void getEgressBootstrap_selectsInScopeProviderVersion_acrossApplications() {
+    // same provider NAME in two apps as two VERSIONS (distinct ids); only the app-b version is in scope
+    var self = resolved(FOO, "app-consumer-1.0.0", consumerDescriptor());
+    var providerInA = resolved(BAR, "app-a-1.0.0", providerDescriptor());
+    var providerInB = resolved(BAR_V2, "app-b-1.0.0", providerDescriptor());
+    when(dataProvider.getData(FOO))
+      .thenReturn(new ModuleBootstrapData(self, List.of(providerInA, providerInB)));
 
-    var actual = service.getEgressBootstrap(FOO, List.of("app-a-1.0.0"));
+    var actual = service.getEgressBootstrap(FOO, List.of("app-consumer-1.0.0", "app-b-1.0.0"));
 
     assertThat(actual.getFound()).isTrue();
     assertThat(actual.getBootstrap().getRequiredModules()).singleElement()
-      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR));
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR_V2));
   }
 
   @Test
   void getEgressBootstrap_selfOutsideScope_returnsNotFound() {
-    var self = resolved(FOO, Set.of("app-a-1.0.0"), consumerDescriptor());
+    var self = resolved(FOO, "app-a-1.0.0", consumerDescriptor());
     when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of()));
 
     var actual = service.getEgressBootstrap(FOO, List.of("app-b-1.0.0"));
@@ -123,9 +124,9 @@ class ModuleBootstrapServiceTest {
 
   @Test
   void getById_dedupesSameNameProviders_keepingHighestVersion() {
-    var self = resolved(FOO, Set.of(APPLICATION_ID), consumerDescriptor());
-    var providerV1 = resolved(BAR, Set.of(APPLICATION_ID), providerDescriptor());
-    var providerV2 = resolved(BAR_V2, Set.of(APPLICATION_ID), providerDescriptor());
+    var self = resolved(FOO, APPLICATION_ID, consumerDescriptor());
+    var providerV1 = resolved(BAR, APPLICATION_ID, providerDescriptor());
+    var providerV2 = resolved(BAR_V2, APPLICATION_ID, providerDescriptor());
     when(dataProvider.getData(FOO))
       .thenReturn(new ModuleBootstrapData(self, List.of(providerV1, providerV2)));
 
@@ -137,8 +138,8 @@ class ModuleBootstrapServiceTest {
 
   @Test
   void getById_narrowsProviderInterfacesToRequiredOnly() {
-    var self = resolved(FOO, Set.of(APPLICATION_ID), consumerDescriptor());
-    var provider = resolved(BAR, Set.of(APPLICATION_ID), providerWithExtraInterface());
+    var self = resolved(FOO, APPLICATION_ID, consumerDescriptor());
+    var provider = resolved(BAR, APPLICATION_ID, providerWithExtraInterface());
     when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(provider)));
 
     var actual = service.getById(FOO);
