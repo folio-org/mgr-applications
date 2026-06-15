@@ -78,7 +78,7 @@ public class ModuleBootstrapService {
     }
     var discoveries = providers.stream()
       .map(p -> toDiscovery(p, narrow(p, requiredInterfaceIds)))
-      .collect(Collectors.toList());
+      .toList();
     return deduplicate(discoveries);
   }
 
@@ -88,13 +88,13 @@ public class ModuleBootstrapService {
       .applicationId(module.applicationId())
       .location(module.location())
       .systemUserRequired(module.systemUserRequired())
-      .interfaces(toStream(provides).map(mapper::convert).collect(Collectors.toList()));
+      .interfaces(toStream(provides).map(mapper::convert).toList());
   }
 
   private static List<InterfaceDescriptor> narrow(ResolvedModule provider, Set<String> requiredInterfaceIds) {
     return toStream(provider.descriptor().getProvides())
       .filter(i -> requiredInterfaceIds.contains(i.getId()))
-      .collect(Collectors.toList());
+      .toList();
   }
 
   private static Set<String> requiredInterfaceIds(ResolvedModule self) {

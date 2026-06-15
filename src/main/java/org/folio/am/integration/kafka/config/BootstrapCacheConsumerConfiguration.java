@@ -67,10 +67,10 @@ public class BootstrapCacheConsumerConfiguration {
   }
 
   private DefaultErrorHandler errorHandler() {
-    var handler = new DefaultErrorHandler((record, ex) ->
-      log.warn("Failed to process discovery event [record: {}]", record, ex.getCause()));
+    var handler = new DefaultErrorHandler((consumerRecord, ex) ->
+      log.warn("Failed to process discovery event [record: {}]", consumerRecord, ex.getCause()));
     // best-effort: evict-all is idempotent, so no retry/backoff
-    handler.setBackOffFunction((record, ex) -> new FixedBackOff(0L, 0L));
+    handler.setBackOffFunction((consumerRecord, ex) -> new FixedBackOff(0L, 0L));
     handler.setLogLevel(KafkaException.Level.INFO);
     return handler;
   }
