@@ -5,6 +5,7 @@ import static org.folio.am.support.TestValues.moduleDiscovery;
 import static org.folio.test.TestUtils.asJsonString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
+import static org.springframework.test.context.jdbc.SqlMergeMode.MergeMode.MERGE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,12 +27,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlMergeMode;
 
 @IntegrationTest
 @EnableKeycloakSecurity
 @EnableKeycloakTlsMode
 @EnableKeycloakDataImport
 @TestPropertySource(properties = {"application.okapi.enabled=false", "application.kong.enabled=false"})
+@SqlMergeMode(MERGE)
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 class ModuleScopedBootstrapIT extends BaseIntegrationTest {
 
@@ -92,6 +95,22 @@ class ModuleScopedBootstrapIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.egress.found").value(false))
       .andExpect(jsonPath("$.egress.bootstrap").doesNotExist());
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-bootstrap-shared-provider.sql")
+  void postModuleBootstrap_egress_sharedProviderReachableViaSecondApp_found() throws Exception {
+    var request = new ModuleBootstrapRequest()
+      .type(ModuleBootstrapRequest.TypeEnum.EGRESS)
+      .applicationIds(List.of("app-consumer-1.0.0", "app-prov-b-1.0.0"));
+
+    mockMvc.perform(post("/modules/{id}/bootstrap", "mod-consumer-1.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON)
+        .content(asJsonString(request)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.egress.found").value(true))
+      .andExpect(jsonPath("$.egress.bootstrap.requiredModules[0].moduleId").value("mod-provider-1.0.0"));
   }
 
   private void postProviderAndConsumerApps() throws Exception {

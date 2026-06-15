@@ -1,26 +1,19 @@
 package org.folio.am.service;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.folio.am.support.TestConstants.MODULE_BAR_ID;
-import static org.folio.am.support.TestConstants.MODULE_BAR_INTERFACE_ID;
-import static org.folio.am.support.TestConstants.MODULE_FOO1_0_1_ID;
-import static org.folio.am.support.TestConstants.MODULE_FOO1_1_ID;
-import static org.folio.am.support.TestConstants.MODULE_FOO_ID;
-import static org.folio.am.support.TestConstants.MODULE_FOO_INTERFACE_ID;
-import static org.folio.am.support.TestValues.moduleBootstrap;
-import static org.folio.am.support.TestValues.moduleBootstrapDiscovery;
-import static org.folio.am.support.TestValues.moduleBootstrapView;
+import static org.folio.am.service.ModuleBootstrapData.ResolvedModule;
+import static org.folio.am.support.TestConstants.APPLICATION_ID;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.folio.am.mapper.ModuleBootstrapMapperImpl;
-import org.folio.am.repository.ModuleBootstrapRepository;
+import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
+import org.folio.common.domain.model.ModuleDescriptor;
+import org.folio.common.domain.model.RoutingEntry;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,72 +25,89 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ModuleBootstrapServiceTest {
 
-  @Mock private ModuleBootstrapRepository repository;
+  private static final String FOO = "test-module-foo-1.0.0";
+  private static final String BAR = "test-module-bar-1.0.0";
+  private static final String BAR_INT = "test-bar-interface";
 
+  @Mock private ModuleBootstrapDataProvider dataProvider;
   private ModuleBootstrapService service;
 
   @BeforeEach
   void setUp() {
-    service = new ModuleBootstrapService(repository, new ModuleBootstrapMapperImpl());
+    service = new ModuleBootstrapService(dataProvider, new ModuleBootstrapMapperImpl());
+  }
+
+  private static ResolvedModule resolved(String id, Set<String> apps, ModuleDescriptor descriptor) {
+    return new ResolvedModule(id, "http://" + id + ":8080", false, descriptor, apps);
+  }
+
+  private static ModuleDescriptor consumerDescriptor() {
+    return new ModuleDescriptor().requires(List.of(new InterfaceReference().id(BAR_INT)));
+  }
+
+  private static ModuleDescriptor providerDescriptor() {
+    return new ModuleDescriptor().provides(List.of(new InterfaceDescriptor().id(BAR_INT)
+      .interfaceType("multiple").addHandlersItem(new RoutingEntry().addMethodsItem("GET").path("/x"))));
   }
 
   @Test
-  void getById_positive() {
-    var expectedView = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
-    expectedView.getDescriptor().addRequiresItem(new InterfaceReference().id(MODULE_BAR_INTERFACE_ID));
+  void getById_returnsModuleAndRequiredProviders() {
+    var self = resolved(FOO, Set.of(APPLICATION_ID), consumerDescriptor());
+    var provider = resolved(BAR, Set.of(APPLICATION_ID), providerDescriptor());
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(provider)));
 
-    var expectedDependencyView = moduleBootstrapView(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID, "not-required-interface");
-    var expectedViews = new ArrayList<>(asList(expectedView, expectedDependencyView));
+    var actual = service.getById(FOO);
 
-    var expectedModuleDiscovery = moduleBootstrapDiscovery(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
-    var expectedDependencyDiscovery = moduleBootstrapDiscovery(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID);
-
-    when(repository.findAllRequiredByModuleId(MODULE_FOO_ID)).thenReturn(expectedViews);
-
-    var actual = service.getById(MODULE_FOO_ID);
-    assertThat(actual).isEqualTo(moduleBootstrap(expectedModuleDiscovery, expectedDependencyDiscovery));
+    assertThat(actual.getModule().getModuleId()).isEqualTo(FOO);
+    assertThat(actual.getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR));
   }
 
   @Test
-  void getById_positive_emptyDependencies() {
-    var expectedView = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
-
-    var expectedDependencyView = moduleBootstrapView(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID, "not-required-interface");
-    var expectedViews = new ArrayList<>(asList(expectedView, expectedDependencyView));
-
-    var expectedModuleDiscovery = moduleBootstrapDiscovery(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
-
-    when(repository.findAllRequiredByModuleId(MODULE_FOO_ID)).thenReturn(expectedViews);
-
-    var actual = service.getById(MODULE_FOO_ID);
-    assertThat(actual).isEqualTo(moduleBootstrap(expectedModuleDiscovery));
+  void getById_throws_whenModuleAbsent() {
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(null, List.of()));
+    assertThatThrownBy(() -> service.getById(FOO))
+      .isInstanceOf(EntityNotFoundException.class)
+      .hasMessage("Module not found by id: " + FOO);
   }
 
   @Test
-  void getById_positive_duplicates() {
-    var expectedView = moduleBootstrapView(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID);
-    expectedView.getDescriptor().addRequiresItem(new InterfaceReference().id(MODULE_FOO_ID));
-    expectedView.getDescriptor().addRequiresItem(new InterfaceReference().id(MODULE_FOO1_1_ID));
+  void getIngressBootstrap_returnsModuleOnly() {
+    var self = resolved(FOO, Set.of(APPLICATION_ID), providerDescriptor());
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of()));
 
-    var expectedDependencyView1 = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID, "not-required-interface");
-    var expectedDependencyView2 =
-      moduleBootstrapView(MODULE_FOO1_1_ID, MODULE_FOO_INTERFACE_ID, "not-required-interface");
-    var expectedDependencyView3 =
-      moduleBootstrapView(MODULE_FOO1_0_1_ID, MODULE_FOO_INTERFACE_ID, "not-required-interface");
+    var actual = service.getIngressBootstrap(FOO);
 
-    when(repository.findAllRequiredByModuleId(MODULE_BAR_ID)).thenReturn(new ArrayList<>(
-      List.of(expectedView, expectedDependencyView1, expectedDependencyView2, expectedDependencyView3)));
-
-    var actual = service.getById(MODULE_BAR_ID);
-    assertThat(actual.getRequiredModules()).hasSize(1);
-    assertThat(actual.getRequiredModules().get(0).getModuleId()).isEqualTo(MODULE_FOO1_1_ID);
+    assertThat(actual.getModule().getModuleId()).isEqualTo(FOO);
+    assertThat(actual.getRequiredModules()).isEmpty();
   }
 
   @Test
-  void getById_negative_notFound() {
-    when(repository.findAllRequiredByModuleId(MODULE_FOO_ID)).thenReturn(Collections.emptyList());
+  void getEgressBootstrap_emptyApplicationIds_returnsNotFound() {
+    var actual = service.getEgressBootstrap(FOO, List.of());
+    assertThat(actual.getFound()).isFalse();
+  }
 
-    assertThatThrownBy(() -> service.getById(MODULE_FOO_ID)).isInstanceOf(EntityNotFoundException.class)
-      .hasMessage("Module not found by id: " + MODULE_FOO_ID);
+  @Test
+  void getEgressBootstrap_sharedProviderInScopeViaSecondApp_isIncluded() {
+    var self = resolved(FOO, Set.of("app-a-1.0.0"), consumerDescriptor());
+    // shared provider belongs to BOTH apps; scope contains only the second
+    var provider = resolved(BAR, Set.of("app-a-1.0.0", "app-b-1.0.0"), providerDescriptor());
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(provider)));
+
+    var actual = service.getEgressBootstrap(FOO, List.of("app-a-1.0.0"));
+
+    assertThat(actual.getFound()).isTrue();
+    assertThat(actual.getBootstrap().getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR));
+  }
+
+  @Test
+  void getEgressBootstrap_selfOutsideScope_returnsNotFound() {
+    var self = resolved(FOO, Set.of("app-a-1.0.0"), consumerDescriptor());
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of()));
+
+    var actual = service.getEgressBootstrap(FOO, List.of("app-b-1.0.0"));
+    assertThat(actual.getFound()).isFalse();
   }
 }
