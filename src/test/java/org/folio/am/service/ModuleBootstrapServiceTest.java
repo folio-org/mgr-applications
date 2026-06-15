@@ -27,7 +27,9 @@ class ModuleBootstrapServiceTest {
 
   private static final String FOO = "test-module-foo-1.0.0";
   private static final String BAR = "test-module-bar-1.0.0";
+  private static final String BAR_V2 = "test-module-bar-2.0.0";
   private static final String BAR_INT = "test-bar-interface";
+  private static final String OTHER_INT = "test-other-interface";
 
   @Mock private ModuleBootstrapDataProvider dataProvider;
   private ModuleBootstrapService service;
@@ -48,6 +50,14 @@ class ModuleBootstrapServiceTest {
   private static ModuleDescriptor providerDescriptor() {
     return new ModuleDescriptor().provides(List.of(new InterfaceDescriptor().id(BAR_INT)
       .interfaceType("multiple").addHandlersItem(new RoutingEntry().addMethodsItem("GET").path("/x"))));
+  }
+
+  private static ModuleDescriptor providerWithExtraInterface() {
+    return new ModuleDescriptor().provides(List.of(
+      new InterfaceDescriptor().id(BAR_INT).interfaceType("multiple")
+        .addHandlersItem(new RoutingEntry().addMethodsItem("GET").path("/x")),
+      new InterfaceDescriptor().id(OTHER_INT).interfaceType("multiple")
+        .addHandlersItem(new RoutingEntry().addMethodsItem("GET").path("/y"))));
   }
 
   @Test
@@ -109,5 +119,31 @@ class ModuleBootstrapServiceTest {
 
     var actual = service.getEgressBootstrap(FOO, List.of("app-b-1.0.0"));
     assertThat(actual.getFound()).isFalse();
+  }
+
+  @Test
+  void getById_dedupesSameNameProviders_keepingHighestVersion() {
+    var self = resolved(FOO, Set.of(APPLICATION_ID), consumerDescriptor());
+    var providerV1 = resolved(BAR, Set.of(APPLICATION_ID), providerDescriptor());
+    var providerV2 = resolved(BAR_V2, Set.of(APPLICATION_ID), providerDescriptor());
+    when(dataProvider.getData(FOO))
+      .thenReturn(new ModuleBootstrapData(self, List.of(providerV1, providerV2)));
+
+    var actual = service.getById(FOO);
+
+    assertThat(actual.getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR_V2));
+  }
+
+  @Test
+  void getById_narrowsProviderInterfacesToRequiredOnly() {
+    var self = resolved(FOO, Set.of(APPLICATION_ID), consumerDescriptor());
+    var provider = resolved(BAR, Set.of(APPLICATION_ID), providerWithExtraInterface());
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(provider)));
+
+    var actual = service.getById(FOO);
+
+    assertThat(actual.getRequiredModules()).singleElement().satisfies(m ->
+      assertThat(m.getInterfaces()).extracting("id").containsExactly(BAR_INT));
   }
 }
