@@ -20,13 +20,6 @@ import org.folio.common.domain.model.ModuleDescriptor;
 public record ModuleBootstrapData(ResolvedModule self, List<ResolvedModule> providers) {
 
   /**
-   * A resolved module row group: module-level fields (identical across the module's applications)
-   * plus the full set of applications the module belongs to.
-   */
-  public record ResolvedModule(String id, String location, boolean systemUserRequired,
-                               ModuleDescriptor descriptor, Set<String> applicationIds) {}
-
-  /**
    * Builds the snapshot from the (distinct) entity rows (descriptors) and the (un-collapsed)
    * (id, applicationId) projection rows (application sets).
    */
@@ -48,4 +41,11 @@ public record ModuleBootstrapData(ResolvedModule self, List<ResolvedModule> prov
     }
     return new ModuleBootstrapData(self, List.copyOf(providers));
   }
+
+  /**
+   * A resolved module row group: module-level fields (identical across the module's applications)
+   * plus the full set of applications the module belongs to.
+   */
+  public record ResolvedModule(String id, String location, boolean systemUserRequired,
+                               ModuleDescriptor descriptor, Set<String> applicationIds) {}
 }
