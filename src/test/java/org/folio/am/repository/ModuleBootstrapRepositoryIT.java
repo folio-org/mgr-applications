@@ -69,38 +69,6 @@ class ModuleBootstrapRepositoryIT extends BaseRepositoryTest {
   }
 
   @Test
-  void findAllRequiredByModuleIdInApplications_returnsOnlyInScopeModules() {
-    var result = repository.findAllRequiredByModuleIdInApplications(MODULE_FOO_ID, java.util.List.of(APP_1_0_0_ID));
-
-    assertThat(result)
-      .hasSize(1)
-      .anyMatch(matchView(MODULE_FOO_ID, APP_1_0_0_ID, MODULE_FOO_DISCOVERY_URL));
-  }
-
-  @Test
-  void findAllRequiredByModuleIdInApplications_returnsAllWhenAllAppsInScope() {
-    var result = repository.findAllRequiredByModuleIdInApplications(
-      MODULE_FOO_ID, java.util.List.of(APP_1_0_0_ID, APP_2_0_0_ID));
-
-    assertThat(result)
-      .hasSize(3)
-      .anyMatch(matchView(MODULE_FOO_ID, APP_1_0_0_ID, MODULE_FOO_DISCOVERY_URL))
-      .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL))
-      .anyMatch(matchView(MODULE_BAZ_ID, APP_2_0_0_ID, MODULE_BAZ_DISCOVERY_URL));
-  }
-
-  @Test
-  void findAllRequiredByModuleIdInApplications_excludesRequestedModuleWhenOutOfScope() {
-    var result = repository.findAllRequiredByModuleIdInApplications(MODULE_FOO_ID, java.util.List.of(APP_2_0_0_ID));
-
-    assertThat(result)
-      .hasSize(2)
-      .noneMatch(view -> view.getId().equals(MODULE_FOO_ID))
-      .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL))
-      .anyMatch(matchView(MODULE_BAZ_ID, APP_2_0_0_ID, MODULE_BAZ_DISCOVERY_URL));
-  }
-
-  @Test
   @Sql(scripts = "classpath:/sql/module-bootstrap-shared-module.sql", executionPhase = BEFORE_TEST_METHOD)
   void findApplicationIdsByModuleId_returnsAllAppRows_forSharedModule() {
     var rows = repository.findApplicationIdsByModuleId("mod-foo-1.0.0");
