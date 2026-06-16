@@ -109,6 +109,7 @@ class ModuleBootstrapServiceTest {
     var actual = service.getEgressBootstrap(FOO, List.of("app-consumer-1.0.0", "app-b-1.0.0"));
 
     assertThat(actual.getFound()).isTrue();
+    assertThat(actual.getBootstrap()).isNotNull();
     assertThat(actual.getBootstrap().getRequiredModules()).singleElement()
       .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR_V2));
   }
@@ -120,6 +121,25 @@ class ModuleBootstrapServiceTest {
 
     var actual = service.getEgressBootstrap(FOO, List.of("app-b-1.0.0"));
     assertThat(actual.getFound()).isFalse();
+  }
+
+  @Test
+  void getEgressBootstrap_nullApplicationIds_returnsNotFound() {
+    var actual = service.getEgressBootstrap(FOO, null);
+    assertThat(actual.getFound()).isFalse();
+  }
+
+  @Test
+  void getEgressBootstrap_selfRequiresNoInterfaces_returnsFoundWithEmptyRequiredModules() {
+    var self = resolved(FOO, "app-consumer-1.0.0", providerDescriptor()); // provides only, requires nothing
+    var provider = resolved(BAR, "app-consumer-1.0.0", providerDescriptor());
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(provider)));
+
+    var actual = service.getEgressBootstrap(FOO, List.of("app-consumer-1.0.0"));
+
+    assertThat(actual.getFound()).isTrue();
+    assertThat(actual.getBootstrap()).isNotNull();
+    assertThat(actual.getBootstrap().getRequiredModules()).isEmpty();
   }
 
   @Test
