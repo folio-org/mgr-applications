@@ -28,29 +28,29 @@ public class BootstrapCacheInProcessInvalidator implements ApplicationDiscoveryL
 
   @Override
   public void onDiscoveryCreate(ModuleDiscovery moduleDiscovery, ModuleType type, String token) {
-    evictAfterCommit();
+    evictAfterCommit(moduleDiscovery.getId());
   }
 
   @Override
   public void onDiscoveryUpdate(ModuleDiscovery moduleDiscovery, ModuleType type, String token) {
-    evictAfterCommit();
+    evictAfterCommit(moduleDiscovery.getId());
   }
 
   @Override
   public void onDiscoveryDelete(String serviceId, String instanceId, ModuleType type, String token) {
-    evictAfterCommit();
+    evictAfterCommit(serviceId);
   }
 
-  private void evictAfterCommit() {
+  private void evictAfterCommit(String moduleId) {
     if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-      evictor.evictAll();
+      evictor.evictForModule(moduleId);
       return;
     }
     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
       @Override
       public void afterCommit() {
-        log.debug("Invalidating module-bootstrap cache after discovery change commit");
-        evictor.evictAll();
+        log.debug("Invalidating module-bootstrap cache after discovery change commit [moduleId={}]", moduleId);
+        evictor.evictForModule(moduleId);
       }
     });
   }

@@ -59,7 +59,9 @@ public class BootstrapCacheConsumerConfiguration {
     // Broadcast: a unique group per instance so EVERY replica receives EVERY event. The prefix is
     // operator-overridable (KAFKA_BOOTSTRAP_CACHE_GROUP_ID) and environment-namespaced by default.
     config.put(GROUP_ID_CONFIG, bootstrapCacheProperties.getGroupIdPrefix() + "-" + UUID.randomUUID());
-    // A fresh replica starts cold, so consume only events from start-up onward.
+    // A fresh replica starts cold, so consume only events from start-up onward. A discovery change in
+    // the brief window between start-up and first partition assignment may be missed on this replica;
+    // the writing replica still evicts in-process, and the TTL backstop bounds any residual staleness.
     config.put(AUTO_OFFSET_RESET_CONFIG, "latest");
     // Never persist offsets for these throwaway groups (see container ack-mode above).
     config.put(ENABLE_AUTO_COMMIT_CONFIG, false);
@@ -69,7 +71,7 @@ public class BootstrapCacheConsumerConfiguration {
   private DefaultErrorHandler errorHandler() {
     var handler = new DefaultErrorHandler((consumerRecord, ex) ->
       log.warn("Failed to process discovery event [record: {}]", consumerRecord, ex.getCause()));
-    // best-effort: evict-all is idempotent, so no retry/backoff
+    // best-effort: eviction is idempotent, so no retry/backoff
     handler.setBackOffFunction((consumerRecord, ex) -> new FixedBackOff(0L, 0L));
     handler.setLogLevel(KafkaException.Level.INFO);
     return handler;

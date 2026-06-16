@@ -10,9 +10,9 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Consumes discovery events from {@code {ENV}.discovery} (per-instance group, broadcast) and
- * full-flushes the module-bootstrap cache on this replica. Invalidation is idempotent, so outbox
- * replay / duplicate delivery is harmless.
+ * Consumes discovery events from {@code {ENV}.discovery} (per-instance group, broadcast) and evicts
+ * the affected module-bootstrap cache snapshots on this replica (the changed module plus its provider
+ * fan-out). Invalidation is idempotent, so outbox replay / duplicate delivery is harmless.
  */
 @Log4j2
 @Component
@@ -28,8 +28,8 @@ public class BootstrapCacheInvalidationListener {
     containerFactory = "bootstrapCacheKafkaListenerContainerFactory",
     topics = "${spring.kafka.topics.discovery}")
   public void onDiscoveryEvent(DiscoveryEvent event) {
-    log.debug("Invalidating module-bootstrap cache on discovery event: moduleId = {}",
-      event == null ? null : event.getModuleId());
-    evictor.evictAll();
+    var moduleId = event == null ? null : event.getModuleId();
+    log.debug("Invalidating module-bootstrap cache on discovery event: moduleId = {}", moduleId);
+    evictor.evictForModule(moduleId);
   }
 }

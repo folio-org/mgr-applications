@@ -36,18 +36,32 @@ class BootstrapCacheInProcessInvalidatorTest {
     invalidator.onDiscoveryCreate(new ModuleDiscovery().id("mod-foo-1.0.0"), ModuleType.BACKEND, "tok");
 
     // not evicted yet (still "in transaction")
-    verify(evictor, never()).evictAll();
+    verify(evictor, never()).evictForModule("mod-foo-1.0.0");
 
     // simulate commit
     for (TransactionSynchronization sync : TransactionSynchronizationManager.getSynchronizations()) {
       sync.afterCommit();
     }
-    verify(evictor).evictAll();
+    verify(evictor).evictForModule("mod-foo-1.0.0");
+  }
+
+  @Test
+  void onDiscoveryUpdate_evictsAfterCommit_whenTransactionActive() {
+    TransactionSynchronizationManager.initSynchronization();
+
+    invalidator.onDiscoveryUpdate(new ModuleDiscovery().id("mod-foo-1.0.0"), ModuleType.BACKEND, "tok");
+
+    verify(evictor, never()).evictForModule("mod-foo-1.0.0");
+
+    for (TransactionSynchronization sync : TransactionSynchronizationManager.getSynchronizations()) {
+      sync.afterCommit();
+    }
+    verify(evictor).evictForModule("mod-foo-1.0.0");
   }
 
   @Test
   void onDiscoveryDelete_evictsImmediately_whenNoTransaction() {
     invalidator.onDiscoveryDelete("mod-foo-1.0.0", "mod-foo-1.0.0", ModuleType.BACKEND, "tok");
-    verify(evictor).evictAll();
+    verify(evictor).evictForModule("mod-foo-1.0.0");
   }
 }

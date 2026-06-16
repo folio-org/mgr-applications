@@ -21,4 +21,18 @@ public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrap
     + "p.id IN (SELECT r.id FROM InterfaceReferenceEntity r WHERE r.moduleId = :moduleId AND "
     + "(r.type = 'REQUIRES' OR r.type = 'OPTIONAL')))) and (view.location is not null OR view.id = :moduleId)")
   List<ModuleBootstrapView> findAllRequiredByModuleId(@Param("moduleId") String moduleId);
+
+  /**
+   * Returns the ids of all modules whose cached bootstrap snapshot can change when the discovery of
+   * {@code moduleId} changes — i.e. modules that require/optionally-use an interface provided by
+   * {@code moduleId} (the reverse of {@link #findAllRequiredByModuleId}). Used to scope cache
+   * invalidation to the affected fan-out instead of flushing the whole cache.
+   *
+   * @param moduleId the module whose discovery changed
+   * @return distinct dependent module ids (excluding {@code moduleId} itself)
+   */
+  @Query(value = "SELECT DISTINCT r.moduleId FROM InterfaceReferenceEntity r WHERE "
+    + "(r.type = 'REQUIRES' OR r.type = 'OPTIONAL') AND "
+    + "r.id IN (SELECT p.id FROM InterfaceReferenceEntity p WHERE p.moduleId = :moduleId AND p.type = 'PROVIDES')")
+  List<String> findAllDependentModuleIds(@Param("moduleId") String moduleId);
 }

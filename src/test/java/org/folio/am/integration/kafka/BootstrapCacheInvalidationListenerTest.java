@@ -19,8 +19,14 @@ class BootstrapCacheInvalidationListenerTest {
   @InjectMocks private BootstrapCacheInvalidationListener listener;
 
   @Test
-  void onDiscoveryEvent_evictsAll() {
-    listener.onDiscoveryEvent(new DiscoveryEvent("mod-x-1.0.0")); // @AllArgsConstructor: single String arg
-    verify(evictor).evictAll();
+  void onDiscoveryEvent_evictsForChangedModule() {
+    listener.onDiscoveryEvent(new DiscoveryEvent("mod-x-1.0.0"));
+    verify(evictor).evictForModule("mod-x-1.0.0");
+  }
+
+  @Test
+  void onDiscoveryEvent_nullEvent_delegatesNullToEvictor() {
+    listener.onDiscoveryEvent(null);
+    verify(evictor).evictForModule(null);
   }
 }
