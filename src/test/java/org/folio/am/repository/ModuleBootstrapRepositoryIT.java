@@ -105,6 +105,23 @@ class ModuleBootstrapRepositoryIT extends BaseRepositoryTest {
       .anyMatch(matchView(MODULE_FOO_ID, APP_1_0_0_ID, MODULE_FOO_DISCOVERY_URL));
   }
 
+  @Test
+  void findAllRequiredByModuleId_returnsProviderOnceWhenItProvidesMultipleRequiredInterfaces() {
+    // test-module-bar provides both test-bar-interface and test-bar-interface-2, and test-module-foo requires both;
+    // the provider must appear once (the IN subquery is a semi-join), not be fanned out now that DISTINCT is gone.
+    var result = repository.findAllRequiredByModuleId(MODULE_FOO_ID);
+
+    assertThat(result).hasSize(3);
+    assertThat(result).filteredOn(view -> view.getId().equals(MODULE_BAR_ID)).hasSize(1);
+    assertNoDuplicateRows(result);
+  }
+
+  private static void assertNoDuplicateRows(List<ModuleBootstrapView> views) {
+    assertThat(views)
+      .extracting(view -> view.getId() + "@" + view.getApplicationId())
+      .doesNotHaveDuplicates();
+  }
+
   private Predicate<ModuleBootstrapView> matchView(String moduleId, String appId, String location) {
     return view ->
       view.getId().equals(moduleId)

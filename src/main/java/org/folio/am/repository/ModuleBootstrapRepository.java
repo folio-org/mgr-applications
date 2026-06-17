@@ -13,10 +13,14 @@ public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrap
   /**
    * Queries the module and all its dependencies by the given id.
    *
+   * <p>No {@code DISTINCT} is used: the {@code v_module_bootstrap} grain is one row per (module, application) —
+   * guaranteed by the {@code application_module} composite primary key — and the nested {@code IN} subqueries are
+   * semi-joins that cannot fan out rows, so duplicates are not possible.</p>
+   *
    * @param moduleId the module identifier
    * @return List of module views
    */
-  @Query(value = "SELECT DISTINCT view FROM ModuleBootstrapView view WHERE (view.id = :moduleId OR view.id IN "
+  @Query(value = "SELECT view FROM ModuleBootstrapView view WHERE (view.id = :moduleId OR view.id IN "
     + "(SELECT p.moduleId FROM InterfaceReferenceEntity p WHERE p.type = 'PROVIDES' AND "
     + "p.id IN (SELECT r.id FROM InterfaceReferenceEntity r WHERE r.moduleId = :moduleId AND "
     + "(r.type = 'REQUIRES' OR r.type = 'OPTIONAL')))) and (view.location is not null OR view.id = :moduleId)")
@@ -31,7 +35,7 @@ public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrap
    * @param applicationIds the application scope
    * @return List of in-scope module views
    */
-  @Query(value = "SELECT DISTINCT view FROM ModuleBootstrapView view WHERE view.applicationId IN :applicationIds "
+  @Query(value = "SELECT view FROM ModuleBootstrapView view WHERE view.applicationId IN :applicationIds "
     + "AND (view.id = :moduleId OR view.id IN "
     + "(SELECT p.moduleId FROM InterfaceReferenceEntity p WHERE p.type = 'PROVIDES' AND "
     + "p.id IN (SELECT r.id FROM InterfaceReferenceEntity r WHERE r.moduleId = :moduleId AND "
