@@ -22,7 +22,6 @@ import java.util.List;
 import org.folio.am.domain.dto.EgressBootstrap;
 import org.folio.am.domain.dto.EgressBootstrapRequest;
 import org.folio.am.domain.dto.ModuleBootstrap;
-import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
 import org.folio.am.service.ModuleBootstrapService;
 import org.folio.test.TestUtils;
 import org.folio.test.types.UnitTest;
