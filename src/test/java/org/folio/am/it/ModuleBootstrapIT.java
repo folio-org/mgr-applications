@@ -160,7 +160,8 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
         .moduleId("consumer-1.0.0")
         .applicationId("test-app-1.0.0")
         .systemUserRequired(false)
-        .interfaces(List.of(new ModuleBootstrapInterface().id("consumer-api").version("1.0").interfaceType("multiple"))))
+        .interfaces(List.of(
+          new ModuleBootstrapInterface().id("consumer-api").version("1.0").interfaceType("multiple"))))
       .requiredModules(List.of());
 
     mockMvc.perform(get("/modules/{id}/bootstrap", "consumer-1.0.0")
