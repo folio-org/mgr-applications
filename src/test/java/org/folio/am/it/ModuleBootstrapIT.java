@@ -16,6 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import org.folio.am.domain.dto.ApplicationDescriptor;
+import org.folio.am.domain.dto.EgressBootstrap;
+import org.folio.am.domain.dto.EgressBootstrapRequest;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.dto.ModuleBootstrap;
 import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
@@ -139,6 +141,97 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
         .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(expectedBootstrapResponse), STRICT));
+  }
+
+  @Test
+  void ingressBootstrap_positive() throws Exception {
+    // Consumer both provides its own interface and requires another; ingress must return only its own routes.
+    var consumerApp = new ApplicationDescriptor()
+      .name("test-app").version("1.0.0")
+      .modules(List.of(new Module().name("consumer").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id("consumer-1.0.0")
+        .requires(List.of(new InterfaceReference().id("dashboard").version("2.0")))
+        .provides(List.of(new InterfaceDescriptor().id("consumer-api").version("1.0").interfaceType("multiple")))));
+    postApplication(consumerApp);
+
+    var expected = new ModuleBootstrap()
+      .module(new ModuleBootstrapDiscovery()
+        .moduleId("consumer-1.0.0")
+        .applicationId("test-app-1.0.0")
+        .systemUserRequired(false)
+        .interfaces(List.of(new ModuleBootstrapInterface().id("consumer-api").version("1.0").interfaceType("multiple"))))
+      .requiredModules(List.of());
+
+    mockMvc.perform(get("/modules/{id}/bootstrap", "consumer-1.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(expected), STRICT));
+  }
+
+  @Test
+  void egressBootstrap_positive_scoped() throws Exception {
+    var providerApp = new ApplicationDescriptor()
+      .name("provider-app").version("1.0.0")
+      .modules(List.of(new Module().name("mod-provider").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id("mod-provider-1.0.0")
+        .provides(List.of(new InterfaceDescriptor().id("dashboard").version("2.0").interfaceType("multiple")))));
+    postApplication(providerApp);
+
+    mockMvc.perform(post("/modules/{id}/discovery", "mod-provider-1.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON)
+        .content(asJsonString(moduleDiscovery("mod-provider", "1.0.0", "http://mod-provider:8081"))))
+      .andExpect(status().isCreated());
+
+    var consumerApp = new ApplicationDescriptor()
+      .name("test-app").version("1.0.0")
+      .modules(List.of(new Module().name("consumer").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id("consumer-1.0.0")
+        .requires(List.of(new InterfaceReference().id("dashboard").version("2.0")))));
+    postApplication(consumerApp);
+
+    // In full scope: provider is resolved.
+    var expectedInScope = new EgressBootstrap().requiredModules(List.of(new ModuleBootstrapDiscovery()
+      .moduleId("mod-provider-1.0.0")
+      .applicationId("provider-app-1.0.0")
+      .location("http://mod-provider:8081")
+      .systemUserRequired(false)
+      .interfaces(List.of(new ModuleBootstrapInterface().id("dashboard").version("2.0").interfaceType("multiple")))));
+
+    mockMvc.perform(post("/modules/{id}/bootstrap", "consumer-1.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON)
+        .content(asJsonString(new EgressBootstrapRequest()
+          .applicationIds(List.of("provider-app-1.0.0", "test-app-1.0.0")))))
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(expectedInScope), STRICT));
+
+    // Provider out of scope: empty requiredModules (consumer itself still in scope).
+    var expectedOutOfScope = new EgressBootstrap().requiredModules(List.of());
+    mockMvc.perform(post("/modules/{id}/bootstrap", "consumer-1.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON)
+        .content(asJsonString(new EgressBootstrapRequest().applicationIds(List.of("test-app-1.0.0")))))
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(expectedOutOfScope), STRICT));
+  }
+
+  @Test
+  void egressBootstrap_negative_moduleNotInScope() throws Exception {
+    var consumerApp = new ApplicationDescriptor()
+      .name("test-app").version("1.0.0")
+      .modules(List.of(new Module().name("consumer").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor().id("consumer-1.0.0")));
+    postApplication(consumerApp);
+
+    mockMvc.perform(post("/modules/{id}/bootstrap", "consumer-1.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON)
+        .content(asJsonString(new EgressBootstrapRequest().applicationIds(List.of("other-app-1.0.0")))))
+      .andExpect(status().isNotFound());
   }
 
   private void postApplication(ApplicationDescriptor applicationDescriptor) throws Exception {
