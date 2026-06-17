@@ -27,10 +27,18 @@ class BootstrapCacheInvalidationListenerTest {
   }
 
   @Test
-  void onDiscoveryEvent_withDependents_evictsCapturedSetWithoutRecomputing() {
-    // delete events carry the dependents captured before deletion -> evict them directly (recompute would be empty)
+  void onDiscoveryEvent_withDependents_evictsCapturedSet() {
+    // delete events carry the fan-out captured inside the delete transaction -> evict that set directly
     listener.onDiscoveryEvent(new DiscoveryEvent("mod-x-1.0.0", List.of("mod-consumer-1.0.0")));
     verify(evictor).evictForModuleWithDependents("mod-x-1.0.0", List.of("mod-consumer-1.0.0"));
+  }
+
+  @Test
+  void onDiscoveryEvent_withEmptyDependents_takesDeleteBranch_notRecompute() {
+    // a delete of a provider with no dependents carries a non-null EMPTY list; it must still take the
+    // captured-set (delete) branch, not the recompute (create/update) branch
+    listener.onDiscoveryEvent(new DiscoveryEvent("mod-x-1.0.0", List.of()));
+    verify(evictor).evictForModuleWithDependents("mod-x-1.0.0", List.of());
   }
 
   @Test

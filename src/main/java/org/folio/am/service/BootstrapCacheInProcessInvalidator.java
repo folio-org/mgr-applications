@@ -38,9 +38,10 @@ public class BootstrapCacheInProcessInvalidator implements ApplicationDiscoveryL
 
   @Override
   public void onDiscoveryDelete(String serviceId, String instanceId, ModuleType type, String token) {
-    // Capture the dependent set now, while the deleted module's PROVIDES rows still exist; the actual eviction
-    // runs afterCommit, by which point the rows are gone and re-deriving them would yield nothing (leaving
-    // dependents in other applications stale until the TTL).
+    // Capture the dependent set now, inside the delete transaction, and evict it afterCommit. A discovery delete
+    // currently only nulls the module's discovery_url — its PROVIDES rows survive — so re-deriving the dependents
+    // afterCommit would still work; capturing up front is defensive and keeps eviction correct even if delete
+    // semantics later remove those rows.
     var dependents = evictor.findDependentModuleIds(serviceId);
     runAfterCommit(serviceId, () -> evictor.evictForModuleWithDependents(serviceId, dependents));
   }

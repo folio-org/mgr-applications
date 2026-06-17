@@ -7,7 +7,9 @@ import static org.folio.am.support.TestConstants.APPLICATION_ID;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import org.folio.am.mapper.ModuleBootstrapMapperImpl;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
@@ -40,7 +42,11 @@ class ModuleBootstrapServiceTest {
   }
 
   private static ResolvedModule resolved(String id, String applicationId, ModuleDescriptor descriptor) {
-    return new ResolvedModule(id, "http://" + id + ":8080", false, descriptor, applicationId);
+    return new ResolvedModule(id, "http://" + id + ":8080", false, descriptor, Set.of(applicationId));
+  }
+
+  private static ResolvedModule resolvedInApps(String id, ModuleDescriptor descriptor, String... applicationIds) {
+    return new ResolvedModule(id, "http://" + id + ":8080", false, descriptor, Set.of(applicationIds));
   }
 
   private static ModuleDescriptor consumerDescriptor() {
@@ -116,6 +122,48 @@ class ModuleBootstrapServiceTest {
   }
 
   @Test
+  void getEgressBootstrap_providerSharedAcrossApplications_inScopeViaAnyApp_retained() {
+    // The SAME provider id belongs to two applications (e.g. the same unchanged module pinned by two versions of
+    // the same application). The tenant entitled only app-b. The provider must be retained because app-b is in scope.
+    var self = resolved(FOO, "app-consumer-1.0.0", consumerDescriptor());
+    var sharedProvider = resolvedInApps(BAR, providerDescriptor(), "app-a-1.0.0", "app-b-1.0.0");
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(sharedProvider)));
+
+    var actual = service.getEgressBootstrap(FOO, List.of("app-consumer-1.0.0", "app-b-1.0.0"));
+
+    assertThat(actual.getFound()).isTrue();
+    assertThat(actual.getBootstrap().getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR));
+  }
+
+  @Test
+  void getEgressBootstrap_providerSharedAcrossApplications_noneInScope_dropped() {
+    var self = resolved(FOO, "app-consumer-1.0.0", consumerDescriptor());
+    var sharedProvider = resolvedInApps(BAR, providerDescriptor(), "app-a-1.0.0", "app-b-1.0.0");
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(sharedProvider)));
+
+    var actual = service.getEgressBootstrap(FOO, List.of("app-consumer-1.0.0"));
+
+    assertThat(actual.getFound()).isTrue();
+    assertThat(actual.getBootstrap().getRequiredModules()).isEmpty();
+  }
+
+  @Test
+  void getEgressBootstrap_selfSharedAcrossApplications_inScopeViaAnyApp_found() {
+    // The requesting module itself is shared across two applications; the tenant entitled only one of them.
+    var self = resolvedInApps(FOO, consumerDescriptor(), "app-x-1.0.0", "app-consumer-1.0.0");
+    var provider = resolved(BAR, "app-consumer-1.0.0", providerDescriptor());
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(provider)));
+
+    var actual = service.getEgressBootstrap(FOO, List.of("app-consumer-1.0.0"));
+
+    assertThat(actual.getFound()).isTrue();
+    assertThat(actual.getBootstrap().getModule().getApplicationId()).isEqualTo("app-consumer-1.0.0");
+    assertThat(actual.getBootstrap().getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR));
+  }
+
+  @Test
   void getEgressBootstrap_selfOutsideScope_returnsNotFound() {
     var self = resolved(FOO, "app-a-1.0.0", consumerDescriptor());
     when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of()));
@@ -128,6 +176,39 @@ class ModuleBootstrapServiceTest {
   void getEgressBootstrap_nullApplicationIds_returnsNotFound() {
     var actual = service.getEgressBootstrap(FOO, null);
     assertThat(actual.getFound()).isFalse();
+  }
+
+  @Test
+  void getEgressBootstrap_nullApplicationIdElement_isIgnored_notThrown() {
+    var self = resolved(FOO, "app-consumer-1.0.0", consumerDescriptor());
+    var provider = resolved(BAR, "app-consumer-1.0.0", providerDescriptor());
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(provider)));
+
+    // a null element in the scope must be ignored, not blow up with NPE -> 500
+    var actual = service.getEgressBootstrap(FOO, Arrays.asList("app-consumer-1.0.0", null));
+
+    assertThat(actual.getFound()).isTrue();
+    assertThat(actual.getBootstrap().getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR));
+  }
+
+  @Test
+  void getEgressBootstrap_onlyNullApplicationIdElements_returnsNotFound() {
+    var actual = service.getEgressBootstrap(FOO, Arrays.asList((String) null, null));
+    assertThat(actual.getFound()).isFalse();
+  }
+
+  @Test
+  void getById_nonSemverProviderId_isKept_notThrown() {
+    // A provider id that is not strict semver must not abort the whole bootstrap; it is kept rather than dedup-sorted.
+    var self = resolved(FOO, APPLICATION_ID, consumerDescriptor());
+    var legacyProvider = resolved("mod-legacy-1.0", APPLICATION_ID, providerDescriptor());
+    when(dataProvider.getData(FOO)).thenReturn(new ModuleBootstrapData(self, List.of(legacyProvider)));
+
+    var actual = service.getById(FOO);
+
+    assertThat(actual.getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo("mod-legacy-1.0"));
   }
 
   @Test

@@ -19,7 +19,7 @@ A consumer (the FOLIO module sidecar) calls this endpoint at startup and wheneve
 
 Different tenants can have different applications — and therefore different provider module versions — installed. A single tenant-independent bootstrap cannot express "for this tenant's application set, which provider version satisfies each required interface." This endpoint lets a caller pass the application scope explicitly and receive the egress bootstrap resolved against exactly that scope, while still supporting a scope-free ingress lookup for the module's own routes.
 
-It complements the existing `GET /modules/{id}/bootstrap`, which always resolves required modules globally. The `POST` variant separates the ingress and egress concerns and makes egress resolution scope-aware.
+It complements the existing `GET /modules/{id}`, which always resolves required modules globally. The `POST` variant separates the ingress and egress concerns and makes egress resolution scope-aware.
 
 ## Entry point(s)
 
@@ -58,7 +58,7 @@ It complements the existing `GET /modules/{id}/bootstrap`, which always resolves
 
 ## Caching
 
-Module-bootstrap resolution (both `GET /modules/{id}/bootstrap` and `POST /modules/{id}/bootstrap`) is backed by a per-replica in-memory cache that absorbs the sidecar start-up request storm without repeated database resolution.
+Module-bootstrap resolution (both `GET /modules/{id}` and `POST /modules/{id}/bootstrap`) is backed by a per-replica in-memory cache that absorbs the sidecar start-up request storm without repeated database resolution.
 
 - **What is cached.** An application-independent snapshot per module id — the module plus all providers of its required/optional interfaces, each with its single application. Ingress, full, and scoped-egress responses are all derived from this one snapshot in memory, so a given module id is resolved from the database at most once per replica until invalidated.
 - **Invalidation is event-driven, not time-based.** A module discovery change (create/update/delete) evicts only the snapshots that can actually change: the changed module's own snapshot, plus every module that requires/optionally-uses an interface the changed module provides (the provider fan-out, resolved by a reverse-dependency query). Unrelated snapshots survive, so a discovery storm does not flush the whole cache. The replica handling the change evicts in-process immediately after the discovery transaction commits; other replicas converge by consuming the discovery event broadcast and computing the same fan-out from their own database read.

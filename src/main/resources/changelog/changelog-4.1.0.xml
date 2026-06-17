@@ -5,4 +5,5 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
   <include file="changes/v4.1.0/expand-module-interface-reference-primary-key.xml" relativeToChangelogFile="true"/>
+  <include file="changes/v4.1.0/aggregate-module-bootstrap-applications.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

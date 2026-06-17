@@ -30,9 +30,11 @@ public class DiscoveryPublisher implements ApplicationDiscoveryListener {
 
   @Override
   public void onDiscoveryDelete(String serviceId, String instanceId, ModuleType type, String token) {
-    // Capture the provider fan-out now, while this listener runs synchronously inside the delete transaction (the
-    // module's PROVIDES rows still exist). The event is dispatched post-commit via the outbox, so every replica can
-    // evict the dependents — re-deriving them on the consumer side after deletion would yield nothing.
+    // Capture the provider fan-out while this listener runs inside the delete transaction and ship it in the event.
+    // A discovery delete today only nulls the module's discovery_url — its PROVIDES rows survive — so a consumer
+    // could re-derive the dependents itself; capturing them here is defensive: it keeps the broadcast correct even
+    // if delete semantics later remove the module/interface rows, and spares each replica the reverse-dependency
+    // query.
     var dependentModuleIds = moduleBootstrapRepository.findAllDependentModuleIds(serviceId);
     sendMessage(new DiscoveryEvent(serviceId, dependentModuleIds));
   }

@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.List;
 import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -28,8 +29,10 @@ public class ModuleBootstrapView {
   @Id
   private String id;
 
-  @Column(name = "application_id")
-  private String applicationId;
+  @Type(JsonBinaryType.class)
+  @Column(name = "application_ids", columnDefinition = "jsonb")
+  @EqualsAndHashCode.Exclude
+  private List<String> applicationIds;
 
   @Column(name = "discovery_url")
   private String location;

@@ -76,4 +76,20 @@ class DiscoveryEventDeserializationTest {
       assertThat(restored.getDependentModuleIds()).containsExactly("mod-consumer-1.0.0", "mod-other-2.0.0");
     }
   }
+
+  @Test
+  void serializeThenDeserialize_withEmptyDependents_keepsNonNullEmptyList() {
+    // A delete of a provider with no dependents ships an empty (but non-null) fan-out. Pin that it survives the
+    // Kafka path as a non-null empty list so the consumer still takes the delete branch (evictForModuleWithDependents)
+    // rather than the create/update branch — i.e. @JsonInclude must not drop an empty list.
+    var original = new DiscoveryEvent("mod-x-1.0.0", List.of());
+
+    try (var serializer = new JacksonJsonSerializer<DiscoveryEvent>();
+         var deserializer = new JacksonJsonDeserializer<>(DiscoveryEvent.class)) {
+      var restored = deserializer.deserialize("it.discovery", serializer.serialize("it.discovery", original));
+
+      assertThat(restored).isNotNull();
+      assertThat(restored.getDependentModuleIds()).isNotNull().isEmpty();
+    }
+  }
 }

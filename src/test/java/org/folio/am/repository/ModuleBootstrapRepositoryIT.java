@@ -70,7 +70,7 @@ class ModuleBootstrapRepositoryIT extends BaseRepositoryTest {
   private Predicate<ModuleBootstrapView> matchView(String moduleId, String appId, String location) {
     return view ->
       view.getId().equals(moduleId)
-        && view.getApplicationId().equals(appId)
+        && view.getApplicationIds().contains(appId)
         && view.getLocation().equals(location)
         && view.getDescriptor() != null;
   }

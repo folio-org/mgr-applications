@@ -113,6 +113,26 @@ class ModuleScopedBootstrapIT extends BaseIntegrationTest {
       .andExpect(jsonPath("$.egress.bootstrap.requiredModules[0].moduleId").value("mod-provider-2.0.0"));
   }
 
+  @Test
+  @Sql(scripts = "classpath:/sql/module-bootstrap-shared-module.sql")
+  void postModuleBootstrap_egress_providerSharedAcrossApplications_foundViaEitherScope() throws Exception {
+    // mod-shared-1.0.0 belongs to both app-foo-1.0.0 and app-foo-2.0.0. A tenant entitled to app-foo-2.0.0 (NOT the
+    // lexicographically-first owning application) must still get the shared provider; the reported applicationId is
+    // the in-scope one. Before the multi-application fix the provider was dropped non-deterministically here.
+    var request = new ModuleBootstrapRequest()
+      .type(ModuleBootstrapRequest.TypeEnum.EGRESS)
+      .applicationIds(List.of("app-consumer-1.0.0", "app-foo-2.0.0"));
+
+    mockMvc.perform(post("/modules/{id}/bootstrap", "mod-consumer-1.0.0")
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON)
+        .content(asJsonString(request)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.egress.found").value(true))
+      .andExpect(jsonPath("$.egress.bootstrap.requiredModules[0].moduleId").value("mod-shared-1.0.0"))
+      .andExpect(jsonPath("$.egress.bootstrap.requiredModules[0].applicationId").value("app-foo-2.0.0"));
+  }
+
   private void postProviderAndConsumerApps() throws Exception {
     postApplication(new ApplicationDescriptor()
       .name("provider-app").version("1.0.0")

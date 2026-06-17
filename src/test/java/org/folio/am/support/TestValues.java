@@ -210,7 +210,7 @@ public class TestValues {
     var view = new ModuleBootstrapView();
     view.setId(moduleId);
     view.setLocation(moduleLocation(moduleId));
-    view.setApplicationId(APPLICATION_ID);
+    view.setApplicationIds(List.of(APPLICATION_ID));
     view.setDescriptor(new ModuleDescriptor().provides(interfaceDescriptors));
     return view;
   }

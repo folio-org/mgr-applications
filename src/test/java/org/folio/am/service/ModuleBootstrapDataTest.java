@@ -13,18 +13,18 @@ import org.junit.jupiter.api.Test;
 class ModuleBootstrapDataTest {
 
   @Test
-  void from_splitsSelfFromProviders_andReadsApplicationIdPerRow() {
+  void from_splitsSelfFromProviders_andReadsApplicationIdsPerRow() {
     var self = moduleBootstrapView("mod-foo-1.0.0", "foo-int");
-    var provider = viewInApp("mod-bar-1.0.0", "app-bar-1.0.0");
+    var provider = viewInApps("mod-bar-1.0.0", "app-bar-1.0.0", "app-bar-2.0.0");
 
     var data = ModuleBootstrapData.from("mod-foo-1.0.0", List.of(self, provider));
 
     assertThat(data.self()).isNotNull();
     assertThat(data.self().id()).isEqualTo("mod-foo-1.0.0");
-    assertThat(data.self().applicationId()).isEqualTo(APPLICATION_ID);
+    assertThat(data.self().applicationIds()).containsExactly(APPLICATION_ID);
     assertThat(data.providers()).singleElement().satisfies(p -> {
       assertThat(p.id()).isEqualTo("mod-bar-1.0.0");
-      assertThat(p.applicationId()).isEqualTo("app-bar-1.0.0");
+      assertThat(p.applicationIds()).containsExactlyInAnyOrder("app-bar-1.0.0", "app-bar-2.0.0");
     });
   }
 
@@ -37,9 +37,9 @@ class ModuleBootstrapDataTest {
     assertThat(data.providers()).hasSize(1);
   }
 
-  private static ModuleBootstrapView viewInApp(String id, String applicationId) {
+  private static ModuleBootstrapView viewInApps(String id, String... applicationIds) {
     var view = moduleBootstrapView(id, "x-int");
-    view.setApplicationId(applicationId);
+    view.setApplicationIds(List.of(applicationIds));
     return view;
   }
 }

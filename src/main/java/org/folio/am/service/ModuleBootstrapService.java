@@ -1,10 +1,14 @@
 package org.folio.am.service;
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.folio.common.utils.CollectionUtils.toStream;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,8 +39,8 @@ public class ModuleBootstrapService {
     var data = dataProvider.getData(moduleId);
     var self = requireSelf(data, moduleId);
     return new ModuleBootstrap()
-      .module(toDiscovery(self, self.descriptor().getProvides()))
-      .requiredModules(requiredModules(self, data.providers()));
+      .module(toDiscovery(self, self.descriptor().getProvides(), null))
+      .requiredModules(requiredModules(self, data.providers(), null));
   }
 
   /**
@@ -46,49 +50,73 @@ public class ModuleBootstrapService {
     var data = dataProvider.getData(moduleId);
     var self = requireSelf(data, moduleId);
     return new ModuleBootstrap()
-      .module(toDiscovery(self, self.descriptor().getProvides()))
+      .module(toDiscovery(self, self.descriptor().getProvides(), null))
       .requiredModules(List.of());
   }
 
   /**
-   * Egress bootstrap scoped to the given applications.
+   * Egress bootstrap scoped to the given applications. A module (self or provider) is in scope when any of its
+   * owning applications is in the requested set, so a module shared across several applications is matched as long
+   * as the tenant entitled at least one of them.
    */
   public EgressBootstrapResult getEgressBootstrap(String moduleId, List<String> applicationIds) {
     if (applicationIds == null || applicationIds.isEmpty()) {
       return new EgressBootstrapResult().found(false);
     }
-    var scope = Set.copyOf(applicationIds);
+    var scope = applicationIds.stream().filter(Objects::nonNull).collect(toUnmodifiableSet());
+    if (scope.isEmpty()) {
+      return new EgressBootstrapResult().found(false);
+    }
     var data = dataProvider.getData(moduleId);
     var self = data.self();
-    if (self == null || !scope.contains(self.applicationId())) {
+    if (self == null || !inScope(self, scope)) {
       return new EgressBootstrapResult().found(false);
     }
     var providers = data.providers().stream()
-      .filter(p -> scope.contains(p.applicationId()))
+      .filter(p -> inScope(p, scope))
       .toList();
     return new EgressBootstrapResult().found(true).bootstrap(new ModuleBootstrap()
-      .module(toDiscovery(self, self.descriptor().getProvides()))
-      .requiredModules(requiredModules(self, providers)));
+      .module(toDiscovery(self, self.descriptor().getProvides(), scope))
+      .requiredModules(requiredModules(self, providers, scope)));
   }
 
-  private List<ModuleBootstrapDiscovery> requiredModules(ResolvedModule self, List<ResolvedModule> providers) {
+  private List<ModuleBootstrapDiscovery> requiredModules(ResolvedModule self, List<ResolvedModule> providers,
+    Set<String> scope) {
     var requiredInterfaceIds = requiredInterfaceIds(self);
     if (requiredInterfaceIds.isEmpty()) {
       return List.of();
     }
     var discoveries = providers.stream()
-      .map(p -> toDiscovery(p, narrow(p, requiredInterfaceIds)))
+      .map(p -> toDiscovery(p, narrow(p, requiredInterfaceIds), scope))
       .toList();
     return deduplicate(discoveries);
   }
 
-  private ModuleBootstrapDiscovery toDiscovery(ResolvedModule module, List<InterfaceDescriptor> provides) {
+  private ModuleBootstrapDiscovery toDiscovery(ResolvedModule module, List<InterfaceDescriptor> provides,
+    Set<String> scope) {
     return new ModuleBootstrapDiscovery()
       .moduleId(module.id())
-      .applicationId(module.applicationId())
+      .applicationId(representativeApplicationId(module, scope))
       .location(module.location())
       .systemUserRequired(module.systemUserRequired())
       .interfaces(toStream(provides).map(mapper::convert).toList());
+  }
+
+  private static boolean inScope(ResolvedModule module, Set<String> scope) {
+    return module.applicationIds().stream().anyMatch(scope::contains);
+  }
+
+  /**
+   * The single applicationId reported on a discovery. When a scope is given (egress) the representative is the
+   * lowest-sorted application that is both owned by the module and in scope, so the reported value is always one the
+   * caller actually entitled; without a scope (ingress/full) it is the lowest-sorted owning application, which is
+   * deterministic across cache reloads and replicas.
+   */
+  private static String representativeApplicationId(ResolvedModule module, Set<String> scope) {
+    return module.applicationIds().stream()
+      .filter(id -> scope == null || scope.contains(id))
+      .min(Comparator.naturalOrder())
+      .orElse(null);
   }
 
   private static List<InterfaceDescriptor> narrow(ResolvedModule provider, Set<String> requiredInterfaceIds) {
@@ -115,24 +143,37 @@ public class ModuleBootstrapService {
   private static List<ModuleBootstrapDiscovery> deduplicate(List<ModuleBootstrapDiscovery> requiredModules) {
     var results = new HashMap<String, ModuleBootstrapDiscovery>();
     for (var discovery : requiredModules) {
-      // SemverUtils splits name from the full semver (handling pre-release/build suffixes like -SNAPSHOT, which a
-      // naive last-dash split mangles into a different name and an unparseable version).
-      var name = SemverUtils.getName(discovery.getModuleId());
-      var version = SemverUtils.getVersion(discovery.getModuleId());
-      var existing = results.get(name);
-      if (existing == null) {
-        results.put(name, discovery);
-      } else {
-        var existingVersion = SemverUtils.getVersion(existing.getModuleId());
-        // Full semver precedence so the highest version wins deterministically regardless of list order, and a
-        // release outranks the snapshot of the same version (2.0.0 > 2.0.0-SNAPSHOT). The legacy interface
-        // comparator returned Integer.MAX_VALUE across differing majors, degrading "keep highest" to "keep last in
-        // list" (findAllRequiredByModuleId has no ORDER BY).
-        if (new Semver(version).isGreaterThan(new Semver(existingVersion))) {
-          results.put(name, discovery);
-        }
-      }
+      mergeHighestVersion(results, discovery);
     }
     return results.values().stream().toList();
+  }
+
+  private static void mergeHighestVersion(Map<String, ModuleBootstrapDiscovery> results,
+    ModuleBootstrapDiscovery discovery) {
+    // SemverUtils splits name from the full semver (handling pre-release/build suffixes like -SNAPSHOT, which a
+    // naive last-dash split mangles into a different name and an unparseable version). A module id that is not
+    // strict semver cannot be name/version-compared, so it is kept as last-seen rather than failing the whole
+    // bootstrap (module ids are normally strict semver; this only guards against malformed persisted ids).
+    String name;
+    String version;
+    try {
+      name = SemverUtils.getName(discovery.getModuleId());
+      version = SemverUtils.getVersion(discovery.getModuleId());
+    } catch (RuntimeException e) {
+      results.put(discovery.getModuleId(), discovery);
+      return;
+    }
+    var existing = results.get(name);
+    if (existing == null) {
+      results.put(name, discovery);
+      return;
+    }
+    // Full semver precedence so the highest version wins deterministically regardless of list order, and a release
+    // outranks the snapshot of the same version (2.0.0 > 2.0.0-SNAPSHOT). The legacy interface comparator returned
+    // Integer.MAX_VALUE across differing majors, degrading "keep highest" to "keep last" (the query has no ORDER BY).
+    var existingVersion = SemverUtils.getVersion(existing.getModuleId());
+    if (new Semver(version).isGreaterThan(new Semver(existingVersion))) {
+      results.put(name, discovery);
+    }
   }
 }
