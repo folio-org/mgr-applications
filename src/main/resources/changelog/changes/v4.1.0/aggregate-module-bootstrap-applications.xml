@@ -1,0 +1,39 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="aggregate-module-bootstrap-applications" author="okuzminov">
+        <!-- A module can belong to more than one application (the same artifact pinned by several versions of the
+             same-named application). The previous view joined module to application_module 1:N, producing one row
+             per (module, application); because the JPA view entity is keyed by module id alone, Hibernate collapsed
+             those rows to a single, non-deterministically chosen application_id, which broke application-scoped
+             egress resolution. Aggregate all owning application ids per module so each module yields exactly one row
+             carrying the full set.
+
+             The application_id column is replaced by an application_ids array, which renames a column; Postgres
+             CREATE OR REPLACE VIEW cannot rename columns, so the view is dropped and recreated. -->
+        <sql splitStatements="true" endDelimiter=";">
+            DROP VIEW IF EXISTS v_module_bootstrap;
+
+            CREATE VIEW v_module_bootstrap AS
+            SELECT m.id,
+                   m.name,
+                   m.version,
+                   m.descriptor,
+                   m.discovery_url,
+                   jsonb_agg(DISTINCT am.application_id) AS application_ids,
+                   COALESCE(m.descriptor, '{}'::jsonb) @> '{"metadata": {"user": {"type": "system"}}}'
+                       AS system_user_required
+              FROM module m
+                INNER JOIN application_module am ON m.id = am.module_id
+              WHERE m.type = 'BACKEND'
+              GROUP BY m.id;
+        </sql>
+        <rollback>
+            <sql>DROP VIEW IF EXISTS v_module_bootstrap;</sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
