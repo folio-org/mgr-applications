@@ -13,12 +13,18 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import org.folio.am.domain.dto.EgressBootstrap;
+import org.folio.am.domain.dto.EgressBootstrapRequest;
 import org.folio.am.domain.dto.ModuleBootstrap;
+import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
 import org.folio.am.service.ModuleBootstrapService;
+import org.folio.test.TestUtils;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +43,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class ModuleBootstrapControllerTest {
 
   private static final String ENDPOINT_PATH = "/modules/{id}";
+  private static final String BOOTSTRAP_PATH = "/modules/{id}/bootstrap";
 
   @Autowired private MockMvc mockMvc;
   @MockitoBean private ModuleBootstrapService service;
@@ -69,5 +76,56 @@ class ModuleBootstrapControllerTest {
       .andExpect(jsonPath("$.errors[0].message", is(errorMessage)))
       .andExpect(jsonPath("$.errors[0].type", is("EntityNotFoundException")))
       .andExpect(jsonPath("$.errors[0].code", is("not_found_error")));
+  }
+
+  @Test
+  void getModuleIngressBootstrap_positive() throws Exception {
+    var module = moduleBootstrapDiscovery(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
+    var expected = new ModuleBootstrap().module(module).requiredModules(List.of());
+    when(service.getIngressBootstrap(MODULE_FOO_ID)).thenReturn(expected);
+
+    var mvcResult = mockMvc.perform(get(BOOTSTRAP_PATH, MODULE_FOO_ID)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andReturn();
+
+    assertThat(parseResponse(mvcResult, ModuleBootstrap.class)).isEqualTo(expected);
+  }
+
+  @Test
+  void getModuleEgressBootstrap_positive() throws Exception {
+    var requiredModule = moduleBootstrapDiscovery(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID);
+    var expected = new EgressBootstrap().requiredModules(List.of(requiredModule));
+    when(service.getEgressBootstrap(MODULE_FOO_ID, List.of("test-app-1.0.0"))).thenReturn(expected);
+
+    var mvcResult = mockMvc.perform(post(BOOTSTRAP_PATH, MODULE_FOO_ID)
+        .contentType(APPLICATION_JSON)
+        .content(TestUtils.asJsonString(new EgressBootstrapRequest().applicationIds(List.of("test-app-1.0.0")))))
+      .andExpect(status().isOk())
+      .andReturn();
+
+    assertThat(parseResponse(mvcResult, EgressBootstrap.class)).isEqualTo(expected);
+  }
+
+  @Test
+  void getModuleEgressBootstrap_negative_emptyApplicationIds() throws Exception {
+    mockMvc.perform(post(BOOTSTRAP_PATH, MODULE_FOO_ID)
+        .contentType(APPLICATION_JSON)
+        .content(TestUtils.asJsonString(new EgressBootstrapRequest().applicationIds(List.of()))))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void getModuleEgressBootstrap_negative_notFound() throws Exception {
+    var errorMessage = "Module not found by id: " + MODULE_FOO_ID;
+    when(service.getEgressBootstrap(MODULE_FOO_ID, List.of("test-app-1.0.0")))
+      .thenThrow(new EntityNotFoundException(errorMessage));
+
+    mockMvc.perform(post(BOOTSTRAP_PATH, MODULE_FOO_ID)
+        .contentType(APPLICATION_JSON)
+        .content(TestUtils.asJsonString(new EgressBootstrapRequest().applicationIds(List.of("test-app-1.0.0")))))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.errors[0].message", is(errorMessage)))
+      .andExpect(jsonPath("$.errors[0].type", is("EntityNotFoundException")));
   }
 }
