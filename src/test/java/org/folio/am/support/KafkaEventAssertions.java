@@ -9,7 +9,6 @@ import static org.testcontainers.shaded.org.awaitility.Durations.ONE_MINUTE;
 import static org.testcontainers.shaded.org.awaitility.Durations.ONE_SECOND;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -26,11 +25,13 @@ public final class KafkaEventAssertions {
 
   public static void assertDiscoveryEvents(String... moduleIds) {
     var topic = getEnvTopicName(DISCOVERY_DESTINATION);
-    var expectedEvents = Arrays.stream(moduleIds).map(DiscoveryEvent::new).collect(Collectors.toList());
+    var expectedModuleIds = Arrays.asList(moduleIds);
+    // Match on moduleId only: delete events also carry the provider fan-out (dependentModuleIds), which is
+    // irrelevant to "a discovery event for module X was published" and would otherwise break full-object equality.
     await().untilAsserted(() -> {
       var consumerRecords = getEvents(topic, DiscoveryEvent.class);
-      var entitlementEvents = mapItems(consumerRecords, ConsumerRecord::value);
-      assertThat(entitlementEvents).containsSequence(expectedEvents);
+      var actualModuleIds = mapItems(mapItems(consumerRecords, ConsumerRecord::value), DiscoveryEvent::getModuleId);
+      assertThat(actualModuleIds).containsSequence(expectedModuleIds);
     });
   }
 
