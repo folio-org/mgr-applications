@@ -38,19 +38,27 @@ public class BootstrapCacheInProcessInvalidator implements ApplicationDiscoveryL
 
   @Override
   public void onDiscoveryDelete(String serviceId, String instanceId, ModuleType type, String token) {
-    evictAfterCommit(serviceId);
+    // Capture the dependent set now, while the deleted module's PROVIDES rows still exist; the actual eviction
+    // runs afterCommit, by which point the rows are gone and re-deriving them would yield nothing (leaving
+    // dependents in other applications stale until the TTL).
+    var dependents = evictor.findDependentModuleIds(serviceId);
+    runAfterCommit(serviceId, () -> evictor.evictForModuleWithDependents(serviceId, dependents));
   }
 
   private void evictAfterCommit(String moduleId) {
+    runAfterCommit(moduleId, () -> evictor.evictForModule(moduleId));
+  }
+
+  private void runAfterCommit(String moduleId, Runnable eviction) {
     if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-      evictor.evictForModule(moduleId);
+      eviction.run();
       return;
     }
     TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
       @Override
       public void afterCommit() {
         log.debug("Invalidating module-bootstrap cache after discovery change commit [moduleId={}]", moduleId);
-        evictor.evictForModule(moduleId);
+        eviction.run();
       }
     });
   }

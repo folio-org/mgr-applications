@@ -7,6 +7,7 @@ import org.folio.am.integration.messaging.MessagePublisher;
 import org.folio.am.integration.messaging.config.MessagingConfiguration;
 import org.folio.am.integration.messaging.outbox.config.TrxOutboxConfiguration;
 import org.folio.am.integration.messaging.outbox.config.TrxOutboxPublishingConfiguration;
+import org.folio.am.repository.ModuleBootstrapRepository;
 import org.folio.am.utils.ConditionalOnFarModeDisabled;
 import org.folio.integration.kafka.producer.EnableKafkaProducer;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,8 @@ public class DiscoveryPublisherConfiguration {
   }
 
   @Bean
-  public DiscoveryPublisher discoveryPublisher(MessagePublisher<DiscoveryEvent> messagePublisher) {
-    return new DiscoveryPublisher(messagePublisher);
+  public DiscoveryPublisher discoveryPublisher(MessagePublisher<DiscoveryEvent> messagePublisher,
+    ModuleBootstrapRepository moduleBootstrapRepository) {
+    return new DiscoveryPublisher(messagePublisher, moduleBootstrapRepository);
   }
 }

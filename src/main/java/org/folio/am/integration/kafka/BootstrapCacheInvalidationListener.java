@@ -29,7 +29,15 @@ public class BootstrapCacheInvalidationListener {
     topics = "${spring.kafka.topics.discovery}")
   public void onDiscoveryEvent(DiscoveryEvent event) {
     var moduleId = event == null ? null : event.getModuleId();
-    log.debug("Invalidating module-bootstrap cache on discovery event: moduleId = {}", moduleId);
-    evictor.evictForModule(moduleId);
+    var dependentModuleIds = event == null ? null : event.getDependentModuleIds();
+    log.debug("Invalidating module-bootstrap cache on discovery event: moduleId = {}, dependentModuleIds = {}",
+      moduleId, dependentModuleIds);
+    if (dependentModuleIds != null) {
+      // Delete event: evict the dependents captured before deletion (re-deriving the fan-out here would be empty).
+      evictor.evictForModuleWithDependents(moduleId, dependentModuleIds);
+    } else {
+      // Create/update event: the provider's PROVIDES rows still exist, so re-derive the fan-out.
+      evictor.evictForModule(moduleId);
+    }
   }
 }

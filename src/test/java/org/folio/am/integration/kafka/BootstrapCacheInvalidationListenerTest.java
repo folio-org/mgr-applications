@@ -2,6 +2,7 @@ package org.folio.am.integration.kafka;
 
 import static org.mockito.Mockito.verify;
 
+import java.util.List;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
 import org.folio.am.service.BootstrapCacheEvictor;
 import org.folio.test.types.UnitTest;
@@ -19,9 +20,17 @@ class BootstrapCacheInvalidationListenerTest {
   @InjectMocks private BootstrapCacheInvalidationListener listener;
 
   @Test
-  void onDiscoveryEvent_evictsForChangedModule() {
+  void onDiscoveryEvent_noDependents_recomputesFanOut() {
+    // create/update events carry no dependents -> the provider's PROVIDES rows still exist, so re-derive the fan-out
     listener.onDiscoveryEvent(new DiscoveryEvent("mod-x-1.0.0"));
     verify(evictor).evictForModule("mod-x-1.0.0");
+  }
+
+  @Test
+  void onDiscoveryEvent_withDependents_evictsCapturedSetWithoutRecomputing() {
+    // delete events carry the dependents captured before deletion -> evict them directly (recompute would be empty)
+    listener.onDiscoveryEvent(new DiscoveryEvent("mod-x-1.0.0", List.of("mod-consumer-1.0.0")));
+    verify(evictor).evictForModuleWithDependents("mod-x-1.0.0", List.of("mod-consumer-1.0.0"));
   }
 
   @Test

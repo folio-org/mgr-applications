@@ -2,7 +2,9 @@ package org.folio.am.service;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.util.List;
 import org.folio.am.domain.dto.ModuleDiscovery;
 import org.folio.am.domain.entity.ModuleType;
 import org.folio.test.types.UnitTest;
@@ -60,8 +62,28 @@ class BootstrapCacheInProcessInvalidatorTest {
   }
 
   @Test
-  void onDiscoveryDelete_evictsImmediately_whenNoTransaction() {
+  void onDiscoveryDelete_capturesDependentsBeforeCommit_evictsCapturedSetAfterCommit() {
+    TransactionSynchronizationManager.initSynchronization();
+    when(evictor.findDependentModuleIds("mod-foo-1.0.0")).thenReturn(List.of("mod-consumer-1.0.0"));
+
     invalidator.onDiscoveryDelete("mod-foo-1.0.0", "mod-foo-1.0.0", ModuleType.BACKEND, "tok");
-    verify(evictor).evictForModule("mod-foo-1.0.0");
+
+    // dependents captured synchronously, while the module's PROVIDES rows still exist (before the delete commits)
+    verify(evictor).findDependentModuleIds("mod-foo-1.0.0");
+    verify(evictor, never()).evictForModuleWithDependents("mod-foo-1.0.0", List.of("mod-consumer-1.0.0"));
+
+    for (TransactionSynchronization sync : TransactionSynchronizationManager.getSynchronizations()) {
+      sync.afterCommit();
+    }
+    verify(evictor).evictForModuleWithDependents("mod-foo-1.0.0", List.of("mod-consumer-1.0.0"));
+  }
+
+  @Test
+  void onDiscoveryDelete_evictsImmediately_whenNoTransaction() {
+    when(evictor.findDependentModuleIds("mod-foo-1.0.0")).thenReturn(List.of("mod-consumer-1.0.0"));
+
+    invalidator.onDiscoveryDelete("mod-foo-1.0.0", "mod-foo-1.0.0", ModuleType.BACKEND, "tok");
+
+    verify(evictor).evictForModuleWithDependents("mod-foo-1.0.0", List.of("mod-consumer-1.0.0"));
   }
 }

@@ -27,6 +27,7 @@ class ModuleBootstrapServiceTest {
   private static final String FOO = "test-module-foo-1.0.0";
   private static final String BAR = "test-module-bar-1.0.0";
   private static final String BAR_V2 = "test-module-bar-2.0.0";
+  private static final String BAR_V2_SNAPSHOT = "test-module-bar-2.0.0-SNAPSHOT";
   private static final String BAR_INT = "test-bar-interface";
   private static final String OTHER_INT = "test-other-interface";
 
@@ -154,6 +155,68 @@ class ModuleBootstrapServiceTest {
 
     assertThat(actual.getRequiredModules()).singleElement()
       .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR_V2));
+  }
+
+  @Test
+  void getById_dedupesSameNameProviders_keepingHighestVersion_reversedOrder() {
+    // Identical to the test above, but the highest version comes FIRST in the provider list.
+    // The javadoc on getById promises the "highest-version" provider across all applications,
+    // independent of list order (findAllRequiredByModuleId has no ORDER BY).
+    var self = resolved(FOO, APPLICATION_ID, consumerDescriptor());
+    var providerV2 = resolved(BAR_V2, APPLICATION_ID, providerDescriptor());
+    var providerV1 = resolved(BAR, APPLICATION_ID, providerDescriptor());
+    when(dataProvider.getData(FOO))
+      .thenReturn(new ModuleBootstrapData(self, List.of(providerV2, providerV1)));
+
+    var actual = service.getById(FOO);
+
+    assertThat(actual.getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR_V2));
+  }
+
+  @Test
+  void getById_dedupesReleaseAndSnapshotOfSameModule_keepsRelease() {
+    // A release outranks the snapshot of the same version (2.0.0 > 2.0.0-SNAPSHOT); the two must be recognised as
+    // the same module name (snapshot/build suffixes contain '-', which naive last-dash splitting mis-handles).
+    var self = resolved(FOO, APPLICATION_ID, consumerDescriptor());
+    var snapshot = resolved(BAR_V2_SNAPSHOT, APPLICATION_ID, providerDescriptor());
+    var release = resolved(BAR_V2, APPLICATION_ID, providerDescriptor());
+    when(dataProvider.getData(FOO))
+      .thenReturn(new ModuleBootstrapData(self, List.of(snapshot, release)));
+
+    var actual = service.getById(FOO);
+
+    assertThat(actual.getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR_V2));
+  }
+
+  @Test
+  void getById_dedupesReleaseAndSnapshotOfSameModule_keepsRelease_reversedOrder() {
+    var self = resolved(FOO, APPLICATION_ID, consumerDescriptor());
+    var release = resolved(BAR_V2, APPLICATION_ID, providerDescriptor());
+    var snapshot = resolved(BAR_V2_SNAPSHOT, APPLICATION_ID, providerDescriptor());
+    when(dataProvider.getData(FOO))
+      .thenReturn(new ModuleBootstrapData(self, List.of(release, snapshot)));
+
+    var actual = service.getById(FOO);
+
+    assertThat(actual.getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR_V2));
+  }
+
+  @Test
+  void getById_dedupesHigherSnapshotMajorOverLowerRelease_keepsSnapshot() {
+    // Snapshot of a higher version still wins over a lower release (2.0.0-SNAPSHOT > 1.0.0).
+    var self = resolved(FOO, APPLICATION_ID, consumerDescriptor());
+    var release = resolved(BAR, APPLICATION_ID, providerDescriptor());
+    var snapshot = resolved(BAR_V2_SNAPSHOT, APPLICATION_ID, providerDescriptor());
+    when(dataProvider.getData(FOO))
+      .thenReturn(new ModuleBootstrapData(self, List.of(release, snapshot)));
+
+    var actual = service.getById(FOO);
+
+    assertThat(actual.getRequiredModules()).singleElement()
+      .satisfies(m -> assertThat(m.getModuleId()).isEqualTo(BAR_V2_SNAPSHOT));
   }
 
   @Test

@@ -1,6 +1,5 @@
 package org.folio.am.service;
 
-import static org.folio.am.utils.ModuleIdUtils.getNameAndVersion;
 import static org.folio.common.utils.CollectionUtils.toStream;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -17,7 +16,8 @@ import org.folio.am.mapper.ModuleBootstrapMapper;
 import org.folio.am.service.ModuleBootstrapData.ResolvedModule;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
-import org.folio.common.utils.InterfaceComparisonUtils;
+import org.folio.common.utils.SemverUtils;
+import org.semver4j.Semver;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -115,15 +115,20 @@ public class ModuleBootstrapService {
   private static List<ModuleBootstrapDiscovery> deduplicate(List<ModuleBootstrapDiscovery> requiredModules) {
     var results = new HashMap<String, ModuleBootstrapDiscovery>();
     for (var discovery : requiredModules) {
-      var nameAndVersion = getNameAndVersion(discovery.getModuleId());
-      var name = nameAndVersion.getLeft();
-      var version = nameAndVersion.getRight();
+      // SemverUtils splits name from the full semver (handling pre-release/build suffixes like -SNAPSHOT, which a
+      // naive last-dash split mangles into a different name and an unparseable version).
+      var name = SemverUtils.getName(discovery.getModuleId());
+      var version = SemverUtils.getVersion(discovery.getModuleId());
       var existing = results.get(name);
       if (existing == null) {
         results.put(name, discovery);
       } else {
-        var existingVersion = getNameAndVersion(existing.getModuleId()).getRight();
-        if (InterfaceComparisonUtils.compare("", version, "", existingVersion) > 0) {
+        var existingVersion = SemverUtils.getVersion(existing.getModuleId());
+        // Full semver precedence so the highest version wins deterministically regardless of list order, and a
+        // release outranks the snapshot of the same version (2.0.0 > 2.0.0-SNAPSHOT). The legacy interface
+        // comparator returned Integer.MAX_VALUE across differing majors, degrading "keep highest" to "keep last in
+        // list" (findAllRequiredByModuleId has no ORDER BY).
+        if (new Semver(version).isGreaterThan(new Semver(existingVersion))) {
           results.put(name, discovery);
         }
       }
