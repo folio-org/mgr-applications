@@ -30,8 +30,3 @@ The pre-existing `GET /modules/{id}` (full, globally-resolved bootstrap) is unch
 - Empty/missing `applicationIds` returns `400`.
 - Required modules are filtered to the interfaces the module actually requires/optional, and deduplicated by name keeping the highest version (same as `GET /modules/{id}`).
 - Scoping is applied in SQL over the existing `v_module_bootstrap` view; there is no tenant context or DB-view change.
-
-## Out of scope
-
-- Caching of scoped results (tracked separately).
-- Sidecar-side changes (entitled-application lookup, per-tenant route tables, refresh on entitlement change).
