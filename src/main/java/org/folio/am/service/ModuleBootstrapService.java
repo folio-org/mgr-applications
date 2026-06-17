@@ -163,17 +163,12 @@ public class ModuleBootstrapService {
       results.put(discovery.getModuleId(), discovery);
       return;
     }
-    var existing = results.get(name);
-    if (existing == null) {
-      results.put(name, discovery);
-      return;
-    }
     // Full semver precedence so the highest version wins deterministically regardless of list order, and a release
     // outranks the snapshot of the same version (2.0.0 > 2.0.0-SNAPSHOT). The legacy interface comparator returned
     // Integer.MAX_VALUE across differing majors, degrading "keep highest" to "keep last" (the query has no ORDER BY).
-    var existingVersion = SemverUtils.getVersion(existing.getModuleId());
-    if (new Semver(version).isGreaterThan(new Semver(existingVersion))) {
-      results.put(name, discovery);
-    }
+    results.merge(name, discovery, (existing, incoming) -> {
+      var existingVersion = SemverUtils.getVersion(existing.getModuleId());
+      return new Semver(version).isGreaterThan(new Semver(existingVersion)) ? incoming : existing;
+    });
   }
 }
