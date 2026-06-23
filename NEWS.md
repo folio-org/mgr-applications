@@ -1,6 +1,7 @@
 ## Version `v4.1.0` (IN PROGRESS)
 * Allow interface to be both provided and require / optional in the same module descriptor (MGRAPPS-99)
 * Upgrade dependencies for Kafka 4.2 compatibility in mgr-applications (MGRAPPS-110)
+* Switch Kong integration test container to folioci/folio-kong image (APPPOCTOOL-37)
 
 ---
 
