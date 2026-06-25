@@ -16,12 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import org.folio.am.domain.dto.ApplicationDescriptor;
-import org.folio.am.domain.dto.EgressBootstrap;
 import org.folio.am.domain.dto.EgressBootstrapRequest;
 import org.folio.am.domain.dto.Module;
-import org.folio.am.domain.dto.ModuleBootstrap;
-import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
-import org.folio.am.domain.dto.ModuleBootstrapInterface;
 import org.folio.am.support.base.BaseIntegrationTest;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
@@ -34,12 +30,14 @@ import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
 @IntegrationTest
 @EnableKeycloakSecurity
 @EnableKeycloakTlsMode
 @EnableKeycloakDataImport
+@TestPropertySource(properties = {"application.okapi.enabled=false", "application.kong.enabled=false"})
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 class ModuleBootstrapIT extends BaseIntegrationTest {
 
@@ -96,21 +94,27 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
         .provides(List.of(new InterfaceDescriptor().id("consumer-api").version("1.0").interfaceType("multiple")))));
     postApplication(consumerApp);
 
-    var expected = new ModuleBootstrap()
-      .module(new ModuleBootstrapDiscovery()
-        .moduleId("consumer-1.0.0")
-        .applicationId("test-app-1.0.0")
-        .systemUserRequired(false)
-        .interfaces(List.of(new ModuleBootstrapInterface()
-          .id("consumer-api")
-          .version("1.0")
-          .interfaceType("multiple"))))
-      .requiredModules(List.of());
-
     mockMvc.perform(get("/modules/{id}/bootstrap", "consumer-1.0.0")
         .header(TOKEN, generateAccessToken(keycloakProperties)))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(expected), STRICT));
+      .andExpect(content().json("""
+        {
+          "module": {
+            "moduleId": "consumer-1.0.0",
+            "applicationId": "test-app-1.0.0",
+            "systemUserRequired": false,
+            "interfaces": [
+              {
+                "id": "consumer-api",
+                "version": "1.0",
+                "interfaceType": "multiple",
+                "endpoints": []
+              }
+            ]
+          },
+          "requiredModules": []
+        }
+        """, STRICT));
   }
 
   @Test
@@ -137,28 +141,43 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
         .requires(List.of(new InterfaceReference().id("dashboard").version("2.0")))));
     postApplication(consumerApp);
 
-    var expectedInScope = new EgressBootstrap().requiredModules(List.of(new ModuleBootstrapDiscovery()
-      .moduleId("mod-provider-1.0.0")
-      .applicationId("provider-app-1.0.0")
-      .location("http://mod-provider:8081")
-      .systemUserRequired(false)
-      .interfaces(List.of(new ModuleBootstrapInterface().id("dashboard").version("2.0").interfaceType("multiple")))));
-
     mockMvc.perform(post("/modules/{id}/bootstrap", "consumer-1.0.0")
         .header(TOKEN, generateAccessToken(keycloakProperties))
         .contentType(APPLICATION_JSON)
         .content(asJsonString(new EgressBootstrapRequest()
           .applicationIds(List.of("provider-app-1.0.0", "test-app-1.0.0")))))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(expectedInScope), STRICT));
+      .andExpect(content().json("""
+        {
+          "requiredModules": [
+            {
+              "moduleId": "mod-provider-1.0.0",
+              "applicationId": "provider-app-1.0.0",
+              "location": "http://mod-provider:8081",
+              "systemUserRequired": false,
+              "interfaces": [
+                {
+                  "id": "dashboard",
+                  "version": "2.0",
+                  "interfaceType": "multiple",
+                  "endpoints": []
+                }
+              ]
+            }
+          ]
+        }
+        """, STRICT));
 
-    var expectedOutOfScope = new EgressBootstrap().requiredModules(List.of());
     mockMvc.perform(post("/modules/{id}/bootstrap", "consumer-1.0.0")
         .header(TOKEN, generateAccessToken(keycloakProperties))
         .contentType(APPLICATION_JSON)
         .content(asJsonString(new EgressBootstrapRequest().applicationIds(List.of("test-app-1.0.0")))))
       .andExpect(status().isOk())
-      .andExpect(content().json(asJsonString(expectedOutOfScope), STRICT));
+      .andExpect(content().json("""
+        {
+          "requiredModules": []
+        }
+        """, STRICT));
   }
 
   @Test
