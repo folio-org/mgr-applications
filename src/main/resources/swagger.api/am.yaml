@@ -151,6 +151,52 @@ paths:
         '500':
           $ref: '#/components/responses/internal-server-error'
 
+  /modules/{id}/bootstrap:
+    get:
+      operationId: getModuleIngressBootstrap
+      description: Retrieve ingress bootstrap (the module's own routes only) for the module referenced by id
+      tags:
+        - module-bootstrap
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      responses:
+        '200':
+          description: Ingress bootstrap info (module with empty requiredModules)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/moduleBootstrap'
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+    post:
+      operationId: getModuleEgressBootstrap
+      description: Retrieve egress bootstrap (required/optional modules) for the module referenced by id, restricted to the supplied application scope
+      tags:
+        - module-bootstrap
+      parameters:
+        - $ref: '#/components/parameters/path-entity-id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/egressBootstrapRequest'
+      responses:
+        '200':
+          description: Egress bootstrap result scoped to the supplied applicationIds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/egressBootstrap'
+        '400':
+          $ref: '#/components/responses/bad-request'
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+
   /modules/discovery:
     get:
       operationId: searchModuleDiscovery
@@ -291,6 +337,10 @@ components:
       $ref: schemas/module/moduleDiscoveries.json
     moduleBootstrap:
       $ref: schemas/module/bootstrap/moduleBootstrap.json
+    egressBootstrapRequest:
+      $ref: schemas/module/bootstrap/egressBootstrapRequest.json
+    egressBootstrap:
+      $ref: schemas/module/bootstrap/egressBootstrap.json
     errorResponse:
       $ref: schemas/common/errors.json
     deploymentDescriptor:

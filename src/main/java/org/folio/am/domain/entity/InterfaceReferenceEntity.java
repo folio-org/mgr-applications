@@ -33,6 +33,7 @@ public class InterfaceReferenceEntity {
   @Column
   private String version;
 
+  @Id
   @Enumerated(EnumType.STRING)
   @JdbcTypeCode(SqlTypes.NAMED_ENUM)
   @Column(columnDefinition = "interface_ref_type", updatable = false)

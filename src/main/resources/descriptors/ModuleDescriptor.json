@@ -95,13 +95,25 @@
     },
     {
       "id": "module-bootstraps",
-      "version": "1.2",
+      "version": "1.3",
       "handlers": [
         {
           "type": "internal",
           "methods": [ "GET" ],
           "pathPattern": "/modules/{id}",
           "permissionsRequired": [ "mgr-applications.module-bootstraps.item.get" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "GET" ],
+          "pathPattern": "/modules/{id}/bootstrap",
+          "permissionsRequired": [ "mgr-applications.module-bootstraps.item.get" ]
+        },
+        {
+          "type": "internal",
+          "methods": [ "POST" ],
+          "pathPattern": "/modules/{id}/bootstrap",
+          "permissionsRequired": [ "mgr-applications.module-bootstraps.item.post" ]
         }
       ]
     }
@@ -211,6 +223,11 @@
       "permissionName": "mgr-applications.module-bootstraps.item.get"
     },
     {
+      "description": "Post module bootstrap",
+      "displayName": "Manager Applications - post module bootstrap",
+      "permissionName": "mgr-applications.module-bootstraps.item.post"
+    },
+    {
       "description": "Manage applications",
       "displayName": "Manager Applications - Manage applications",
       "permissionName": "mgr-applications.applications.all",
@@ -250,7 +267,8 @@
         "mgr-applications.discoveries.item.get",
         "mgr-applications.discoveries.collection.get",
         "mgr-applications.app-discoveries.collection.get",
-        "mgr-applications.module-bootstraps.item.get"
+        "mgr-applications.module-bootstraps.item.get",
+        "mgr-applications.module-bootstraps.item.post"
       ]
     },
     {
@@ -261,7 +279,8 @@
       "subPermissions": [
         "mgr-applications.applications.all",
         "mgr-applications.discoveries.all",
-        "mgr-applications.module-bootstraps.item.get"
+        "mgr-applications.module-bootstraps.item.get",
+        "mgr-applications.module-bootstraps.item.post"
       ]
     }
   ]

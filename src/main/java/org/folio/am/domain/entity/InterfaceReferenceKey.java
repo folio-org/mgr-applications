@@ -19,4 +19,9 @@ public class InterfaceReferenceKey implements Serializable {
    * Reference to interface id.
    */
   private String id;
+
+  /**
+   * Reference type.
+   */
+  private InterfaceReferenceEntity.ReferenceType type;
 }
