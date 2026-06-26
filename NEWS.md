@@ -1,3 +1,8 @@
+## Version `v3.0.7` (IN PROGRESS)
+* Application-scoped sidecar bootstrap: ingress and egress module-bootstrap endpoints (EUREKA-899)
+
+---
+
 ## Version `v3.0.6` (03.12.2025)
 * Provide "System User required" attribute as part of module bootstrap data (MGRAPPS-54)
 ---

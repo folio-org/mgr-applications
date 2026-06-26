@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
+import java.util.List;
 import java.util.function.Predicate;
 import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.folio.am.support.base.BaseRepositoryTest;
@@ -65,6 +66,60 @@ class ModuleBootstrapViewRepositoryIT extends BaseRepositoryTest {
     assertThat(result)
       .hasSize(1)
       .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL));
+  }
+
+  @Test
+  void findAllRequiredByModuleIdAndApplicationIdsIn_returnsOnlyInScopeModules() {
+    var result = repository.findAllRequiredByModuleIdAndApplicationIdsIn(MODULE_FOO_ID, List.of(APP_1_0_0_ID));
+    assertThat(result)
+      .hasSize(1)
+      .anyMatch(matchView(MODULE_FOO_ID, APP_1_0_0_ID, MODULE_FOO_DISCOVERY_URL));
+  }
+
+  @Test
+  void findAllRequiredByModuleIdAndApplicationIdsIn_returnsAllWhenAllAppsInScope() {
+    var result = repository.findAllRequiredByModuleIdAndApplicationIdsIn(
+      MODULE_FOO_ID, List.of(APP_1_0_0_ID, APP_2_0_0_ID));
+    assertThat(result)
+      .hasSize(3)
+      .anyMatch(matchView(MODULE_FOO_ID, APP_1_0_0_ID, MODULE_FOO_DISCOVERY_URL))
+      .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL))
+      .anyMatch(matchView(MODULE_BAZ_ID, APP_2_0_0_ID, MODULE_BAZ_DISCOVERY_URL));
+  }
+
+  @Test
+  void findAllRequiredByModuleIdAndApplicationIdsIn_excludesSelfWhenSelfNotInScope() {
+    var result = repository.findAllRequiredByModuleIdAndApplicationIdsIn(MODULE_FOO_ID, List.of(APP_2_0_0_ID));
+    assertThat(result)
+      .hasSize(2)
+      .noneMatch(view -> view.getId().equals(MODULE_FOO_ID))
+      .anyMatch(matchView(MODULE_BAR_ID, APP_2_0_0_ID, MODULE_BAR_DISCOVERY_URL))
+      .anyMatch(matchView(MODULE_BAZ_ID, APP_2_0_0_ID, MODULE_BAZ_DISCOVERY_URL));
+  }
+
+  @Test
+  void findViewsById_returnsSelfRow() {
+    var result = repository.findViewsById(MODULE_FOO_ID);
+    assertThat(result)
+      .hasSize(1)
+      .anyMatch(matchView(MODULE_FOO_ID, APP_1_0_0_ID, MODULE_FOO_DISCOVERY_URL));
+  }
+
+  @Test
+  void findAllRequiredByModuleId_returnsProviderOnceWhenItProvidesMultipleRequiredInterfaces() {
+    // test-module-bar provides both test-bar-interface and test-bar-interface-2, and test-module-foo requires both;
+    // the provider must appear once (the IN subquery is a semi-join), not be fanned out now that DISTINCT is gone.
+    var result = repository.findAllRequiredByModuleId(MODULE_FOO_ID);
+
+    assertThat(result).hasSize(3);
+    assertThat(result).filteredOn(view -> view.getId().equals(MODULE_BAR_ID)).hasSize(1);
+    assertNoDuplicateRows(result);
+  }
+
+  private static void assertNoDuplicateRows(List<ModuleBootstrapView> views) {
+    assertThat(views)
+      .extracting(view -> view.getId() + "@" + view.getApplicationId())
+      .doesNotHaveDuplicates();
   }
 
   private Predicate<ModuleBootstrapView> matchView(String moduleId, String appId, String location) {
