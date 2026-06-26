@@ -18,6 +18,7 @@ import java.util.List;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.EgressBootstrapRequest;
 import org.folio.am.domain.dto.Module;
+import org.folio.am.integration.kafka.DiscoveryPublisher;
 import org.folio.am.support.base.BaseIntegrationTest;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
@@ -30,6 +31,7 @@ import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -42,6 +44,7 @@ import org.springframework.test.context.jdbc.Sql;
 class ModuleBootstrapIT extends BaseIntegrationTest {
 
   @Autowired KeycloakProperties keycloakProperties;
+  @MockBean private DiscoveryPublisher discoveryPublisher;
 
   @Test
   @WireMockStub(scripts = {
