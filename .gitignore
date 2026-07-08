@@ -41,3 +41,4 @@ build/
 .claude/
 .codemie/
 CLAUDE.md
+/.codegraph/

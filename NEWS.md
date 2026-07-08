@@ -1,3 +1,8 @@
+## Version `v4.0.2` (IN PROGRESS)
+* Application-scoped sidecar bootstrap: ingress and egress module-bootstrap endpoints (EUREKA-899)
+
+---
+
 ## Version `v4.0.1` (27.04.2026)
 * Allow interface to be both provided and require / optional in the same module descriptor (MGRAPPS-99)
 

@@ -100,4 +100,50 @@ class ModuleBootstrapServiceTest {
     assertThatThrownBy(() -> service.getById(MODULE_FOO_ID)).isInstanceOf(EntityNotFoundException.class)
       .hasMessage("Module not found by id: " + MODULE_FOO_ID);
   }
+
+  @Test
+  void getIngressBootstrap_positive() {
+    var fooView = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
+    when(repository.findViewsById(MODULE_FOO_ID)).thenReturn(new ArrayList<>(List.of(fooView)));
+
+    var actual = service.getIngressBootstrap(MODULE_FOO_ID);
+
+    assertThat(actual.getModule()).isEqualTo(moduleBootstrapDiscovery(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID));
+    assertThat(actual.getRequiredModules()).isEmpty();
+  }
+
+  @Test
+  void getIngressBootstrap_negative_notFound() {
+    when(repository.findViewsById(MODULE_FOO_ID)).thenReturn(Collections.emptyList());
+
+    assertThatThrownBy(() -> service.getIngressBootstrap(MODULE_FOO_ID))
+      .isInstanceOf(EntityNotFoundException.class)
+      .hasMessage("Module not found by id: " + MODULE_FOO_ID);
+  }
+
+  @Test
+  void getEgressBootstrap_positive() {
+    var fooView = moduleBootstrapView(MODULE_FOO_ID, MODULE_FOO_INTERFACE_ID);
+    fooView.getDescriptor().addRequiresItem(new InterfaceReference().id(MODULE_BAR_INTERFACE_ID));
+    var barView = moduleBootstrapView(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID, "not-required-interface");
+    var scope = List.of("test-app-1.0.0");
+    when(repository.findAllRequiredByModuleIdAndApplicationIdsIn(MODULE_FOO_ID, scope))
+      .thenReturn(new ArrayList<>(asList(fooView, barView)));
+
+    var actual = service.getEgressBootstrap(MODULE_FOO_ID, scope);
+
+    assertThat(actual.getRequiredModules())
+      .containsExactly(moduleBootstrapDiscovery(MODULE_BAR_ID, MODULE_BAR_INTERFACE_ID));
+  }
+
+  @Test
+  void getEgressBootstrap_negative_moduleNotInScope() {
+    var scope = List.of("other-app-1.0.0");
+    when(repository.findAllRequiredByModuleIdAndApplicationIdsIn(MODULE_FOO_ID, scope))
+      .thenReturn(new ArrayList<>());
+
+    assertThatThrownBy(() -> service.getEgressBootstrap(MODULE_FOO_ID, scope))
+      .isInstanceOf(EntityNotFoundException.class)
+      .hasMessage("Module not found by id: " + MODULE_FOO_ID);
+  }
 }
