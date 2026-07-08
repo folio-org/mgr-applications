@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Request for egress module bootstrap. Required-module resolution is restricted to providers within the supplied application scope.",
+  "properties": {
+    "applicationIds": {
+      "description": "Application IDs that define the egress resolution scope.",
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    }
+  },
+  "required": ["applicationIds"]
+}

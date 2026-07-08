@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Egress bootstrap: discovery information for the required/optional modules, resolved within a requested application scope.",
+  "properties": {
+    "requiredModules": {
+      "description": "Discovery information for the required/optional modules within scope",
+      "type": "array",
+      "items": { "$ref": "moduleBootstrapDiscovery.json" }
+    }
+  },
+  "required": ["requiredModules"]
+}

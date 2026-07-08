@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.folio.am.domain.dto.EgressBootstrap;
 import org.folio.am.domain.dto.ModuleBootstrap;
 import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
 import org.folio.am.domain.entity.ModuleBootstrapView;
@@ -42,18 +43,43 @@ public class ModuleBootstrapService {
   @Transactional(readOnly = true)
   public ModuleBootstrap getById(String moduleId) {
     var views = repository.findAllRequiredByModuleId(moduleId);
-
     var moduleView = removeModuleViewById(moduleId, views);
-    var module = mapper.convert(moduleView);
+    return new ModuleBootstrap()
+      .module(mapper.convert(moduleView))
+      .requiredModules(resolveRequiredModules(moduleView, views));
+  }
 
+  /**
+   * Ingress bootstrap: the module's own routes only, with no dependency resolution.
+   */
+  @Transactional(readOnly = true)
+  public ModuleBootstrap getIngressBootstrap(String moduleId) {
+    var views = repository.findViewsById(moduleId);
+    if (views.isEmpty()) {
+      throw new EntityNotFoundException("Module not found by id: " + moduleId);
+    }
+    return new ModuleBootstrap()
+      .module(mapper.convert(views.get(0)))
+      .requiredModules(List.of());
+  }
+
+  /**
+   * Egress bootstrap: the required/optional providers resolved only within the supplied application scope. The
+   * self module is used to derive the required interfaces and to confirm scope membership, but is not returned.
+   */
+  @Transactional(readOnly = true)
+  public EgressBootstrap getEgressBootstrap(String moduleId, List<String> applicationIds) {
+    var views = repository.findAllRequiredByModuleIdAndApplicationIdsIn(moduleId, applicationIds);
+    var moduleView = removeModuleViewById(moduleId, views);
+    return new EgressBootstrap()
+      .requiredModules(resolveRequiredModules(moduleView, views));
+  }
+
+  private List<ModuleBootstrapDiscovery> resolveRequiredModules(ModuleBootstrapView moduleView,
+    List<ModuleBootstrapView> views) {
     var requiredInterfaces = getRequiredOptionalInterfaces(moduleView);
     var requiredModules = toModuleDiscoveries(requiredInterfaces, views);
-
-    requiredModules = deduplicateRequiredModules(requiredModules);
-
-    return new ModuleBootstrap()
-      .module(module)
-      .requiredModules(requiredModules);
+    return deduplicateRequiredModules(requiredModules);
   }
 
   private List<ModuleBootstrapDiscovery> deduplicateRequiredModules(List<ModuleBootstrapDiscovery> requiredModules) {
