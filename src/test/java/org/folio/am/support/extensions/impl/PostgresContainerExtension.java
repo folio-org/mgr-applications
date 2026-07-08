@@ -1,6 +1,7 @@
 package org.folio.am.support.extensions.impl;
 
 import static java.lang.String.valueOf;
+import static org.folio.test.extensions.impl.DockerImageRegistry.getPostgresImageName;
 
 import java.util.UUID;
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -16,7 +17,7 @@ public class PostgresContainerExtension implements BeforeAllCallback, AfterAllCa
   private static final String DB_PORT_PROPERTY = "DB_PORT";
 
   @SuppressWarnings("resource")
-  private static final PostgreSQLContainer<?> CONTAINER = new PostgreSQLContainer<>("postgres:16-alpine")
+  private static final PostgreSQLContainer<?> CONTAINER = new PostgreSQLContainer<>(getPostgresImageName())
     .withDatabaseName("postgres")
     .withEnv("PG_USER", "postgres")
     .withUsername("postgres")

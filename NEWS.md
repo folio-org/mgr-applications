@@ -2,6 +2,8 @@
 * Allow interface to be both provided and require / optional in the same module descriptor (MGRAPPS-99)
 * Upgrade dependencies for Kafka 4.2 compatibility in mgr-applications (MGRAPPS-110)
 * Application-scoped sidecar bootstrap: ingress and egress module-bootstrap endpoints (EUREKA-899)
+* Switch Kong integration test container to folioci/folio-kong image (APPPOCTOOL-37)
+
 
 ---
 

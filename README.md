@@ -29,6 +29,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
   * [Event structure](#event-structure)
 * [Manager Tenant Entitlements Integration](#manager-tenant-entitlements-integration)
 * [Folio Application Registry mode](#folio-application-registry-mode)
+* [Integration Testing](#integration-testing)
 
 ## Introduction
 
@@ -346,6 +347,18 @@ the integrations with Kafka, Kong, Okapi, mgr-tenant-entitlements is disabled.
 To enable this mode set `FAR_MODE` env variable to `true` and make sure to leave other integration variables unset or
 set to `false`.
 
+
+## Integration Testing
+
+Integration tests use Testcontainers for PostgreSQL and Kong. The following environment variables
+let you redirect containers to a private registry or adjust startup behaviour without changing
+source code.
+
+| Environment variable                     | Default                         | Description                          |
+|:-----------------------------------------|:--------------------------------|:-------------------------------------|
+| `TESTCONTAINERS_POSTGRES_IMAGE`          | `postgres:16-alpine`            | PostgreSQL container image           |
+| `TESTCONTAINERS_KONG_IMAGE`              | `folioci/folio-kong:latest`     | Kong container image                 |
+| `TESTCONTAINERS_KONG_READINESS_TIMEOUT`  | `120`                           | Seconds to wait for Kong startup     |
 
 ## AI Documentation
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/folio-org/mgr-applications)
