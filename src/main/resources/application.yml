@@ -36,12 +36,6 @@ spring:
         max.in.flight.requests.per.connection: 5
         retries: 5
         spring.json.add.type.headers: false
-    consumer:
-      group-id: ${KAFKA_CONSUMER_GROUP_ID:${application.environment}-mgr-applications-group}
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
-    topics:
-      entitlement: ${KAFKA_ENTITLEMENT_TOPIC:${application.environment}.entitlement}
 application:
   router:
     path-prefix: ${ROUTER_PATH_PREFIX:}
@@ -52,22 +46,6 @@ application:
     enabled: ${FAR_MODE:false}
   security:
     enabled: ${SECURITY_ENABLED:true}
-  kong:
-    enabled: ${KONG_INTEGRATION_ENABLED:true}
-    url: ${KONG_ADMIN_URL:${kong.url:}}
-    module-self-url: ${MODULE_URL:http://mgr-applications:8081}
-    register-module: ${REGISTER_MODULE_IN_KONG:true}
-    connect-timeout: ${KONG_CONNECT_TIMEOUT:}
-    read-timeout: ${KONG_READ_TIMEOUT:}
-    write-timeout: ${KONG_WRITE_TIMEOUT:}
-    retries: ${KONG_RETRIES:}
-    tenant-checks:
-      enabled: ${KONG_TENANT_CHECKS_ENABLED:false}
-    tls:
-      enabled: ${KONG_TLS_ENABLED:false}
-      trust-store-path: ${KONG_TLS_TRUSTSTORE_PATH:}
-      trust-store-password: ${KONG_TLS_TRUSTSTORE_PASSWORD:}
-      trust-store-type: ${KONG_TLS_TRUSTSTORE_TYPE:}
   okapi:
     enabled: ${OKAPI_INTEGRATION_ENABLED:true}
     url: ${OKAPI_URL:${okapi.url:}}
@@ -79,10 +57,6 @@ application:
         - name: discovery
           numPartitions: ${KAFKA_DISCOVERY_TOPIC_PARTITIONS:1}
           replicationFactor: ${KAFKA_DISCOVERY_TOPIC_REPLICATION_FACTOR:}
-  retry:
-    tenant-routes:
-      retry-delay: ${TENANT_ROUTES_RETRY_DELAY:500ms}
-      retry-attempts: ${TENANT_ROUTES_RETRY_ATTEMPTS:10}
   keycloak:
     enabled: ${KC_INTEGRATION_ENABLED:true}
     url: ${KC_URL:http://keycloak:8080}
@@ -176,6 +150,3 @@ messaging:
           keep-alive: 600s
       scheduling:
         enabled: true
-
-routemanagement:
-  enable: ${ROUTEMANAGEMENT_ENABLE:true}

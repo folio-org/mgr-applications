@@ -1,6 +1,6 @@
 # mgr-applications
 
-Spring Boot 4.0.3 Application Manager for FOLIO: manages application/module lifecycle (registration, discovery, deployment, validation). Java 21, PostgreSQL/JPA, Liquibase, Kafka, Kong, Keycloak, OpenAPI codegen, MapStruct, Lombok.
+Spring Boot 4.x Application Manager for FOLIO: manages application/module lifecycle (registration, discovery, deployment, validation). Java 21, PostgreSQL/JPA, Liquibase, Kafka, Keycloak, OpenAPI codegen, MapStruct, Lombok.
 
 ## Build & Test
 
@@ -26,14 +26,13 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 **Repositories** extend `JpaCqlRepository` for CQL filtering (e.g. `name=="app*"`) via `cql2pgjson`; use `findByQuery()`.
 
 **Integrations**:
-- Kong (`integration.kong`): `KongDiscoveryListener` syncs discovery → Kong services/routes. Toggle `KONG_INTEGRATION_ENABLED`.
-- Kafka (`integration.kafka`): `DiscoveryPublisher` → `${ENV}.discovery`; `EntitlementEventListener` consumes `${ENV}.entitlement` (ENTITLE/UPGRADE/REVOKE), updates Kong tenant routes when `KONG_TENANT_CHECKS_ENABLED=true`.
+- Kafka (`integration.kafka`): `DiscoveryPublisher` publishes `${ENV}.discovery` events.
 - Keycloak (`integration.okapi`): resource-server/client/role/policy import; JWT validation. Toggle `KC_INTEGRATION_ENABLED`.
 - mgr-tenant-entitlements (`integration.mte`): blocks deletion of entitled applications.
 
-**Events** via `ApplicationEventPublisher`: `ApplicationDescriptorListener` (create/delete), `ApplicationDiscoveryListener` (discovery create/update/delete) drive Keycloak/Kong/Kafka side effects. Reliable publishing via transactional outbox (`integration.messaging`).
+**Events** via `ApplicationEventPublisher`: `ApplicationDescriptorListener` (create/delete) and `ApplicationDiscoveryListener` (discovery create/update/delete) drive Keycloak and Kafka side effects. Reliable publishing via transactional outbox (`integration.messaging`).
 
-**FAR mode** (`FAR_MODE=true`): descriptor CRUD only; disables Kong/Kafka/Okapi/mte.
+**FAR mode** (`FAR_MODE=true`): descriptor CRUD only; disables Kafka/Okapi/mte.
 
 **Validation** (`VALIDATION_MODE`): NONE / BASIC / ON_CREATE (full dependency checks).
 
@@ -49,4 +48,4 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 
 ## Key Dependencies
 
-`folio-spring-cql`, `folio-security`, `folio-integration-kafka`, `folio-backend-common`, `folio-integration-kong`, `cql2pgjson`, `semver4j`.
+`folio-spring-cql`, `folio-security`, `folio-kafka-producer`, `folio-backend-common`, `cql2pgjson`, `semver4j`.

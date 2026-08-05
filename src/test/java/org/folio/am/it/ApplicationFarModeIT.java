@@ -31,7 +31,7 @@ import org.springframework.test.context.jdbc.Sql;
 @IntegrationTest
 @Sql(scripts = "classpath:/sql/application-descriptor.sql", executionPhase = BEFORE_TEST_METHOD)
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
-@TestPropertySource(properties = {"application.far-mode.enabled=true", "application.kong.enabled=false"})
+@TestPropertySource(properties = "application.far-mode.enabled=true")
 class ApplicationFarModeIT extends BaseIntegrationTest {
 
   @Test

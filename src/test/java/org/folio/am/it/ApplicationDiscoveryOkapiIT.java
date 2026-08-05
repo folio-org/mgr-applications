@@ -1,6 +1,5 @@
 package org.folio.am.it;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.am.integration.kafka.DiscoveryPublisher.DISCOVERY_DESTINATION;
 import static org.folio.am.support.KafkaEventAssertions.assertDiscoveryEvents;
 import static org.folio.am.support.KafkaEventAssertions.assertNoDiscoveryEvents;
@@ -37,8 +36,6 @@ import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
@@ -47,14 +44,11 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 @SqlMergeMode(MERGE)
 @EnableOkapiSecurity
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
-@TestPropertySource(properties = {"application.okapi.enabled=true", "application.kong.enabled=false"})
+@TestPropertySource(properties = "application.okapi.enabled=true")
 class ApplicationDiscoveryOkapiIT extends BaseIntegrationTest {
 
   @BeforeAll
-  public static void setUp(@Autowired ApplicationContext applicationContext) {
-    assertThat(applicationContext.containsBean("kongAdminClient")).isFalse();
-    assertThat(applicationContext.containsBean("okapiClient")).isTrue();
-
+  public static void setUp() {
     fakeKafkaConsumer.registerTopic(getEnvTopicName(DISCOVERY_DESTINATION), DiscoveryEvent.class);
   }
 
