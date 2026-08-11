@@ -42,8 +42,6 @@ import org.folio.am.support.TestValues;
 import org.folio.am.support.base.BaseIntegrationTest;
 import org.folio.common.utils.OkapiHeaders;
 import org.folio.test.TestUtils;
-import org.folio.test.extensions.EnableOkapiSecurity;
-import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.folio.tools.kong.client.KongAdminClient;
 import org.folio.tools.kong.model.Service;
@@ -58,9 +56,11 @@ import org.springframework.web.client.HttpClientErrorException;
 
 @IntegrationTest
 @SqlMergeMode(MERGE)
-@EnableOkapiSecurity
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
-@TestPropertySource(properties = {"application.okapi.enabled=true", "application.kong.enabled=true"})
+@TestPropertySource(properties = {
+  "application.security.enabled=true",
+  "application.keycloak.enabled=false",
+  "application.kong.enabled=true"})
 class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Autowired private KongAdminClient kongAdminClient;
@@ -94,11 +94,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/mod-authtoken/verify-token-create-module-discovery.json",
-    "/wiremock/stubs/okapi/application-discovery/get-test-module-bar-discovery.json",
-    "/wiremock/stubs/okapi/application-discovery/create-test-module-bar-discovery.json"
-  })
   @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
   void create_positive() throws Exception {
     var moduleDiscovery = TestValues.moduleDiscovery(MODULE_BAR_NAME, MODULE_BAR_VERSION, MODULE_BAR_URL);
@@ -123,7 +118,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
-  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-create-module-discovery.json")
   void create_positive_moduleNotFound() throws Exception {
     var moduleDiscovery = TestValues.moduleDiscovery("mod-unknown", "1.2.3", "http://test:80801");
 
@@ -142,13 +136,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
-  @WireMockStub({
-    "/wiremock/stubs/mod-authtoken/verify-token-create-modules-discovery.json",
-    "/wiremock/stubs/okapi/application-discovery/get-test-module-bar-discovery.json",
-    "/wiremock/stubs/okapi/application-discovery/get-test-module-foo-discovery-not-found.json",
-    "/wiremock/stubs/okapi/application-discovery/create-test-module-bar-discovery.json",
-    "/wiremock/stubs/okapi/application-discovery/create-test-module-foo-discovery.json"
-  })
   void create_positive_batchRequest() throws Exception {
     var moduleDiscoveries = TestValues.moduleDiscoveries(
       TestValues.moduleDiscovery(MODULE_BAR_NAME, MODULE_BAR_VERSION, MODULE_BAR_URL),
@@ -175,7 +162,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
-  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-create-modules-discovery.json")
   void create_positive_batchRequestModuleNotFound() throws Exception {
     var moduleDiscoveries = TestValues.moduleDiscoveries(
       TestValues.moduleDiscovery("mod-unknown", "1.2.3", "http://test:80801"));
@@ -194,12 +180,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/mod-authtoken/verify-token-update-module-discovery.json",
-    "/wiremock/stubs/okapi/application-discovery/get-test-module-foo-discovery.json",
-    "/wiremock/stubs/okapi/application-discovery/delete-test-module-foo-discovery.json",
-    "/wiremock/stubs/okapi/application-discovery/create-test-module-foo-discovery-updated.json"
-  })
   @Sql(scripts = "classpath:/sql/module-discoveries.sql")
   void update_positive() throws Exception {
     var newModuleDiscoveryUrl = "http://test-module-foo-updated:8080";
@@ -224,7 +204,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries.sql")
-  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-update-module-discovery.json")
   void update_negative_noModule() throws Exception {
     var moduleDiscovery = TestValues.moduleDiscovery("mod-unknown", "1.2.3", "http://mod-unknwon:8081");
     mockMvc.perform(put("/modules/{id}/discovery", moduleDiscovery.getId())
@@ -241,7 +220,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-update-module-discovery.json")
   void update_negative_moduleIdDiffersFromThePathId() throws Exception {
     var id = "another-id";
 
@@ -261,7 +239,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-update-module-discovery.json")
   void update_negative_moduleIdDiffersFromArtifactId() throws Exception {
     var id = "another-id";
 
@@ -282,10 +259,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries.sql")
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/okapi/application-discovery/delete-test-module-foo-discovery.json",
-    "/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json"
-  })
   void delete_positive() throws Exception {
     kongAdminClient.upsertService(MODULE_FOO_ID, new Service().url(MODULE_FOO_URL));
     kongAdminClient.upsertService(MODULE_BAR_ID, new Service().url(MODULE_BAR_URL));
@@ -315,11 +288,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries.sql")
-  @WireMockStub({
-    "/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json",
-    "/wiremock/stubs/okapi/application-discovery/get-test-module-foo-discovery.json",
-    "/wiremock/stubs/okapi/application-discovery/delete-test-module-foo-discovery-not-found.json",
-  })
   void delete_positive_discoveryIsNotInIntegrationServices() throws Exception {
     mockMvc.perform(delete("/modules/{id}/discovery", MODULE_FOO_ID)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
@@ -342,7 +310,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json")
   void delete_positive_noDiscovery() throws Exception {
     mockMvc.perform(delete("/modules/{id}/discovery", MODULE_FOO_ID)
       .contentType(APPLICATION_JSON)
@@ -354,7 +321,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries-ui-it.sql")
-  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-create-module-discovery.json")
   void create_positive_uiModule() throws Exception {
     var uiModuleDiscovery = uiModuleDiscovery();
 
@@ -380,7 +346,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-update-module-discovery.json")
   @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
   void update_positive_uiModule() throws Exception {
     var newModuleDiscoveryUrl = "http://test-ui-module-updated:8080";
@@ -413,7 +378,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
-  @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json")
   void delete_positive_uiModule() throws Exception {
     // Verify no Kong service exists before deletion
     assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))

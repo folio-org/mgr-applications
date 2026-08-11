@@ -41,7 +41,7 @@ import org.springframework.test.context.jdbc.Sql;
 @EnableKeycloakSecurity
 @EnableKeycloakTlsMode
 @EnableKeycloakDataImport
-@TestPropertySource(properties = {"application.okapi.enabled=false", "application.kong.enabled=false"})
+@TestPropertySource(properties = "application.kong.enabled=false")
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 class ModuleBootstrapIT extends BaseIntegrationTest {
 

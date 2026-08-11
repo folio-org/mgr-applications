@@ -165,10 +165,10 @@ public class ApplicationService {
   }
 
   /**
-   * Saves application descriptor to the database and register Module Descriptors in Okapi.
+   * Saves application descriptor to the database.
    *
    * @param descriptor - application descriptor object to save.
-   * @param token - okapi token.
+   * @param token - x-okapi-token value.
    * @return saved {@link ApplicationDescriptor} object
    */
   @Transactional
@@ -192,14 +192,14 @@ public class ApplicationService {
 
     addModuleDescriptors(descriptor::setModuleDescriptors, descriptor::getModuleDescriptors, moduleDescriptors);
     addModuleDescriptors(descriptor::setUiModuleDescriptors, descriptor::getUiModuleDescriptors, uiModuleDescriptors);
-    return createApplication(descriptor, token);
+    return createApplication(descriptor);
   }
 
   /**
    * Deletes application descriptor by id.
    *
    * @param id - application descriptor id
-   * @param token - okapi token.
+   * @param token - x-okapi-token value.
    * @throws EntityNotFoundException if application descriptor is not found by id.
    */
   @Transactional
@@ -209,12 +209,9 @@ public class ApplicationService {
 
     validateAppInstallations(id, token);
 
-    var applicationDescriptor = getAppDescriptorWithModDescriptors(application);
-
     removeModulesFromApplication(application, token);
     appRepository.delete(application);
 
-    eventPublisher.publishDescriptorDelete(applicationDescriptor, token);
     log.debug("Application Descriptor entity deleted: id = {}", application.getId());
   }
 
@@ -247,14 +244,11 @@ public class ApplicationService {
       .uiModuleDescriptors(filterAndMap(entity.getModules(), ModuleEntity::isUiModule, ModuleEntity::getDescriptor));
   }
 
-  private ApplicationDescriptor createApplication(ApplicationDescriptor descriptor, String token) {
+  private ApplicationDescriptor createApplication(ApplicationDescriptor descriptor) {
     var entity = mapper.convert(descriptor);
     populateDiscoveryFromDb(entity.getModules());
 
     var saved = appRepository.save(entity);
-
-    var md = descriptor.getModuleDescriptors();
-    eventPublisher.publishDescriptorCreate(descriptor.moduleDescriptors(md), token);
     log.debug("Application Descriptor entity saved: id = {}", saved.getId());
 
     return saved.getApplicationDescriptor();

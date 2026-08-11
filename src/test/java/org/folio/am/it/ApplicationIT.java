@@ -89,9 +89,6 @@ class ApplicationIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/okapi/application/create-test-app.json"
-  })
   void create_positive() throws Exception {
     var applicationDescriptor = getApplicationDescriptor("test-module-1.1.0", "1.1.0");
 
@@ -172,9 +169,6 @@ class ApplicationIT extends BaseIntegrationTest {
   }
 
   @Test
-  @WireMockStub(scripts = {
-    "/wiremock/stubs/okapi/application/create-test-app.json"
-  })
   void create_positive_with_dependency() throws Exception {
 
     var applicationDescriptor = new ApplicationDescriptor()
@@ -217,9 +211,7 @@ class ApplicationIT extends BaseIntegrationTest {
   @Test
   @WireMockStub(scripts = {
     "/wiremock/stubs/module-descriptor-provider/get-bar-module-descriptor.json",
-    "/wiremock/stubs/module-descriptor-provider/get-foo-module-descriptor.json",
-    "/wiremock/stubs/okapi/application/create-bar-module.json",
-    "/wiremock/stubs/okapi/application/create-foo-module.json"
+    "/wiremock/stubs/module-descriptor-provider/get-foo-module-descriptor.json"
   })
   void create_positive_moduleDescriptorsByUrl() throws Exception {
     var baseUrl = getWireMockAdminClient().getWireMockUrl();

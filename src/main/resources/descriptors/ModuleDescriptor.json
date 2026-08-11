@@ -148,10 +148,7 @@
     {
       "description": "Register a new application",
       "displayName": "Manager Applications - create application",
-      "permissionName": "mgr-applications.applications.item.post",
-      "subPermissions": [
-        "okapi.proxy.modules.post"
-      ]
+      "permissionName": "mgr-applications.applications.item.post"
     },
     {
       "description": "Validate a new application descriptor",
@@ -176,10 +173,7 @@
     {
       "description": "De-register (delete) application",
       "displayName": "Manager Applications - delete application",
-      "permissionName": "mgr-applications.applications.item.delete",
-      "subPermissions": [
-        "okapi.proxy.modules.delete"
-      ]
+      "permissionName": "mgr-applications.applications.item.delete"
     },
     {
       "description": "Retrieve registered application",
@@ -202,48 +196,27 @@
     {
       "description": "Register new module discoveries for application",
       "displayName": "Manager Applications - create discoveries",
-      "permissionName": "mgr-applications.discoveries.collection.post",
-      "subPermissions": [
-        "okapi.discovery.get",
-        "okapi.discovery.delete",
-        "okapi.discovery.post"
-      ]
+      "permissionName": "mgr-applications.discoveries.collection.post"
     },
     {
       "description": "Update module discovery for application",
       "displayName": "Manager Applications - update discovery",
-      "permissionName": "mgr-applications.discoveries.item.put",
-      "subPermissions": [
-        "okapi.discovery.get",
-        "okapi.discovery.delete",
-        "okapi.discovery.post"
-      ]
+      "permissionName": "mgr-applications.discoveries.item.put"
     },
     {
       "description": "Update module discoveries for application",
       "displayName": "Manager Applications - update discoveries",
-      "permissionName": "mgr-applications.discoveries.collection.put",
-      "subPermissions": [
-        "okapi.discovery.get",
-        "okapi.discovery.delete",
-        "okapi.discovery.post"
-      ]
+      "permissionName": "mgr-applications.discoveries.collection.put"
     },
     {
       "description": "De-register (delete) module discovery for application",
       "displayName": "Manager Applications - delete discovery",
-      "permissionName": "mgr-applications.discoveries.item.delete",
-      "subPermissions": [
-        "okapi.discovery.delete"
-      ]
+      "permissionName": "mgr-applications.discoveries.item.delete"
     },
     {
       "description": "De-register (delete) module discoveries for application",
       "displayName": "Manager Applications - delete discoveries",
-      "permissionName": "mgr-applications.discoveries.collection.delete",
-      "subPermissions": [
-        "okapi.discovery.delete"
-      ]
+      "permissionName": "mgr-applications.discoveries.collection.delete"
     },
     {
       "description": "Get module discovery for module",

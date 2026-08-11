@@ -37,7 +37,6 @@ import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDiscoveries;
 import org.folio.am.domain.dto.ApplicationDiscovery;
 import org.folio.am.domain.dto.ApplicationReferences;
-import org.folio.am.domain.dto.DeploymentDescriptor;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.dto.ModuleBootstrap;
 import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
@@ -146,27 +145,6 @@ public class TestValues {
     entity.setVersion(version);
     entity.setType(type);
     return entity;
-  }
-
-  public static DeploymentDescriptor deploymentDescriptor() {
-    return new DeploymentDescriptor()
-      .srvcId(SERVICE_ID)
-      .instId(SERVICE_ID)
-      .url(MODULE_URL);
-  }
-
-  public static DeploymentDescriptor deploymentDescriptor(String moduleId) {
-    return new DeploymentDescriptor()
-      .instId(moduleId)
-      .srvcId(moduleId)
-      .url("http://" + moduleId);
-  }
-
-  public static DeploymentDescriptor deploymentDescriptor(String moduleId, String url) {
-    return new DeploymentDescriptor()
-      .instId(moduleId)
-      .srvcId(moduleId)
-      .url(url);
   }
 
   public static Module module() {
