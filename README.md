@@ -63,10 +63,7 @@ Run locally with proper environment variables set (see [Environment variables](#
 listening port 8081 (default listening port):
 
 ```shell
-java \
-  -Dokapi.url=http://localhost:9130 \
-  -Dokapi.token=${okapiToken} \
-  -jar target/mgr-applications-*.jar
+java -jar target/mgr-applications-*.jar
 ```
 
 Build the docker container with following script after compilation:
@@ -82,10 +79,8 @@ docker run \
   --name mgr-applications \
   --link postgres:postgres \
   -e DB_HOST=postgres \
-  -e okapi.url=http://okapi:9130 \
   -e tenant.url=http://mgr-tenants:8081 \
   -e te.url=http://mgr-tenant-entitlements:8081 \
-  -e okapi.token=${okapiToken} \
   -p 8081:8081 \
   -d mgr-applications
 ```
@@ -100,10 +95,8 @@ docker run \
 | DB_PASSWORD                              | postgres                     |  false   | Postgres username password                                                                                                                                                                                 |
 | DB_DATABASE                              | okapi_modules                |  false   | Postgres database name                                                                                                                                                                                     |
 | MODULE_URL                               | http://mgr-applications:8081 |  false   | Module URL (module cannot define url for Kong registration by itself, because it can be under Load Balancer, so this value must be provided manually)                                                      |
-| okapi.url                                | -                            |  false   | Okapi URL used to perform HTTP requests by `OkapiClient`.                                                                                                                                                  |
-| OKAPI_INTEGRATION_ENABLED                | true                         |  false   | Defines if okapi integration is enabled or disabled.<br/>If it set to `false` - it will exclude all okapi-related beans from spring context.                                                               |
 | tenant.url                               | -                            |   true   | Tenant URL used to perform HTTP requests by `TenantManagerClient`.                                                                                                                                         |
-| kong.url                                 | -                            |   true   | Okapi URL used to perform HTTP requests for recurring jobs, required.                                                                                                                                      |
+| kong.url                                 | -                            |   true   | Kong Admin URL used to perform HTTP requests for route management, required.                                                                                                                               |
 | KONG_ADMIN_URL                           | -                            |  false   | Alias for `kong.url`.                                                                                                                                                                                      |
 | KONG_INTEGRATION_ENABLED                 | true                         |  false   | Defines if kong integration is enabled or disabled.<br/>If it set to `false` - it will exclude all kong-related beans from spring context.                                                                 |
 | KONG_CONNECT_TIMEOUT                     | -                            |  false   | Defines the timeout in milliseconds for establishing a connection from Kong to upstream service. If the value is not provided then Kong defaults are applied.                                              |
@@ -133,7 +126,6 @@ docker run \
 | TE_TLS_TRUSTSTORE_TYPE                   | -                            |  false   | Truststore file type for TLS connection to mgr-tenant-entitlements module.                                                                                                                                 |
 | SECURITY_ENABLED                         | true                         |  false   | Allows to enable/disable security. If true and KC_INTEGRATION_ENABLED is also true - the Keycloak will be used as a security provider.                                                                     |
 | FAR_MODE                                 | false                        |  false   | Allows to enable Folio Application Registry mode, if FAR mode is enabled, kong integration must disabled using environment variable `KONG_INTEGRATION_ENABLED`.                                            |
-| MOD_AUTHTOKEN_URL                        | -                            |   true   | Mod-authtoken URL. Required if OKAPI_INTEGRATION_ENABLED is true and SECURITY_ENABLED is true and KC_INTEGRATION_ENABLED is false.                                                                         |
 | SECURE\_STORE\_ENV                       | folio                        |  false   | First segment of the secure store key, for example `prod` or `test`. Defaults to `folio`. In Ramsons and Sunflower defaults to ENV with fall-back `folio`.                                                 |
 | SECRET_STORE_TYPE                        | -                            |   true   | Secure storage type. Supported values: `EPHEMERAL`, `AWS_SSM`, `VAULT`, `FSSP`                                                                                                                             |
 | VALIDATION_MODE                          | basic                        |  false   | Validation mode applied during Application Descriptors checking (see POST `/applications/validate` endpoint). Possible values: `none`, `basic`, `onCreate`                                                 |
@@ -343,7 +335,7 @@ curl -XGET "$TE_URL/entitlements?query=applicationId=$applicationId"
 
 In this mode, we only need a subset of the component's functionality.
 While CRUD operations for application descriptors works as-is,
-the integrations with Kafka, Kong, Okapi, mgr-tenant-entitlements is disabled.
+the integrations with Kafka, Kong, mgr-tenant-entitlements is disabled.
 To enable this mode set `FAR_MODE` env variable to `true` and make sure to leave other integration variables unset or
 set to `false`.
 

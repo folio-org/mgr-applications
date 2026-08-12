@@ -45,7 +45,6 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 @Import(KafkaTestConfiguration.class)
 @TestPropertySource(properties = {
-  "application.okapi.enabled=false",
   "application.kong.enabled=true",
   "application.kong.tenant-checks.enabled=true"
 })

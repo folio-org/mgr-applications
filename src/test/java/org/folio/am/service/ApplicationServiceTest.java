@@ -150,7 +150,6 @@ class ApplicationServiceTest {
     var actual = service.create(descriptor, OKAPI_AUTH_TOKEN, true);
 
     assertThat(actual).isEqualTo(descriptor);
-    verify(eventPublisher).publishDescriptorCreate(descriptor, OKAPI_AUTH_TOKEN);
     verify(applicationValidatorService).validate(context);
     verify(moduleDescriptorLoader).loadByUrls(descriptor.getModules());
     verify(moduleDescriptorLoader).loadByUrls(descriptor.getUiModules());
@@ -168,7 +167,6 @@ class ApplicationServiceTest {
     var actual = service.create(descriptor, OKAPI_AUTH_TOKEN, false);
 
     assertThat(actual).isEqualTo(descriptor);
-    verify(eventPublisher).publishDescriptorCreate(descriptor, OKAPI_AUTH_TOKEN);
     verifyNoInteractions(applicationValidatorService);
   }
 
@@ -186,7 +184,6 @@ class ApplicationServiceTest {
     var actual = service.create(descriptor, OKAPI_AUTH_TOKEN, true);
 
     assertThat(actual).isEqualTo(expectedDescriptor);
-    verify(eventPublisher).publishDescriptorCreate(descriptor, OKAPI_AUTH_TOKEN);
     verify(applicationValidatorService).validate(context);
   }
 
@@ -211,7 +208,6 @@ class ApplicationServiceTest {
     assertThat(entity.getModules())
       .anyMatch(me -> me.getDiscoveryUrl().equals(dbModule.getDiscoveryUrl()));
 
-    verify(eventPublisher).publishDescriptorCreate(descriptor, OKAPI_AUTH_TOKEN);
     verify(applicationValidatorService).validate(context);
     verify(moduleDescriptorLoader).loadByUrls(descriptor.getModules());
     verify(moduleDescriptorLoader).loadByUrls(descriptor.getUiModules());
@@ -248,7 +244,6 @@ class ApplicationServiceTest {
       verify(discoveryService).delete(module.getId(), OKAPI_AUTH_TOKEN);
       verify(moduleRepository).delete(module);
     });
-    verify(eventPublisher).publishDescriptorDelete(expectedEntityToDelete.getApplicationDescriptor(), OKAPI_AUTH_TOKEN);
   }
 
   @Test
@@ -265,7 +260,6 @@ class ApplicationServiceTest {
     service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
 
     verify(repository).delete(expectedEntityToDelete);
-    verify(eventPublisher).publishDescriptorDelete(expectedEntityToDelete.getApplicationDescriptor(), OKAPI_AUTH_TOKEN);
     verifyNoInteractions(entitlementService);
   }
 
@@ -280,7 +274,6 @@ class ApplicationServiceTest {
     service.delete(APPLICATION_ID, OKAPI_AUTH_TOKEN);
 
     verify(repository).delete(expectedEntityToDelete);
-    verify(eventPublisher).publishDescriptorDelete(expectedEntityToDelete.getApplicationDescriptor(), OKAPI_AUTH_TOKEN);
     verifyNoInteractions(discoveryService, moduleRepository);
   }
 

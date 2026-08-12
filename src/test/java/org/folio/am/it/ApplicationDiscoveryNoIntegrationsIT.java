@@ -46,13 +46,12 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 @IntegrationTest
 @SqlMergeMode(MERGE)
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
-@TestPropertySource(properties = {"application.okapi.enabled=false", "application.kong.enabled=false"})
+@TestPropertySource(properties = "application.kong.enabled=false")
 class ApplicationDiscoveryNoIntegrationsIT extends BaseIntegrationTest {
 
   @BeforeAll
   public static void setUp(@Autowired ApplicationContext applicationContext) {
     assertThat(applicationContext.containsBean("kongAdminClient")).isFalse();
-    assertThat(applicationContext.containsBean("okapiClient")).isFalse();
 
     fakeKafkaConsumer.registerTopic(getEnvTopicName(DISCOVERY_DESTINATION), DiscoveryEvent.class);
   }

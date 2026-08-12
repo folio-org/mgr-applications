@@ -42,8 +42,7 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 @TestPropertySource(properties = {
   "application.far-mode.enabled=true",
-  "application.kong.enabled=false",
-  "application.okapi.enabled=false"
+  "application.kong.enabled=false"
 })
 class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
 

@@ -454,8 +454,6 @@ components:
       $ref: schemas/module/bootstrap/egressBootstrap.json
     errorResponse:
       $ref: schemas/common/errors.json
-    deploymentDescriptor:
-      $ref: schemas/deploymentDescriptor.json
     applicationReferences:
       $ref: schemas/applicationReferences.json
     validationMode:

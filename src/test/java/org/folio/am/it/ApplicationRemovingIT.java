@@ -54,8 +54,6 @@ class ApplicationRemovingIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/mte/get-entitlement-not-exist.json")
-  @WireMockStub(scripts = "/wiremock/stubs/okapi/application/delete-mod-bar-1.0.0.json")
-  @WireMockStub(scripts = "/wiremock/stubs/okapi/application-discovery/delete-module-bar-discovery.json")
   void delete_positive_modulesPartiallyRemoved() throws Exception {
     mockMvc.perform(delete("/applications/{id}", APPLICATION_ID)
         .header(TOKEN, generateAccessToken(keycloakProperties)))
@@ -90,7 +88,6 @@ class ApplicationRemovingIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/mte/get-entitlement.json")
-  @WireMockStub(scripts = "/wiremock/stubs/okapi/application/delete-test-app.json")
   void delete_negative_entitlementExist() throws Exception {
     mockMvc.perform(delete("/applications/{id}", APPLICATION_ID)
         .header(TOKEN, generateAccessToken(keycloakProperties)))
@@ -99,7 +96,6 @@ class ApplicationRemovingIT extends BaseIntegrationTest {
 
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/mte/get-entitlement-service-exception.json")
-  @WireMockStub(scripts = "/wiremock/stubs/okapi/application/delete-test-app.json")
   void delete_negative_serviceException() throws Exception {
     mockMvc.perform(delete("/applications/{id}", APPLICATION_ID)
         .header(TOKEN, generateAccessToken(keycloakProperties)))

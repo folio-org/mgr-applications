@@ -58,7 +58,7 @@ import org.springframework.web.client.HttpClientErrorException;
 @IntegrationTest
 @SqlMergeMode(MERGE)
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
-@TestPropertySource(properties = {"application.okapi.enabled=false", "application.kong.enabled=true"})
+@TestPropertySource(properties = "application.kong.enabled=true")
 class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
 
   @Autowired private KongAdminClient kongAdminClient;
