@@ -4,6 +4,11 @@
 * Application-scoped sidecar bootstrap: ingress and egress module-bootstrap endpoints (EUREKA-899)
 * Switch Kong integration test container to folioci/folio-kong image (APPPOCTOOL-37)
 * Remove Kong gateway management from mgr-applications (MGRAPPS-108)
+* **Breaking:** Remove "Okapi integration" mode. `OKAPI_INTEGRATION_ENABLED`, `OKAPI_URL` and
+  `MOD_AUTHTOKEN_URL` are no longer supported, module/discovery descriptors are no longer pushed to
+  an Okapi gateway, and mod-authtoken security mode is no longer reachable. The `okapi.*`
+  subPermissions were dropped from the module descriptor (MGRAPPS-55)
+
 
 ---
 

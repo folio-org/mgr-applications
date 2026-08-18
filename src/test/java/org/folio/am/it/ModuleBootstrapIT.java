@@ -34,14 +34,12 @@ import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
 @IntegrationTest
 @EnableKeycloakSecurity
 @EnableKeycloakTlsMode
 @EnableKeycloakDataImport
-@TestPropertySource(properties = "application.okapi.enabled=false")
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 class ModuleBootstrapIT extends BaseIntegrationTest {
 

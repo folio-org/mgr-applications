@@ -46,10 +46,6 @@ application:
     enabled: ${FAR_MODE:false}
   security:
     enabled: ${SECURITY_ENABLED:true}
-  okapi:
-    enabled: ${OKAPI_INTEGRATION_ENABLED:true}
-    url: ${OKAPI_URL:${okapi.url:}}
-    mod-authtoken-url: ${MOD_AUTHTOKEN_URL}
   environment: ${ENV:folio}
   kafka:
     producer:

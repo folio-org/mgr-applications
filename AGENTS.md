@@ -13,7 +13,7 @@ mvn test -Dtest=ApplicationServiceTest#shouldCreateApplication  # single test
 mvn checkstyle:check           # runs during build, FOLIO rules
 ```
 
-Run locally: `java -Dokapi.url=... -Dokapi.token=... -jar target/mgr-applications-*.jar`. Full env vars in `README.md`.
+Run locally: `java -jar target/mgr-applications-*.jar`. Full env vars in `README.md`.
 
 ## Architecture
 
@@ -27,12 +27,12 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 
 **Integrations**:
 - Kafka (`integration.kafka`): `DiscoveryPublisher` publishes `${ENV}.discovery` events.
-- Keycloak (`integration.okapi`): resource-server/client/role/policy import; JWT validation. Toggle `KC_INTEGRATION_ENABLED`.
+- Keycloak (via `folio-security`): resource-server/client/role/policy import; JWT validation. Toggle `KC_INTEGRATION_ENABLED`.
 - mgr-tenant-entitlements (`integration.mte`): blocks deletion of entitled applications.
 
-**Events** via `ApplicationEventPublisher`: `ApplicationDescriptorListener` (create/delete) and `ApplicationDiscoveryListener` (discovery create/update/delete) drive Keycloak and Kafka side effects. Reliable publishing via transactional outbox (`integration.messaging`).
+**Events** via `ApplicationEventPublisher`: `ApplicationDiscoveryListener` (discovery create/update/delete) drives Kafka side effects. Reliable publishing via transactional outbox (`integration.messaging`).
 
-**FAR mode** (`FAR_MODE=true`): descriptor CRUD only; disables Kafka/Okapi/mte.
+**FAR mode** (`FAR_MODE=true`): descriptor CRUD only; disables Kafka/Keycloak/mte.
 
 **Validation** (`VALIDATION_MODE`): NONE / BASIC / ON_CREATE (full dependency checks).
 

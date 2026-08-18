@@ -56,8 +56,6 @@ class ApplicationCleanupIT extends BaseIntegrationTest {
   @Test
   @WireMockStub(scripts = "/wiremock/stubs/mte/get-entitlement-application-cleanup-not-installed.json")
   @WireMockStub(scripts = "/wiremock/stubs/mte/get-entitlement-application-cleanup.json")
-  @WireMockStub(scripts = "/wiremock/stubs/okapi/application/delete-mod-bar-1.0.0.json")
-  @WireMockStub(scripts = "/wiremock/stubs/okapi/application-discovery/delete-module-bar-discovery.json")
   void cleanup_positive_removesUnusedAppsAndSkipsEntitledApps() throws Exception {
     mockMvc.perform(post("/applications/cleanup")
         .header(TOKEN, generateAccessToken(keycloakProperties)))
