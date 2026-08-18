@@ -1,4 +1,4 @@
-package org.folio.am.integration.kong;
+package org.folio.am.integration.gateway;
 
 import static java.util.Collections.singletonList;
 
@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "application.kong.enabled")
-public class KongDiscoveryListener implements ApplicationDiscoveryListener {
+@ConditionalOnProperty(value = "application.apigw.enabled")
+public class ApiGatewayDiscoveryListener implements ApplicationDiscoveryListener {
 
   private final KongGatewayService kongGatewayService;
   private final ModuleRepository moduleRepository;

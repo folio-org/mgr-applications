@@ -58,7 +58,7 @@ import org.springframework.web.client.HttpClientErrorException;
 @IntegrationTest
 @SqlMergeMode(MERGE)
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
-@TestPropertySource(properties = "application.kong.enabled=true")
+@TestPropertySource(properties = "application.apigw.enabled=true")
 class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
 
   @Autowired private KongAdminClient kongAdminClient;
@@ -67,7 +67,7 @@ class ApplicationDiscoveryKongIT extends BaseIntegrationTest {
   public static void setUp(@Autowired ApplicationContext applicationContext) {
     assertThat(applicationContext.containsBean("folioKongAdminClient")).isTrue();
     assertThat(applicationContext.containsBean("folioKongGatewayService")).isTrue();
-    assertThat(applicationContext.containsBean("kongDiscoveryListener")).isTrue();
+    assertThat(applicationContext.containsBean("apiGatewayDiscoveryListener")).isTrue();
     assertThat(applicationContext.containsBean("okapiClient")).isFalse();
 
     fakeKafkaConsumer.registerTopic(getEnvTopicName(DISCOVERY_DESTINATION), DiscoveryEvent.class);

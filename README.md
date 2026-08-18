@@ -11,6 +11,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 * [Compiling](#compiling)
 * [Running It](#running-it)
 * [Environment Variables](#environment-variables)
+  * [Deprecated environment variables](#deprecated-environment-variables)
   * [SSL Configuration environment variables](#ssl-configuration-environment-variables)
   * [Secure storage environment variables](#secure-storage-environment-variables)
     * [AWS-SSM](#aws-ssm)
@@ -20,9 +21,10 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
   * [Import Keycloak data on startup](#import-keycloak-data-on-startup)
   * [Keycloak Security](#keycloak-security)
   * [Keycloak specific environment variables](#keycloak-specific-environment-variables)
-* [Kong Gateway Integration](#kong-gateway-integration)
-  * [Kong Service Registration](#kong-service-registration)
-  * [Kong Route Registration](#kong-route-registration)
+* [API Gateway Integration](#api-gateway-integration)
+  * [Gateway Service Registration](#gateway-service-registration)
+  * [Gateway Route Registration](#gateway-route-registration)
+  * [Gateway Tenant Checks Enforcement](#gateway-tenant-checks-enforcement)
 * [Kafka Integration](#kafka-integration)
   * [Events upon discovery changes](#events-upon-discovery-changes)
   * [Naming convention](#naming-convention)
@@ -40,7 +42,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 * Enabling/disabling of an application (including dependencies)
 * (Un-)Deployment of an application (optional)
 * Application health and availability monitoring
-* Optional integration with Kong gateway
+* Optional integration with the API Gateway
   * Add/remove services on application discovery update
 
 ## Compiling
@@ -94,20 +96,20 @@ docker run \
 | DB_USERNAME                              | postgres                     |  false   | Postgres username                                                                                                                                                                                          |
 | DB_PASSWORD                              | postgres                     |  false   | Postgres username password                                                                                                                                                                                 |
 | DB_DATABASE                              | okapi_modules                |  false   | Postgres database name                                                                                                                                                                                     |
-| MODULE_URL                               | http://mgr-applications:8081 |  false   | Module URL (module cannot define url for Kong registration by itself, because it can be under Load Balancer, so this value must be provided manually)                                                      |
+| MODULE_URL                               | http://mgr-applications:8081 |  false   | Module URL (module cannot define url for gateway registration by itself, because it can be under Load Balancer, so this value must be provided manually)                                                   |
 | tenant.url                               | -                            |   true   | Tenant URL used to perform HTTP requests by `TenantManagerClient`.                                                                                                                                         |
-| kong.url                                 | -                            |   true   | Kong Admin URL used to perform HTTP requests for route management, required.                                                                                                                               |
-| KONG_ADMIN_URL                           | -                            |  false   | Alias for `kong.url`.                                                                                                                                                                                      |
-| KONG_INTEGRATION_ENABLED                 | true                         |  false   | Defines if kong integration is enabled or disabled.<br/>If it set to `false` - it will exclude all kong-related beans from spring context.                                                                 |
-| KONG_CONNECT_TIMEOUT                     | -                            |  false   | Defines the timeout in milliseconds for establishing a connection from Kong to upstream service. If the value is not provided then Kong defaults are applied.                                              |
-| KONG_READ_TIMEOUT                        | -                            |  false   | Defines the timeout in milliseconds between two successive read operations for transmitting a request from Kong to the upstream service. If the value is not provided then Kong defaults are applied.      |
-| KONG_WRITE_TIMEOUT                       | -                            |  false   | Defines the timeout in milliseconds between two successive write operations for transmitting a request from Kong to the upstream service. If the value is not provided then Kong defaults are applied.     |
-| KONG_RETRIES                             | -                            |  false   | Defines the number of retries to execute upon failure to proxy. If the value is not provided then Kong defaults are applied.                                                                               |
-| KONG_TLS_ENABLED                         | false                        |  false   | Allows to enable/disable TLS connection to Kong.                                                                                                                                                           |
-| KONG_TLS_TRUSTSTORE_PATH                 | -                            |  false   | Truststore file path for TLS connection to Kong.                                                                                                                                                           |
-| KONG_TLS_TRUSTSTORE_PASSWORD             | -                            |  false   | Truststore password for TLS connection to Kong.                                                                                                                                                            |
-| KONG_TLS_TRUSTSTORE_TYPE                 | -                            |  false   | Truststore type for TLS connection to Kong.                                                                                                                                                                |
-| KONG_TENANT_CHECKS_ENABLED               | false                        |  false   | Enables tenant checks enforcement via entitlement consumption. When true, mgr-applications consumes entitlement Kafka events and updates Kong route expressions to enforce tenant checks per route.    |
+| APIGW_URL                                | -                            |   true   | API Gateway Admin URL used to perform HTTP requests for route management, required.                                                                                                                        |
+| kong.url                                 | -                            |  false   | Lowest-precedence alias for `APIGW_URL`.                                                                                                                                                                   |
+| APIGW_ENABLED                            | true                         |  false   | Defines if API Gateway integration is enabled or disabled.<br/>If it set to `false` - it will exclude all gateway-related beans from spring context.                                                       |
+| APIGW_CONNECT_TIMEOUT                    | -                            |  false   | Defines the timeout in milliseconds for establishing a connection from the gateway to upstream service. If the value is not provided then gateway defaults are applied.                                    |
+| APIGW_READ_TIMEOUT                       | -                            |  false   | Defines the timeout in milliseconds between two successive read operations for transmitting a request from the gateway to the upstream service. If the value is not provided then gateway defaults are applied. |
+| APIGW_WRITE_TIMEOUT                      | -                            |  false   | Defines the timeout in milliseconds between two successive write operations for transmitting a request from the gateway to the upstream service. If the value is not provided then gateway defaults are applied. |
+| APIGW_RETRIES                            | -                            |  false   | Defines the number of retries to execute upon failure to proxy. If the value is not provided then gateway defaults are applied.                                                                            |
+| APIGW_TLS_ENABLED                        | false                        |  false   | Allows to enable/disable TLS connection to the API Gateway.                                                                                                                                                |
+| APIGW_TLS_TRUSTSTORE_PATH                | -                            |  false   | Truststore file path for TLS connection to the API Gateway.                                                                                                                                                |
+| APIGW_TLS_TRUSTSTORE_PASSWORD            | -                            |  false   | Truststore password for TLS connection to the API Gateway.                                                                                                                                                 |
+| APIGW_TLS_TRUSTSTORE_TYPE                | -                            |  false   | Truststore type for TLS connection to the API Gateway.                                                                                                                                                     |
+| APIGW_TENANT_CHECKS_ENABLED              | false                        |  false   | Enables tenant checks enforcement via entitlement consumption. When true, mgr-applications consumes entitlement Kafka events and updates gateway route expressions to enforce tenant checks per route. |
 | ENV                                      | folio                        |  false   | The logical name of the deployment (kafka topic prefix), must be unique across all environments using the same shared Kafka/Elasticsearch clusters, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed |
 | KAFKA_HOST                               | kafka                        |  false   | Kafka broker hostname                                                                                                                                                                                       |
 | KAFKA_PORT                               | 9092                         |  false   | Kafka broker port                                                                                                                                                                                           |
@@ -125,14 +127,36 @@ docker run \
 | TE_TLS_TRUSTSTORE_PASSWORD               | -                            |  false   | Truststore password for TLS connection to mgr-tenant-entitlements module.                                                                                                                                  |
 | TE_TLS_TRUSTSTORE_TYPE                   | -                            |  false   | Truststore file type for TLS connection to mgr-tenant-entitlements module.                                                                                                                                 |
 | SECURITY_ENABLED                         | true                         |  false   | Allows to enable/disable security. If true and KC_INTEGRATION_ENABLED is also true - the Keycloak will be used as a security provider.                                                                     |
-| FAR_MODE                                 | false                        |  false   | Allows to enable Folio Application Registry mode, if FAR mode is enabled, kong integration must disabled using environment variable `KONG_INTEGRATION_ENABLED`.                                            |
+| FAR_MODE                                 | false                        |  false   | Allows to enable Folio Application Registry mode, if FAR mode is enabled, API Gateway integration must be disabled using environment variable `APIGW_ENABLED`.                                             |
 | SECURE\_STORE\_ENV                       | folio                        |  false   | First segment of the secure store key, for example `prod` or `test`. Defaults to `folio`. In Ramsons and Sunflower defaults to ENV with fall-back `folio`.                                                 |
 | SECRET_STORE_TYPE                        | -                            |   true   | Secure storage type. Supported values: `EPHEMERAL`, `AWS_SSM`, `VAULT`, `FSSP`                                                                                                                             |
 | VALIDATION_MODE                          | basic                        |  false   | Validation mode applied during Application Descriptors checking (see POST `/applications/validate` endpoint). Possible values: `none`, `basic`, `onCreate`                                                 |
 | MAX_HTTP_REQUEST_HEADER_SIZE             | 200KB                        |   true   | Maximum size of the HTTP request header.                                                                                                                                                                   |
-| REGISTER_MODULE_IN_KONG                  | true                         |  false   | Defines if module must be registered in Kong (it will create for itself service and list of routes from module descriptor)                                                                                 |
+| APIGW_REGISTER_MODULE                    | true                         |  false   | Defines if module must be registered in the API Gateway (it will create for itself service and list of routes from module descriptor)                                                                      |
 | ROUTER_PATH_PREFIX                       |                              |  false   | Defines routes prefix to be added to the generated endpoints by OpenAPI generator (`/foo/entites` -> `{{prefix}}/foo/entities`). Required if load balancing group has format like `{{host}}/{{moduleId}}`  |
-| ROUTEMANAGEMENT_ENABLE                   | true                         |  false   | Enable Kong routes management for modules discovery information (e.g. creation of routes on module discovery creation/update, removal of routes on deletion of module discovery information)               |
+| ROUTEMANAGEMENT_ENABLE                   | true                         |  false   | Enable gateway routes management for modules discovery information (e.g. creation of routes on module discovery creation/update, removal of routes on deletion of module discovery information)            |
+
+### Deprecated environment variables
+
+The Kong-specific names below are still functional: each one is used when its replacement is not set.
+A `WARN` message is logged at startup for every deprecated name that is in use.
+Support for them is planned to be removed in the `Vetch` flower release.
+
+| Deprecated name                            | Replacement                   |
+|:-------------------------------------------|:------------------------------|
+| `KONG_INTEGRATION_ENABLED`                 | `APIGW_ENABLED`               |
+| `KONG_ADMIN_URL`                           | `APIGW_URL`                   |
+| `REGISTER_MODULE_IN_KONG`                  | `APIGW_REGISTER_MODULE`       |
+| `KONG_CONNECT_TIMEOUT`                     | `APIGW_CONNECT_TIMEOUT`       |
+| `KONG_READ_TIMEOUT`                        | `APIGW_READ_TIMEOUT`          |
+| `KONG_WRITE_TIMEOUT`                       | `APIGW_WRITE_TIMEOUT`         |
+| `KONG_RETRIES`                             | `APIGW_RETRIES`               |
+| `KONG_TLS_ENABLED`                         | `APIGW_TLS_ENABLED`           |
+| `KONG_TLS_TRUSTSTORE_PATH`                 | `APIGW_TLS_TRUSTSTORE_PATH`   |
+| `KONG_TLS_TRUSTSTORE_PASSWORD`             | `APIGW_TLS_TRUSTSTORE_PASSWORD` |
+| `KONG_TLS_TRUSTSTORE_TYPE`                 | `APIGW_TLS_TRUSTSTORE_TYPE`   |
+| `KONG_TENANT_CHECKS_ENABLED`               | `APIGW_TENANT_CHECKS_ENABLED` |
+| `application.kong.*` configuration properties | the matching `application.apigw.*` property |
 
 ### SSL Configuration environment variables
 
@@ -227,12 +251,12 @@ The feature is controlled by two env variables `SECURITY_ENABLED` and `KC_INTEGR
 | KC_JWKS_REFRESH_INTERVAL          | 60                         |    false    | Jwks refresh interval for realm JWT parser (in minutes).                                                                                                |
 | KC_FORCED_JWKS_REFRESH_INTERVAL   | 60                         |    false    | Forced jwks refresh interval for realm JWT parser (used in signing key rotation, in minutes).                                                           |
 
-## Kong Gateway Integration
+## API Gateway Integration
 
-Kong gateway integration implemented using idempotent approach
+API Gateway integration implemented using idempotent approach
 with [Kong Admin API](https://docs.konghq.com/gateway/latest/admin-api/).
 
-### Kong Service Registration
+### Gateway Service Registration
 
 On service discovery registration for each module, Kong Gateway services are added and configured to enable proper routing and access through Kong.
 
@@ -247,12 +271,12 @@ On service discovery registration for each module, Kong Gateway services are add
 To view registered services in Kong, use:
 
 ```shell
-curl -X GET "$KONG_ADMIN_URL/services"
+curl -X GET "$APIGW_URL/services"
 ```
 
 This will return a list of all services registered in the Kong Gateway.
 
-### Kong Route Registration
+### Gateway Route Registration
 
 Routes are registered for each module and mapped to the corresponding Kong Service. Routes define how incoming requests are matched and forwarded to the backend service.
 
@@ -262,21 +286,21 @@ Routes are registered for each module and mapped to the corresponding Kong Servi
   - Routes expression matches
   - Tags for module identification (`moduleId`, `interfaceId`)
 - Routes are managed idempotently: existing routes are updated in place, new routes are created, and obsolete routes are removed.
-- Tenant-specific route enforcement is supported via entitlement events (see [Kong Tenant Checks Enforcement](#kong-tenant-checks-enforcement)).
+- Tenant-specific route enforcement is supported via entitlement events (see [Gateway Tenant Checks Enforcement](#gateway-tenant-checks-enforcement)).
 
 To view the routes for a specific service, use:
 
 ```shell
-curl -X GET "$KONG_ADMIN_URL/services/$moduleId/routes"
+curl -X GET "$APIGW_URL/services/$moduleId/routes"
 ```
 
 This will return all routes registered for the specified module's service.
 
-**Note:** Route expressions and tenant restrictions are dynamically managed based on entitlement events when `KONG_TENANT_CHECKS_ENABLED=true`. See the dedicated section for details.
+**Note:** Route expressions and tenant restrictions are dynamically managed based on entitlement events when `APIGW_TENANT_CHECKS_ENABLED=true`. See the dedicated section for details.
 
-### Kong Tenant Checks Enforcement
+### Gateway Tenant Checks Enforcement
 
-The application supports dynamic tenant-specific route enforcement through entitlement events. When `KONG_TENANT_CHECKS_ENABLED=true`:
+The application supports dynamic tenant-specific route enforcement through entitlement events. When `APIGW_TENANT_CHECKS_ENABLED=true`:
 
 - **Entitlement Subscription**: The application subscribes to the `${ENV}.entitlement` Kafka topic to receive tenant entitlement events.
 - **Dynamic Route Updates**: Routes are automatically updated with tenant-specific expressions based on entitlement events:
@@ -304,8 +328,8 @@ The application supports dynamic tenant-specific route enforcement through entit
 
 #### Behavior
 
-- **Default (KONG_TENANT_CHECKS_ENABLED=false)**: No entitlement subscription, no route expression changes
-- **Enabled (KONG_TENANT_CHECKS_ENABLED=true)**: Consumes entitlement events and dynamically updates Kong route expressions
+- **Default (APIGW_TENANT_CHECKS_ENABLED=false)**: No entitlement subscription, no route expression changes
+- **Enabled (APIGW_TENANT_CHECKS_ENABLED=true)**: Consumes entitlement events and dynamically updates Kong route expressions
 - **Idempotent**: Updates are applied incrementally based on current route state
 - **Fallback**: Routes without tenant restrictions allow access to all tenants (wildcard behavior)
 
@@ -335,7 +359,7 @@ curl -XGET "$TE_URL/entitlements?query=applicationId=$applicationId"
 
 In this mode, we only need a subset of the component's functionality.
 While CRUD operations for application descriptors works as-is,
-the integrations with Kafka, Kong, mgr-tenant-entitlements is disabled.
+the integrations with Kafka, the API Gateway, mgr-tenant-entitlements is disabled.
 To enable this mode set `FAR_MODE` env variable to `true` and make sure to leave other integration variables unset or
 set to `false`.
 

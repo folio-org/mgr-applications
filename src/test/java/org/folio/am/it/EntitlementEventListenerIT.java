@@ -45,8 +45,8 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
 @Import(KafkaTestConfiguration.class)
 @TestPropertySource(properties = {
-  "application.kong.enabled=true",
-  "application.kong.tenant-checks.enabled=true"
+  "application.apigw.enabled=true",
+  "application.apigw.tenant-checks.enabled=true"
 })
 class EntitlementEventListenerIT extends BaseIntegrationTest {
 
@@ -64,7 +64,7 @@ class EntitlementEventListenerIT extends BaseIntegrationTest {
   static void setUp(@Autowired ApplicationContext applicationContext) {
     assertThat(applicationContext.containsBean("folioKongAdminClient")).isTrue();
     assertThat(applicationContext.containsBean("folioKongGatewayService")).isTrue();
-    assertThat(applicationContext.containsBean("kongDiscoveryListener")).isTrue();
+    assertThat(applicationContext.containsBean("apiGatewayDiscoveryListener")).isTrue();
     assertThat(applicationContext.containsBean("entitlementEventListener")).isTrue();
     assertThat(applicationContext.containsBean("entitlementKafkaListenerContainerFactory")).isTrue();
     assertThat(applicationContext.containsBean("okapiClient")).isFalse();

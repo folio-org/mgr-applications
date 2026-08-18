@@ -27,7 +27,7 @@ import org.springframework.util.backoff.FixedBackOff;
 @Log4j2
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "application.kong.tenant-checks.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "application.apigw.tenant-checks.enabled", havingValue = "true")
 public class EntitlementConsumerConfiguration {
 
   private final KafkaProperties kafkaProperties;
