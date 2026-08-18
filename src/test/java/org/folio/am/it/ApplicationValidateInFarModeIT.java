@@ -5,6 +5,7 @@ import static org.folio.test.TestUtils.asJsonString;
 import static org.folio.test.TestUtils.copy;
 import static org.folio.test.TestUtils.parse;
 import static org.folio.test.TestUtils.readString;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -66,6 +67,58 @@ class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
       .andExpect(jsonPath("$.[1]", is(APP_INN_REACH.getId())))
       .andExpect(jsonPath("$.[2]", is(APP_PLATFORM_COMPLETE.getId())))
       .andExpect(jsonPath("$.[3]", is(APP_PLATFORM_MINIMAL.getId())));
+  }
+
+  @Test
+  void validateDescriptors_positive_scopedToApplicationWithoutDependencies() throws Exception {
+    var req = validationReq(APP_PLATFORM_MINIMAL.getId(),
+      APP_PLATFORM_MINIMAL, APP_PLATFORM_COMPLETE, APP_EHOLDINGS, APP_INN_REACH);
+
+    attemptPost("/applications/validate-descriptors", req)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()", is(1)))
+      .andExpect(jsonPath("$.[0]", is(APP_PLATFORM_MINIMAL.getId())));
+  }
+
+  @Test
+  void validateDescriptors_positive_scopedToApplicationWithTransitiveDependencies() throws Exception {
+    var req = validationReq(APP_INN_REACH.getId(),
+      APP_PLATFORM_MINIMAL, APP_PLATFORM_COMPLETE, APP_EHOLDINGS, APP_INN_REACH);
+
+    attemptPost("/applications/validate-descriptors", req)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()", is(3)))
+      .andExpect(jsonPath("$", containsInAnyOrder(
+        APP_INN_REACH.getId(), APP_PLATFORM_COMPLETE.getId(), APP_PLATFORM_MINIMAL.getId())));
+  }
+
+  @Test
+  void validateDescriptors_negative_scopedApplicationNotInRequest() throws Exception {
+    var scopeApplicationId = APP_PLATFORM_MINIMAL.getId();
+    var req = validationReq(scopeApplicationId, APP_PLATFORM_COMPLETE);
+
+    attemptPost("/applications/validate-descriptors", req)
+      .andExpectAll(validationErr(
+        RequestValidationException.class.getSimpleName(),
+        "Scope application descriptor must be included in the request",
+        "scopeApplicationId", scopeApplicationId));
+  }
+
+  @Test
+  void validateDescriptors_negative_scopedDependencyCannotBeResolved() throws Exception {
+    var req = validationReq(APP_EHOLDINGS.getId(), APP_EHOLDINGS);
+
+    attemptPost("/applications/validate-descriptors", req)
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].message",
+        containsString("Cannot find application which satisfies the dependency")))
+      .andExpect(jsonPath("$.errors[0].code", is("validation_error")))
+      .andExpect(jsonPath("$.errors[0].type", is(RequestValidationException.class.getSimpleName())))
+      .andExpect(jsonPath("$.errors[0].parameters[0].key", is("dependencyName")))
+      .andExpect(jsonPath("$.errors[0].parameters[0].value", is(APP_PLATFORM_MINIMAL.getName())))
+      .andExpect(jsonPath("$.errors[0].parameters[1].key", is("dependencyVersion")))
+      .andExpect(jsonPath("$.errors[0].parameters[1].value", is("^2.1.0-SNAPSHOT")))
+      .andExpect(jsonPath("$.total_records", is(1)));
   }
 
   @Test
@@ -179,5 +232,10 @@ class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
 
   private static ApplicationDescriptorsValidation validationReq(ApplicationDescriptor... descriptors) {
     return new ApplicationDescriptorsValidation(List.of(descriptors));
+  }
+
+  private static ApplicationDescriptorsValidation validationReq(String scopeApplicationId,
+    ApplicationDescriptor... descriptors) {
+    return validationReq(descriptors).scopeApplicationId(scopeApplicationId);
   }
 }

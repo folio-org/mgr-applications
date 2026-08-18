@@ -10,6 +10,11 @@
       "items": {
         "$ref": "applicationDescriptor.json"
       }
+    },
+    "scopeApplicationId": {
+      "description": "Optional root application ID that must match a descriptor in applicationDescriptors. When provided, validation is limited to this application and its full dependency tree.",
+      "type": "string",
+      "minLength": 1
     }
   },
   "required": [

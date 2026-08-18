@@ -7,7 +7,7 @@
   `MOD_AUTHTOKEN_URL` are no longer supported, module/discovery descriptors are no longer pushed to
   an Okapi gateway, and mod-authtoken security mode is no longer reachable. The `okapi.*`
   subPermissions were dropped from the module descriptor (MGRAPPS-55)
-
+* Add dependency-scoped validation for application descriptors using `scopeApplicationId` (MGRAPPS-101)
 
 ---
 
