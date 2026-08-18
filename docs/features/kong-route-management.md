@@ -10,7 +10,7 @@ Automatically creates, updates, and deletes Kong Gateway routes when module disc
 
 ## Why it exists
 
-Kong Gateway acts as the API gateway/reverse proxy for the FOLIO platform. When a module instance starts and registers its discovery information (hostname/port), Kong needs to be configured with:
+The API Gateway (Kong) acts as the gateway/reverse proxy for the FOLIO platform. When a module instance starts and registers its discovery information (hostname/port), Kong needs to be configured with:
 - A service pointing to the module's location
 - Routes mapping API paths to that service
 
@@ -25,7 +25,7 @@ Without this automation, operators would need to manually configure Kong wheneve
 - `POST /modules/discovery` - batch creates discovery information for multiple modules
 
 **Internal events:**
-Discovery lifecycle events are published via `ApplicationEventPublisher` to all registered `ApplicationDiscoveryListener` implementations. The `KongDiscoveryListener` listens for:
+Discovery lifecycle events are published via `ApplicationEventPublisher` to all registered `ApplicationDiscoveryListener` implementations. The `ApiGatewayDiscoveryListener` listens for:
 - `onDiscoveryCreate` - creates Kong service and routes
 - `onDiscoveryUpdate` - recreates Kong routes for updated module
 - `onDiscoveryDelete` - removes Kong routes and service
@@ -56,13 +56,13 @@ Discovery lifecycle events are published via `ApplicationEventPublisher` to all 
 
 | Variable | Purpose |
 |----------|---------|
-| `application.kong.enabled` | Enables or disables Kong integration entirely. When `false`, `KongDiscoveryListener` is not loaded. Maps to env var `KONG_INTEGRATION_ENABLED` (default: `true`). |
-| `routemanagement.enable` | Controls whether routes are managed in Kong. When `false`, only Kong services are created/deleted, but routes are not added. Maps to env var `ROUTEMANAGEMENT_ENABLE` (default: `true`). |
-| `application.kong.url` | Kong Admin API URL. Maps to env var `KONG_ADMIN_URL` (falls back to `kong.url`). |
-| `application.kong.connect-timeout` | Kong client connection timeout. Maps to env var `KONG_CONNECT_TIMEOUT`. |
-| `application.kong.read-timeout` | Kong client read timeout. Maps to env var `KONG_READ_TIMEOUT`. |
-| `application.kong.write-timeout` | Kong client write timeout. Maps to env var `KONG_WRITE_TIMEOUT`. |
-| `application.kong.retries` | Number of Kong client retries. Maps to env var `KONG_RETRIES`. |
+| `application.apigw.enabled` | Enables or disables API Gateway integration entirely. When `false`, `ApiGatewayDiscoveryListener` is not loaded. Maps to env var `APIGW_ENABLED` (default: `true`). |
+| `routemanagement.enable` | Controls whether routes are managed in the API Gateway. When `false`, only Kong services are created/deleted, but routes are not added. Maps to env var `ROUTEMANAGEMENT_ENABLE` (default: `true`). |
+| `application.apigw.url` | Kong Admin API URL. Maps to env var `APIGW_URL` (falls back to `kong.url`). |
+| `application.apigw.connect-timeout` | Kong client connection timeout. Maps to env var `APIGW_CONNECT_TIMEOUT`. |
+| `application.apigw.read-timeout` | Kong client read timeout. Maps to env var `APIGW_READ_TIMEOUT`. |
+| `application.apigw.write-timeout` | Kong client write timeout. Maps to env var `APIGW_WRITE_TIMEOUT`. |
+| `application.apigw.retries` | Number of Kong client retries. Maps to env var `APIGW_RETRIES`. |
 
 ## Dependencies and interactions
 

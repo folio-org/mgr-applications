@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "application.kong.tenant-checks.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "application.apigw.tenant-checks.enabled", havingValue = "true")
 public class EntitlementEventListener {
 
   private final KongGatewayService gatewayService;

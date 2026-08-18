@@ -13,8 +13,8 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {
   "application.security.enabled=true",
   "application.keycloak.enabled=false",
-  "application.kong.module-self-url=https://test-mgr-applications:443",
-  "application.kong.register-module=true",
+  "application.apigw.module-self-url=https://test-mgr-applications:443",
+  "application.apigw.register-module=true",
 })
 class KongRegistrationIT extends BaseIntegrationTest {
 

@@ -1,4 +1,4 @@
-package org.folio.am.integration.kong;
+package org.folio.am.integration.gateway;
 
 import static org.folio.am.support.TestConstants.MODULE_ID;
 import static org.folio.am.support.TestConstants.MODULE_URL;
@@ -32,9 +32,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @UnitTest
 @ExtendWith(MockitoExtension.class)
-class KongDiscoveryListenerTest {
+class ApiGatewayDiscoveryListenerTest {
 
-  @InjectMocks private KongDiscoveryListener service;
+  @InjectMocks private ApiGatewayDiscoveryListener service;
   @Mock private KongGatewayService kongAdminClient;
   @Mock private ModuleRepository moduleRepository;
 

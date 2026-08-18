@@ -3,6 +3,10 @@
 * Upgrade dependencies for Kafka 4.2 compatibility in mgr-applications (MGRAPPS-110)
 * Application-scoped sidecar bootstrap: ingress and egress module-bootstrap endpoints (EUREKA-899)
 * Switch Kong integration test container to folioci/folio-kong image (APPPOCTOOL-37)
+* Rename API Gateway configuration to the gateway-agnostic `APIGW_*` environment variables and
+  `application.apigw.*` properties. The legacy `KONG_*` variables and `application.kong.*` properties
+  keep working, log a deprecation warning at startup, and are planned for removal in the Vetch
+  release (EUREKA-887)
 * **Breaking:** Remove "Okapi integration" mode. `OKAPI_INTEGRATION_ENABLED`, `OKAPI_URL` and
   `MOD_AUTHTOKEN_URL` are no longer supported, module/discovery descriptors are no longer pushed to
   an Okapi gateway, and mod-authtoken security mode is no longer reachable. The `okapi.*`

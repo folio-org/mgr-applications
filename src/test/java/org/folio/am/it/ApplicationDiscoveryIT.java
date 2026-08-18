@@ -60,7 +60,7 @@ import org.springframework.web.client.HttpClientErrorException;
 @TestPropertySource(properties = {
   "application.security.enabled=true",
   "application.keycloak.enabled=false",
-  "application.kong.enabled=true"})
+  "application.apigw.enabled=true"})
 class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Autowired private KongAdminClient kongAdminClient;

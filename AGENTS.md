@@ -26,8 +26,8 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 **Repositories** extend `JpaCqlRepository` for CQL filtering (e.g. `name=="app*"`) via `cql2pgjson`; use `findByQuery()`.
 
 **Integrations**:
-- Kong (`integration.kong`): `KongDiscoveryListener` syncs discovery → Kong services/routes. Toggle `KONG_INTEGRATION_ENABLED`.
-- Kafka (`integration.kafka`): `DiscoveryPublisher` → `${ENV}.discovery`; `EntitlementEventListener` consumes `${ENV}.entitlement` (ENTITLE/UPGRADE/REVOKE), updates Kong tenant routes when `KONG_TENANT_CHECKS_ENABLED=true`.
+- API Gateway (`integration.gateway`): `ApiGatewayDiscoveryListener` syncs discovery → Kong services/routes. Toggle `APIGW_ENABLED` (gateway admin URL: `APIGW_URL`).
+- Kafka (`integration.kafka`): `DiscoveryPublisher` → `${ENV}.discovery`; `EntitlementEventListener` consumes `${ENV}.entitlement` (ENTITLE/UPGRADE/REVOKE), updates Kong tenant routes when `APIGW_TENANT_CHECKS_ENABLED=true`.
 - Keycloak (via `folio-security`): resource-server/client/role/policy import; JWT validation. Toggle `KC_INTEGRATION_ENABLED`.
 - mgr-tenant-entitlements (`integration.mte`): blocks deletion of entitled applications.
 

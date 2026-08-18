@@ -39,5 +39,5 @@ Operators need a safe way to remove stale application descriptors without manual
 
 ## Dependencies and interactions
 - Depends on `mgr-tenant-entitlements` `GET /entitlements` queries filtered by `applicationId=<id>` to determine whether an application descriptor can be deleted.
-- When `application.kong.enabled` is enabled and a removed backend module has discovery information, cleanup-triggered discovery deletion removes the corresponding Kong service.
-- When both `application.kong.enabled` and `routemanagement.enable` are enabled, the same cleanup flow also deletes that Kong service's routes before deleting the service.
+- When `application.apigw.enabled` is enabled and a removed backend module has discovery information, cleanup-triggered discovery deletion removes the corresponding Kong service.
+- When both `application.apigw.enabled` and `routemanagement.enable` are enabled, the same cleanup flow also deletes that Kong service's routes before deleting the service.
