@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.domain.dto.ApplicationDescriptor;
@@ -53,6 +54,40 @@ public class ApplicationDescriptorsValidationService {
   }
 
   /**
+   * Validates all supplied application descriptors when no scope is specified. When a scope is specified,
+   * validates only the scoped application and the descriptors reachable through its dependencies.
+   *
+   * @param descriptors       application descriptors supplied for validation
+   * @param scopeApplicationId optional application ID which is the root of the validation scope
+   * @return IDs of the application descriptors that were validated
+   */
+  public List<String> validateDescriptors(List<ApplicationDescriptor> descriptors,
+    @Nullable String scopeApplicationId) {
+    if (scopeApplicationId == null) {
+      return validateDescriptors(descriptors);
+    }
+
+    var availableDescriptorsByName = getAvailableDescriptorsByName(descriptors);
+    var scopeDescriptor = resolveScopeDescriptor(scopeApplicationId, descriptors);
+    var scopedDescriptorsByName = new HashMap<String, ApplicationDescriptor>();
+    scopedDescriptorsByName.put(scopeDescriptor.getName(), scopeDescriptor);
+
+    toStream(scopeDescriptor.getDependencies())
+      .forEach(dependency -> resolveDependencyToAppDescriptors(
+        dependency, scopedDescriptorsByName, availableDescriptorsByName));
+
+    var scopedDescriptors = new ArrayList<>(scopedDescriptorsByName.values());
+    log.debug("Validate application dependency scope: root = {}, ids = {}",
+      scopeApplicationId, toAppIdsString(scopedDescriptors));
+
+    dependenciesValidator.validate(scopedDescriptors);
+
+    return toStream(scopedDescriptors)
+      .map(ApplicationDescriptor::getId)
+      .sorted().toList();
+  }
+
+  /**
    * Resolve the dependency to an application descriptor and recursively resolve its dependencies.
    * If the dependency is already resolved, then validate the version range to ensure compatibility.
    *
@@ -83,6 +118,65 @@ public class ApplicationDescriptorsValidationService {
       toStream(resolvedDescriptor.getDependencies())
         .forEach(dep -> resolveDependencyToAppDescriptors(dep, resolvedDescriptorsByName));
     }
+  }
+
+  /**
+   * Resolves a dependency while keeping the resolved descriptor map limited to the selected application tree.
+   * The request descriptors are preferred because they may contain the application version currently being
+   * published; stored descriptors are used only when the dependency is not present in the request.
+   */
+  private void resolveDependencyToAppDescriptors(Dependency dependency,
+    Map<String, ApplicationDescriptor> resolvedDescriptorsByName,
+    Map<String, List<ApplicationDescriptor>> availableDescriptorsByName) {
+    if (resolvedDescriptorsByName.containsKey(dependency.getName())) {
+      validateRangeOnResolvedApp(dependency, resolvedDescriptorsByName.get(dependency.getName()));
+      return;
+    }
+
+    var resolvedDescriptor = resolveDependencyDescriptor(dependency, availableDescriptorsByName);
+
+    if (resolvedDescriptor != null) {
+      resolvedDescriptorsByName.put(resolvedDescriptor.getName(), resolvedDescriptor);
+      toStream(resolvedDescriptor.getDependencies())
+        .forEach(dep -> resolveDependencyToAppDescriptors(dep, resolvedDescriptorsByName, availableDescriptorsByName));
+    }
+  }
+
+  private ApplicationDescriptor resolveDependencyDescriptor(Dependency dependency,
+    Map<String, List<ApplicationDescriptor>> availableDescriptorsByName) {
+    var availableDescriptors = availableDescriptorsByName.get(dependency.getName());
+    if (availableDescriptors == null) {
+      return getLatestApplicationMatchingDependency(dependency);
+    }
+
+    var dependencyVersionRange = semverRangeFrom(dependency);
+    var matchingDescriptor = availableDescriptors.stream()
+      .filter(descriptor -> appVersionIsInRange(dependencyVersionRange).test(descriptor.getId()))
+      .max(Comparator.comparing((ApplicationDescriptor descriptor) ->
+        new Semver(getVersion(descriptor.getId()))));
+    if (matchingDescriptor.isEmpty()) {
+      // This call is expected to throw; getFirst() is used only to provide
+      // application details in the standard version-mismatch error.
+      validateRangeOnResolvedApp(dependency, availableDescriptors.getFirst());
+      return null;
+    }
+    return matchingDescriptor.get();
+  }
+
+  private static Map<String, List<ApplicationDescriptor>> getAvailableDescriptorsByName(
+    List<ApplicationDescriptor> descriptors) {
+    return toStream(descriptors).collect(Collectors.groupingBy(ApplicationDescriptor::getName));
+  }
+
+  private ApplicationDescriptor resolveScopeDescriptor(String scopeApplicationId,
+    List<ApplicationDescriptor> descriptors) {
+    return toStream(descriptors)
+      .filter(descriptor -> scopeApplicationId.equals(descriptor.getId()))
+      .findFirst()
+      .orElseThrow(() -> new RequestValidationException(
+        "Scope application descriptor must be included in the request",
+        "scopeApplicationId",
+        scopeApplicationId));
   }
 
   /**

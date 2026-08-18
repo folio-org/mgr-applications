@@ -166,7 +166,7 @@ paths:
   /applications/validate-descriptors:
     post:
       operationId: validateDescriptorsDependenciesIntegrity
-      description: Validate descriptors integrity at application and interface levels.
+      description: Validate descriptors integrity at application and interface levels. When scopeApplicationId is provided, validation is limited to that application's dependency tree; when omitted, all supplied descriptors are validated.
       tags:
         - applications
       requestBody:
