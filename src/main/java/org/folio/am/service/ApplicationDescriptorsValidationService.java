@@ -46,11 +46,7 @@ public class ApplicationDescriptorsValidationService {
     var allDescriptors = new ArrayList<>(allResolvedAppDescriptorsByName.values());
     log.debug("Validate applications including dependencies: ids = {}", () -> toAppIdsString(allDescriptors));
 
-    dependenciesValidator.validate(allDescriptors);
-
-    return toStream(allDescriptors)
-      .map(ApplicationDescriptor::getId)
-      .sorted().toList();
+    return validateAndGetIds(allDescriptors);
   }
 
   /**
@@ -73,16 +69,20 @@ public class ApplicationDescriptorsValidationService {
     scopedDescriptorsByName.put(scopeDescriptor.getName(), scopeDescriptor);
 
     toStream(scopeDescriptor.getDependencies())
-      .forEach(dependency -> resolveDependencyToAppDescriptors(
+      .forEach(dependency -> resolveScopedDependencyToAppDescriptors(
         dependency, scopedDescriptorsByName, availableDescriptorsByName));
 
     var scopedDescriptors = new ArrayList<>(scopedDescriptorsByName.values());
     log.debug("Validate application dependency scope: root = {}, ids = {}",
       scopeApplicationId, toAppIdsString(scopedDescriptors));
 
-    dependenciesValidator.validate(scopedDescriptors);
+    return validateAndGetIds(scopedDescriptors);
+  }
 
-    return toStream(scopedDescriptors)
+  private List<String> validateAndGetIds(List<ApplicationDescriptor> descriptors) {
+    dependenciesValidator.validate(descriptors);
+
+    return toStream(descriptors)
       .map(ApplicationDescriptor::getId)
       .sorted().toList();
   }
@@ -96,15 +96,7 @@ public class ApplicationDescriptorsValidationService {
    */
   private void resolveDependencyToAppDescriptors(Dependency dependency,
     Map<String, ApplicationDescriptor> resolvedDescriptorsByName) {
-    if (resolvedDescriptorsByName.containsKey(dependency.getName())) {
-      // already resolved, just validate the version range
-      // to ensure the dependency is compatible with the already resolved application
-      var resolved = resolvedDescriptorsByName.get(dependency.getName());
-
-      validateRangeOnResolvedApp(dependency, resolved);
-
-      log.debug("Application dependency already resolved: dependency = {}, application = {}",
-        dependency, resolved.getId());
+    if (validateIfAlreadyResolved(dependency, resolvedDescriptorsByName)) {
       return;
     }
 
@@ -125,24 +117,37 @@ public class ApplicationDescriptorsValidationService {
    * The request descriptors are preferred because they may contain the application version currently being
    * published; stored descriptors are used only when the dependency is not present in the request.
    */
-  private void resolveDependencyToAppDescriptors(Dependency dependency,
+  private void resolveScopedDependencyToAppDescriptors(Dependency dependency,
     Map<String, ApplicationDescriptor> resolvedDescriptorsByName,
     Map<String, List<ApplicationDescriptor>> availableDescriptorsByName) {
-    if (resolvedDescriptorsByName.containsKey(dependency.getName())) {
-      validateRangeOnResolvedApp(dependency, resolvedDescriptorsByName.get(dependency.getName()));
+    if (validateIfAlreadyResolved(dependency, resolvedDescriptorsByName)) {
       return;
     }
 
-    var resolvedDescriptor = resolveDependencyDescriptor(dependency, availableDescriptorsByName);
+    var resolvedDescriptor = resolveScopedDependencyDescriptor(dependency, availableDescriptorsByName);
 
     if (resolvedDescriptor != null) {
       resolvedDescriptorsByName.put(resolvedDescriptor.getName(), resolvedDescriptor);
       toStream(resolvedDescriptor.getDependencies())
-        .forEach(dep -> resolveDependencyToAppDescriptors(dep, resolvedDescriptorsByName, availableDescriptorsByName));
+        .forEach(dep -> resolveScopedDependencyToAppDescriptors(
+          dep, resolvedDescriptorsByName, availableDescriptorsByName));
     }
   }
 
-  private ApplicationDescriptor resolveDependencyDescriptor(Dependency dependency,
+  private boolean validateIfAlreadyResolved(Dependency dependency,
+    Map<String, ApplicationDescriptor> resolvedDescriptorsByName) {
+    if (!resolvedDescriptorsByName.containsKey(dependency.getName())) {
+      return false;
+    }
+
+    var resolved = resolvedDescriptorsByName.get(dependency.getName());
+    validateRangeOnResolvedApp(dependency, resolved);
+    log.debug("Application dependency already resolved: dependency = {}, application = {}",
+      dependency, resolved.getId());
+    return true;
+  }
+
+  private ApplicationDescriptor resolveScopedDependencyDescriptor(Dependency dependency,
     Map<String, List<ApplicationDescriptor>> availableDescriptorsByName) {
     var availableDescriptors = availableDescriptorsByName.get(dependency.getName());
     if (availableDescriptors == null) {
@@ -155,8 +160,8 @@ public class ApplicationDescriptorsValidationService {
       .max(Comparator.comparing((ApplicationDescriptor descriptor) ->
         new Semver(getVersion(descriptor.getId()))));
     if (matchingDescriptor.isEmpty()) {
-      // This call is expected to throw; getFirst() is used only to provide
-      // application details in the standard version-mismatch error.
+      // This call is expected to throw a version-mismatch exception; getFirst()
+      // is used only to provide application details in the standard error.
       validateRangeOnResolvedApp(dependency, availableDescriptors.getFirst());
       return null;
     }
