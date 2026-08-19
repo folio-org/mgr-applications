@@ -93,6 +93,19 @@ class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
   }
 
   @Test
+  void validateDescriptors_positive_scopedDependencyResolvedFromStoredApplication() throws Exception {
+    doPost("/applications", APP_PLATFORM_MINIMAL);
+
+    var req = validationReq(APP_INN_REACH.getId(), APP_PLATFORM_COMPLETE, APP_EHOLDINGS, APP_INN_REACH);
+
+    attemptPost("/applications/validate-descriptors", req)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()", is(3)))
+      .andExpect(jsonPath("$", containsInAnyOrder(
+        APP_INN_REACH.getId(), APP_PLATFORM_COMPLETE.getId(), APP_PLATFORM_MINIMAL.getId())));
+  }
+
+  @Test
   void validateDescriptors_negative_scopedApplicationNotInRequest() throws Exception {
     var scopeApplicationId = APP_PLATFORM_MINIMAL.getId();
     var req = validationReq(scopeApplicationId, APP_PLATFORM_COMPLETE);
