@@ -230,6 +230,25 @@ class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
       .andExpect(jsonPath("$.total_records", is(1)));
   }
 
+  @Test
+  void validateDescriptors_negative_scopedDependencyVersionMismatch() throws Exception {
+    var appMinimal = APP_PLATFORM_MINIMAL;
+    var appEholdings = copy(APP_EHOLDINGS);
+    var dependencyVersion = "0.0.1-test";
+    appEholdings.getDependencies().getFirst().setVersion(dependencyVersion);
+
+    var req = validationReq(appEholdings.getId(), appMinimal, appEholdings);
+
+    attemptPost("/applications/validate-descriptors", req)
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].message",
+        containsString(format("Dependency version range '%s' "
+          + "is not satisfied by already resolved application '%s' with version '%s'",
+          dependencyVersion, appMinimal.getName(), appMinimal.getVersion()))))
+      .andExpect(jsonPath("$.errors[0].code", is("validation_error")))
+      .andExpect(jsonPath("$.errors[0].type", is(RequestValidationException.class.getSimpleName())));
+  }
+
   private static ApplicationDescriptorsValidation validationReq(ApplicationDescriptor... descriptors) {
     return new ApplicationDescriptorsValidation(List.of(descriptors));
   }
