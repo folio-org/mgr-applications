@@ -1,6 +1,6 @@
 # mgr-applications
 
-Spring Boot 4.0.3 Application Manager for FOLIO: manages application/module lifecycle (registration, discovery, deployment, validation). Java 21, PostgreSQL/JPA, Liquibase, Kafka, Kong, Keycloak, OpenAPI codegen, MapStruct, Lombok.
+Spring Boot 4.x Application Manager for FOLIO: manages application/module lifecycle (registration, discovery, deployment, validation). Java 21, PostgreSQL/JPA, Liquibase, Kafka, Kong, Keycloak, OpenAPI codegen, MapStruct, Lombok.
 
 ## Build & Test
 
@@ -8,7 +8,7 @@ Spring Boot 4.0.3 Application Manager for FOLIO: manages application/module life
 mvn clean install              # full build
 mvn clean install -DskipTests  # skip tests
 mvn test                       # unit tests (@Tag("unit"), *Test.java)
-mvn verify                     # integration tests (@Tag("integration"), *IT.java; Testcontainers Postgres+Kafka)
+mvn verify                     # integration tests (@Tag("integration"), *IT.java; Testcontainers Postgres+Kafka+Kong)
 mvn test -Dtest=ApplicationServiceTest#shouldCreateApplication  # single test
 mvn checkstyle:check           # runs during build, FOLIO rules
 ```
@@ -26,14 +26,14 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 **Repositories** extend `JpaCqlRepository` for CQL filtering (e.g. `name=="app*"`) via `cql2pgjson`; use `findByQuery()`.
 
 **Integrations**:
-- Kong (`integration.kong`): `KongDiscoveryListener` syncs discovery → Kong services/routes. Toggle `KONG_INTEGRATION_ENABLED`.
-- Kafka (`integration.kafka`): `DiscoveryPublisher` → `${ENV}.discovery`; `EntitlementEventListener` consumes `${ENV}.entitlement` (ENTITLE/UPGRADE/REVOKE), updates Kong tenant routes when `KONG_TENANT_CHECKS_ENABLED=true`.
+- Kong (via `folio-integration-kong`): self-registers the module's service + routes in Kong at startup (`KongModuleRegistrar`, `MODULE_URL`, `REGISTER_MODULE_IN_KONG`). Toggle `KONG_INTEGRATION_ENABLED`.
+- Kafka (`integration.kafka`): `DiscoveryPublisher` publishes `${ENV}.discovery` events.
 - Keycloak (via `folio-security`): resource-server/client/role/policy import; JWT validation. Toggle `KC_INTEGRATION_ENABLED`.
 - mgr-tenant-entitlements (`integration.mte`): blocks deletion of entitled applications.
 
-**Events** via `ApplicationEventPublisher`: `ApplicationDiscoveryListener` (discovery create/update/delete) drives Kong/Kafka side effects. Reliable publishing via transactional outbox (`integration.messaging`).
+**Events** via `ApplicationEventPublisher`: `ApplicationDiscoveryListener` (discovery create/update/delete) drives Kafka side effects. Reliable publishing via transactional outbox (`integration.messaging`).
 
-**FAR mode** (`FAR_MODE=true`): descriptor CRUD only; disables Kong/Kafka/mte.
+**FAR mode** (`FAR_MODE=true`): descriptor CRUD only; disables Kafka/Keycloak/mte. Kong self-registration is not disabled by FAR mode — set `KONG_INTEGRATION_ENABLED=false` explicitly.
 
 **Validation** (`VALIDATION_MODE`): NONE / BASIC / ON_CREATE (full dependency checks).
 
@@ -49,4 +49,4 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 
 ## Key Dependencies
 
-`folio-spring-cql`, `folio-security`, `folio-integration-kafka`, `folio-backend-common`, `folio-integration-kong`, `cql2pgjson`, `semver4j`.
+`folio-spring-cql`, `folio-security`, `folio-kafka-producer`, `folio-backend-common`, `folio-integration-kong`, `cql2pgjson`, `semver4j`.
