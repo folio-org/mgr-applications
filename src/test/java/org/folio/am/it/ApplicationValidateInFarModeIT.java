@@ -40,7 +40,10 @@ import org.springframework.test.context.jdbc.Sql;
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
-@TestPropertySource(properties = "application.far-mode.enabled=true")
+@TestPropertySource(properties = {
+  "application.far-mode.enabled=true",
+  "application.kong.enabled=false"
+})
 class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
 
   private static final ApplicationDescriptor APP_PLATFORM_MINIMAL =

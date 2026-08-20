@@ -46,6 +46,20 @@ application:
     enabled: ${FAR_MODE:false}
   security:
     enabled: ${SECURITY_ENABLED:true}
+  kong:
+    enabled: ${KONG_INTEGRATION_ENABLED:true}
+    url: ${KONG_ADMIN_URL:${kong.url:}}
+    module-self-url: ${MODULE_URL:http://mgr-applications:8081}
+    register-module: ${REGISTER_MODULE_IN_KONG:true}
+    connect-timeout: ${KONG_CONNECT_TIMEOUT:}
+    read-timeout: ${KONG_READ_TIMEOUT:}
+    write-timeout: ${KONG_WRITE_TIMEOUT:}
+    retries: ${KONG_RETRIES:}
+    tls:
+      enabled: ${KONG_TLS_ENABLED:false}
+      trust-store-path: ${KONG_TLS_TRUSTSTORE_PATH:}
+      trust-store-password: ${KONG_TLS_TRUSTSTORE_PASSWORD:}
+      trust-store-type: ${KONG_TLS_TRUSTSTORE_TYPE:}
   environment: ${ENV:folio}
   kafka:
     producer:

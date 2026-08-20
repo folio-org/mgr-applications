@@ -36,12 +36,14 @@ import org.folio.common.utils.OkapiHeaders;
 import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 
 @IntegrationTest
 @SqlMergeMode(MERGE)
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
+@TestPropertySource(properties = "application.kong.enabled=false")
 class ApplicationDiscoveryNoIntegrationsIT extends BaseIntegrationTest {
 
   @BeforeAll

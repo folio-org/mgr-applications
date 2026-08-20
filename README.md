@@ -20,6 +20,8 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
   * [Import Keycloak data on startup](#import-keycloak-data-on-startup)
   * [Keycloak Security](#keycloak-security)
   * [Keycloak specific environment variables](#keycloak-specific-environment-variables)
+* [Kong Gateway Integration](#kong-gateway-integration)
+  * [Kong Self-Registration](#kong-self-registration)
 * [Kafka Integration](#kafka-integration)
   * [Events upon discovery changes](#events-upon-discovery-changes)
   * [Naming convention](#naming-convention)
@@ -89,7 +91,19 @@ docker run \
 | DB_USERNAME                              | postgres                     |  false   | Postgres username                                                                                                                                                                                          |
 | DB_PASSWORD                              | postgres                     |  false   | Postgres username password                                                                                                                                                                                 |
 | DB_DATABASE                              | okapi_modules                |  false   | Postgres database name                                                                                                                                                                                     |
+| MODULE_URL                               | http://mgr-applications:8081 |  false   | Module URL (module cannot define url for Kong registration by itself, because it can be under Load Balancer, so this value must be provided manually)                                                      |
 | tenant.url                               | -                            |   true   | Tenant URL used to perform HTTP requests by `TenantManagerClient`.                                                                                                                                         |
+| kong.url                                 | -                            |   true   | Kong Admin URL used to perform HTTP requests for self-registration, required.                                                                                                                              |
+| KONG_ADMIN_URL                           | -                            |  false   | Alias for `kong.url`.                                                                                                                                                                                      |
+| KONG_INTEGRATION_ENABLED                 | true                         |  false   | Defines if kong integration is enabled or disabled.<br/>If it set to `false` - it will exclude all kong-related beans from spring context.                                                                 |
+| KONG_CONNECT_TIMEOUT                     | -                            |  false   | Defines the timeout in milliseconds for establishing a connection from Kong to upstream service. If the value is not provided then Kong defaults are applied.                                              |
+| KONG_READ_TIMEOUT                        | -                            |  false   | Defines the timeout in milliseconds between two successive read operations for transmitting a request from Kong to the upstream service. If the value is not provided then Kong defaults are applied.      |
+| KONG_WRITE_TIMEOUT                       | -                            |  false   | Defines the timeout in milliseconds between two successive write operations for transmitting a request from Kong to the upstream service. If the value is not provided then Kong defaults are applied.     |
+| KONG_RETRIES                             | -                            |  false   | Defines the number of retries to execute upon failure to proxy. If the value is not provided then Kong defaults are applied.                                                                               |
+| KONG_TLS_ENABLED                         | false                        |  false   | Allows to enable/disable TLS connection to Kong.                                                                                                                                                           |
+| KONG_TLS_TRUSTSTORE_PATH                 | -                            |  false   | Truststore file path for TLS connection to Kong.                                                                                                                                                           |
+| KONG_TLS_TRUSTSTORE_PASSWORD             | -                            |  false   | Truststore password for TLS connection to Kong.                                                                                                                                                            |
+| KONG_TLS_TRUSTSTORE_TYPE                 | -                            |  false   | Truststore type for TLS connection to Kong.                                                                                                                                                                |
 | ENV                                      | folio                        |  false   | The logical name of the deployment (kafka topic prefix), must be unique across all environments using the same shared Kafka/Elasticsearch clusters, `a-z (any case)`, `0-9`, `-`, `_` symbols only allowed |
 | KAFKA_HOST                               | kafka                        |  false   | Kafka broker hostname                                                                                                                                                                                       |
 | KAFKA_PORT                               | 9092                         |  false   | Kafka broker port                                                                                                                                                                                           |
@@ -106,11 +120,12 @@ docker run \
 | TE_TLS_TRUSTSTORE_PASSWORD               | -                            |  false   | Truststore password for TLS connection to mgr-tenant-entitlements module.                                                                                                                                  |
 | TE_TLS_TRUSTSTORE_TYPE                   | -                            |  false   | Truststore file type for TLS connection to mgr-tenant-entitlements module.                                                                                                                                 |
 | SECURITY_ENABLED                         | true                         |  false   | Allows to enable/disable security. If true and KC_INTEGRATION_ENABLED is also true - the Keycloak will be used as a security provider.                                                                     |
-| FAR_MODE                                 | false                        |  false   | Allows to enable Folio Application Registry mode.                                                                                                                                                           |
+| FAR_MODE                                 | false                        |  false   | Allows to enable Folio Application Registry mode, if FAR mode is enabled, kong integration must disabled using environment variable `KONG_INTEGRATION_ENABLED`.                                            |
 | SECURE\_STORE\_ENV                       | folio                        |  false   | First segment of the secure store key, for example `prod` or `test`. Defaults to `folio`. In Ramsons and Sunflower defaults to ENV with fall-back `folio`.                                                 |
 | SECRET_STORE_TYPE                        | -                            |   true   | Secure storage type. Supported values: `EPHEMERAL`, `AWS_SSM`, `VAULT`, `FSSP`                                                                                                                             |
 | VALIDATION_MODE                          | basic                        |  false   | Validation mode applied during Application Descriptors checking (see POST `/applications/validate` endpoint). Possible values: `none`, `basic`, `onCreate`                                                 |
 | MAX_HTTP_REQUEST_HEADER_SIZE             | 200KB                        |   true   | Maximum size of the HTTP request header.                                                                                                                                                                   |
+| REGISTER_MODULE_IN_KONG                  | true                         |  false   | Defines if module must be registered in Kong (it will create for itself service and list of routes from module descriptor)                                                                                 |
 | ROUTER_PATH_PREFIX                       |                              |  false   | Defines routes prefix to be added to the generated endpoints by OpenAPI generator (`/foo/entites` -> `{{prefix}}/foo/entities`). Required if load balancing group has format like `{{host}}/{{moduleId}}`  |
 
 ### SSL Configuration environment variables
@@ -206,6 +221,30 @@ The feature is controlled by two env variables `SECURITY_ENABLED` and `KC_INTEGR
 | KC_JWKS_REFRESH_INTERVAL          | 60                         |    false    | Jwks refresh interval for realm JWT parser (in minutes).                                                                                                |
 | KC_FORCED_JWKS_REFRESH_INTERVAL   | 60                         |    false    | Forced jwks refresh interval for realm JWT parser (used in signing key rotation, in minutes).                                                           |
 
+## Kong Gateway Integration
+
+Kong gateway integration implemented using idempotent approach
+with [Kong Admin API](https://docs.konghq.com/gateway/latest/admin-api/).
+
+### Kong Self-Registration
+
+On startup, the module registers itself in the Kong Gateway as a service with a list of routes defined in its module
+descriptor (`descriptors/ModuleDescriptor.json`):
+
+- A Kong Service is created (or updated if it already exists) with the name equal to the module id (e.g. `mgr-applications-4.0.0`)
+- The service URL is taken from the `MODULE_URL` environment variable (the module cannot define the URL for Kong
+  registration by itself, because it can be under a Load Balancer, so this value must be provided manually)
+- Routes are created for all routing entries from the module descriptor
+- Registration is idempotent: on restart, the existing service and routes are updated in place
+- Self-registration is controlled by `KONG_INTEGRATION_ENABLED` and `REGISTER_MODULE_IN_KONG` environment variables
+
+To view the registered service and its routes in Kong, use:
+
+```shell
+curl -X GET "$KONG_ADMIN_URL/services"
+curl -X GET "$KONG_ADMIN_URL/services/mgr-applications-4.0.0/routes"
+```
+
 ## Kafka Integration
 ### Events upon discovery changes
 * The application publishes lightweight kafka events when discovery information is registered/updated/removed.
@@ -233,19 +272,22 @@ curl -XGET "$TE_URL/entitlements?query=applicationId=$applicationId"
 In this mode, we only need a subset of the component's functionality.
 While CRUD operations for application descriptors works as-is,
 the integrations with Kafka, Keycloak, and mgr-tenant-entitlements are disabled.
+Kong self-registration is **not** disabled by FAR mode — set `KONG_INTEGRATION_ENABLED=false` explicitly if it must be off.
 To enable this mode set `FAR_MODE` env variable to `true` and make sure to leave other integration variables unset or
 set to `false`.
 
 
 ## Integration Testing
 
-Integration tests use Testcontainers for PostgreSQL and Kafka. The following environment variables
+Integration tests use Testcontainers for PostgreSQL, Kafka and Kong. The following environment variables
 let you redirect containers to a private registry or adjust startup behaviour without changing
 source code.
 
 | Environment variable                     | Default                         | Description                          |
 |:-----------------------------------------|:--------------------------------|:-------------------------------------|
 | `TESTCONTAINERS_POSTGRES_IMAGE`          | `postgres:16-alpine`            | PostgreSQL container image           |
+| `TESTCONTAINERS_KONG_IMAGE`              | `folioci/folio-kong:latest`     | Kong Gateway container image         |
+| `TESTCONTAINERS_KONG_READINESS_TIMEOUT`  | `120`                           | Seconds to wait for Kong startup     |
 
 ## AI Documentation
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/folio-org/mgr-applications)

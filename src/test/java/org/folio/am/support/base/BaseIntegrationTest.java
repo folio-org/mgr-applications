@@ -4,6 +4,7 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
 
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.support.TestUtils;
+import org.folio.am.support.extensions.EnableKongGateway;
 import org.folio.am.support.extensions.EnablePostgres;
 import org.folio.common.service.TransactionHelper;
 import org.folio.test.FakeKafkaConsumer;
@@ -36,6 +37,7 @@ import org.springframework.test.context.TestExecutionListeners;
 @EnableWireMock
 @EnablePostgres
 @SpringBootTest
+@EnableKongGateway
 @ActiveProfiles("it")
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)

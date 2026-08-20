@@ -211,6 +211,12 @@
 
     <dependency>
       <groupId>org.folio</groupId>
+      <artifactId>folio-integration-kong</artifactId>
+      <version>${applications-poc-tools.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.folio</groupId>
       <artifactId>folio-java-checkstyle</artifactId>
       <version>${folio-java-checkstyle.version}</version>
       <scope>provided</scope>
