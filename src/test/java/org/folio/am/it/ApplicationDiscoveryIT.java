@@ -1,8 +1,5 @@
 package org.folio.am.it;
 
-import static org.apache.commons.lang3.StringUtils.stripToNull;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.am.integration.kafka.DiscoveryPublisher.DISCOVERY_DESTINATION;
 import static org.folio.am.support.KafkaEventAssertions.assertDiscoveryEvents;
 import static org.folio.am.support.TestConstants.APPLICATION_ID;
@@ -34,8 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.net.URL;
-import lombok.SneakyThrows;
 import org.folio.am.integration.kafka.model.DiscoveryEvent;
 import org.folio.am.support.KafkaEventAssertions;
 import org.folio.am.support.TestValues;
@@ -45,34 +40,22 @@ import org.folio.test.TestUtils;
 import org.folio.test.extensions.EnableOkapiSecurity;
 import org.folio.test.extensions.WireMockStub;
 import org.folio.test.types.IntegrationTest;
-import org.folio.tools.kong.client.KongAdminClient;
-import org.folio.tools.kong.model.Service;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
-import org.springframework.web.client.HttpClientErrorException;
 
 @IntegrationTest
 @SqlMergeMode(MERGE)
 @EnableOkapiSecurity
 @Sql(scripts = "classpath:/sql/truncate-tables.sql", executionPhase = AFTER_TEST_METHOD)
-@TestPropertySource(properties = {"application.okapi.enabled=true", "application.kong.enabled=true"})
+@TestPropertySource(properties = "application.okapi.enabled=true")
 class ApplicationDiscoveryIT extends BaseIntegrationTest {
-
-  @Autowired private KongAdminClient kongAdminClient;
 
   @BeforeAll
   public static void setUp() {
     fakeKafkaConsumer.registerTopic(getEnvTopicName(DISCOVERY_DESTINATION), DiscoveryEvent.class);
-  }
-
-  @AfterEach
-  void tearDown() {
-    deleteService(MODULE_FOO_ID);
   }
 
   @Test
@@ -115,8 +98,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(TestValues.moduleDiscoveries(moduleDiscovery)), STRICT));
-
-    assertThatKongHasServiceWithUrl(MODULE_BAR_ID, MODULE_BAR_URL);
 
     assertDiscoveryEvents(MODULE_BAR_ID);
   }
@@ -167,9 +148,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
-    assertThatKongHasServiceWithUrl(MODULE_BAR_ID, MODULE_BAR_URL);
-    assertThatKongHasServiceWithUrl(MODULE_FOO_ID, MODULE_FOO_URL);
-
     KafkaEventAssertions.assertDiscoveryEvents(MODULE_BAR_ID, MODULE_FOO_ID);
   }
 
@@ -203,7 +181,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   @Sql(scripts = "classpath:/sql/module-discoveries.sql")
   void update_positive() throws Exception {
     var newModuleDiscoveryUrl = "http://test-module-foo-updated:8080";
-    kongAdminClient.upsertService(MODULE_FOO_ID, new Service().url(MODULE_FOO_URL));
 
     var moduleDiscovery = TestValues.moduleFooDiscovery().location(newModuleDiscoveryUrl);
     mockMvc.perform(put("/modules/{id}/discovery", MODULE_FOO_ID)
@@ -218,7 +195,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(moduleDiscovery), STRICT));
 
-    assertThatKongHasServiceWithUrl(MODULE_FOO_ID, newModuleDiscoveryUrl);
     assertDiscoveryEvents(MODULE_FOO_ID);
   }
 
@@ -287,9 +263,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
     "/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json"
   })
   void delete_positive() throws Exception {
-    kongAdminClient.upsertService(MODULE_FOO_ID, new Service().url(MODULE_FOO_URL));
-    kongAdminClient.upsertService(MODULE_BAR_ID, new Service().url(MODULE_BAR_URL));
-
     mockMvc.perform(delete("/modules/{id}/discovery", MODULE_FOO_ID)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isNoContent());
@@ -307,9 +280,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
 
-    assertThat(kongAdminClient.getService(MODULE_BAR_ID)).isNotNull();
-    assertThatThrownBy(() -> kongAdminClient.getService(MODULE_FOO_ID))
-      .isInstanceOf(HttpClientErrorException.NotFound.class);
     assertDiscoveryEvents(MODULE_FOO_ID);
   }
 
@@ -346,9 +316,8 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   void delete_positive_noDiscovery() throws Exception {
     mockMvc.perform(delete("/modules/{id}/discovery", MODULE_FOO_ID)
       .contentType(APPLICATION_JSON)
-      .header(TOKEN, OKAPI_AUTH_TOKEN));
-    assertThatThrownBy(() -> kongAdminClient.getService(MODULE_FOO_ID))
-      .isInstanceOf(HttpClientErrorException.NotFound.class);
+      .header(TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNoContent());
     KafkaEventAssertions.assertNoDiscoveryEvents();
   }
 
@@ -372,10 +341,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(moduleDiscoveries(uiModuleDiscovery)), STRICT));
 
-    // Verify NO Kong service created for UI module
-    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
-      .isInstanceOf(HttpClientErrorException.NotFound.class);
-
     assertDiscoveryEvents(UI_MODULE_ID);
   }
 
@@ -384,10 +349,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
   void update_positive_uiModule() throws Exception {
     var newModuleDiscoveryUrl = "http://test-ui-module-updated:8080";
-
-    // Verify no Kong service exists before update
-    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
-      .isInstanceOf(HttpClientErrorException.NotFound.class);
 
     var uiModuleDiscovery = uiModuleDiscovery().location(newModuleDiscoveryUrl);
 
@@ -404,10 +365,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(uiModuleDiscovery), STRICT));
 
-    // Verify still no Kong service after update
-    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
-      .isInstanceOf(HttpClientErrorException.NotFound.class);
-
     assertDiscoveryEvents(UI_MODULE_ID);
   }
 
@@ -415,10 +372,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   @Sql(scripts = "classpath:/sql/module-discoveries-with-ui.sql")
   @WireMockStub("/wiremock/stubs/mod-authtoken/verify-token-delete-module-discovery.json")
   void delete_positive_uiModule() throws Exception {
-    // Verify no Kong service exists before deletion
-    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
-      .isInstanceOf(HttpClientErrorException.NotFound.class);
-
     // No Okapi stubs needed - UI modules skip Okapi
     mockMvc.perform(delete("/modules/{id}/discovery", UI_MODULE_ID)
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
@@ -430,32 +383,6 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(moduleDiscoveries(moduleFooDiscovery())), STRICT));
 
-    // Verify still no Kong service after deletion
-    assertThatThrownBy(() -> kongAdminClient.getService(UI_MODULE_ID))
-      .isInstanceOf(HttpClientErrorException.NotFound.class);
-
     assertDiscoveryEvents(UI_MODULE_ID);
-  }
-
-  @SneakyThrows
-  private void assertThatKongHasServiceWithUrl(String serviceId, String urlString) {
-    var url = new URL(urlString);
-    var adminClientService = kongAdminClient.getService(serviceId);
-    assertThat(adminClientService).isNotNull().satisfies(service -> {
-      assertThat(service.getProtocol()).isEqualTo(url.getProtocol());
-      assertThat(service.getHost()).isEqualTo(url.getHost());
-      assertThat(service.getPort()).isEqualTo(url.getPort());
-      assertThat(service.getPath()).isEqualTo(stripToNull(url.getPath()));
-    });
-  }
-
-  private void deleteService(String serviceId) {
-    try {
-      kongAdminClient.getServiceRoutes(serviceId, null)
-        .forEach(route -> kongAdminClient.deleteRoute(serviceId, route.getId()));
-    } catch (HttpClientErrorException.NotFound nf) {
-      // Do nothing
-    }
-    kongAdminClient.deleteService(serviceId);
   }
 }

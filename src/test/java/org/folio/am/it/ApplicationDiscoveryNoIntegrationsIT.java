@@ -51,7 +51,6 @@ class ApplicationDiscoveryNoIntegrationsIT extends BaseIntegrationTest {
 
   @BeforeAll
   public static void setUp(@Autowired ApplicationContext applicationContext) {
-    assertThat(applicationContext.containsBean("kongAdminClient")).isFalse();
     assertThat(applicationContext.containsBean("okapiClient")).isFalse();
 
     fakeKafkaConsumer.registerTopic(getEnvTopicName(DISCOVERY_DESTINATION), DiscoveryEvent.class);

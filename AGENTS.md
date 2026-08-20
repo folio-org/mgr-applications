@@ -7,7 +7,7 @@ This file provides guidance to agents when working with code in this repository.
 `mgr-applications` is a Spring Boot application that serves as the Application Manager for the FOLIO library management platform. It provides functionality for managing application and module lifecycles, including registration, discovery, deployment, validation, and integration with external services.
 
 **Technology Stack:**
-- Java 21 with Spring Boot 4.0.3
+- Java 21 with Spring Boot 4.x
 - PostgreSQL database with JPA/Hibernate
 - Liquibase for database migrations
 - Kafka for event streaming
@@ -53,7 +53,7 @@ mvn test -Dtest=ApplicationServiceTest#shouldCreateApplication
 - Integration tests: Tagged with `@Tag("integration")`, use `mvn verify` or `mvn failsafe:integration-test`
 - Integration tests are in files ending with `*IT.java`
 - Unit tests are in files ending with `*Test.java`
-- Test containers are used for PostgreSQL and Kafka in integration tests
+- Test containers are used for PostgreSQL, Kafka and Kong in integration tests
 
 ### Running the Application
 
@@ -129,18 +129,12 @@ Integration Layer (External Systems)
 
 ### Integration Points
 
-**Kong Gateway Integration (`org.folio.am.integration.kong`):**
-- `KongDiscoveryListener`: Event listener that syncs discovery changes to Kong
-- Automatically registers/updates Kong services and routes based on module descriptors
-- Supports tenant-based routing with dynamic route expression updates
-- Controlled by `KONG_INTEGRATION_ENABLED` environment variable
+**Kong Gateway Integration (via `folio-integration-kong`):**
+- Self-registers the module's service and routes at startup (`KongModuleRegistrar`, `MODULE_URL`, `REGISTER_MODULE_IN_KONG`)
+- Controlled by `KONG_INTEGRATION_ENABLED`
 
 **Kafka Integration (`org.folio.am.integration.kafka`):**
-- `DiscoveryPublisher`: Publishes discovery change events to `${ENV}.discovery` topic
-- `EntitlementEventListener`: Consumes entitlement events from `${ENV}.entitlement` topic
-  - Updates Kong routes with tenant restrictions when `KONG_TENANT_CHECKS_ENABLED=true`
-  - Handles ENTITLE, UPGRADE, REVOKE event types
-  - Dynamically adds/removes tenants from route expressions using `x-okapi-tenant` header validation
+- `DiscoveryPublisher` publishes discovery change events to `${ENV}.discovery`
 
 **Keycloak Integration (`org.folio.am.integration.okapi`):**
 - Import mode: Creates/updates resource servers, clients, resources, permissions, roles, policies
@@ -171,7 +165,6 @@ ApplicationService.create()
     → OkapiModuleRegisterService (Keycloak registration)
   → ModuleDiscoveryService.addDiscoveryUrl()
     → ApplicationEventPublisher.publishDiscoveryCreate()
-      → KongDiscoveryListener (Kong service creation)
       → DiscoveryPublisher (Kafka event)
 ```
 
@@ -206,7 +199,8 @@ ApplicationService.create()
 
 **Folio Application Registry (FAR) Mode:**
 - When `FAR_MODE=true`: Only CRUD operations for application descriptors are enabled
-- Disables Kong, Kafka, Okapi, and mgr-tenant-entitlements integrations
+- Disables Kafka, Keycloak, Okapi, and mgr-tenant-entitlements integrations
+- Kong self-registration is not disabled by FAR mode; set `KONG_INTEGRATION_ENABLED=false` explicitly
 - Used for registry-only deployments without service discovery
 
 ## Important Patterns
@@ -340,7 +334,7 @@ For complete guidelines, examples, and checklist, refer to the external document
 
 - `folio-spring-cql`: CQL query support for FOLIO
 - `folio-security`: Security and Keycloak integration
-- `folio-integration-kafka`: Kafka integration utilities
+- `folio-kafka-producer`: Kafka integration utilities
 - `folio-backend-common`: Common FOLIO backend models (ModuleDescriptor)
 - `folio-integration-kong`: Kong Gateway integration
 - `cql2pgjson`: CQL to PostgreSQL JSON conversion

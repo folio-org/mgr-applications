@@ -1,3 +1,8 @@
+## Version `v4.0.3` (IN PROGRESS)
+* Remove Kong gateway route management (discovery-driven service/route synchronization and tenant checks via entitlement events); module self-registration in Kong remains (MGRAPPS-108)
+
+---
+
 ## Version `v4.0.2` (11.09.2026)
 * Application-scoped sidecar bootstrap: ingress and egress module-bootstrap endpoints (EUREKA-899)
 
