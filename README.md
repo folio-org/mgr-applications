@@ -276,6 +276,63 @@ Kong self-registration is **not** disabled by FAR mode — set `KONG_INTEGRATION
 To enable this mode set `FAR_MODE` env variable to `true` and make sure to leave other integration variables unset or
 set to `false`.
 
+## Application descriptor dependency validation
+
+`POST /applications/validate-descriptors` supports two validation modes:
+
+- Full-scope mode: omit `scopeApplicationId`. The supplied descriptors and all dependencies resolved from them are
+  validated using the existing platform-wide behavior. This is the mode used for platform-level validation.
+- Dependency-scoped mode: set `scopeApplicationId` to the ID of an application descriptor included in the request. The
+  application manager recursively resolves that application's dependencies and validates only the resulting dependency tree.
+  The request may contain descriptors for the complete platform; unrelated descriptors are ignored in this mode.
+
+For example, this request contains an unrelated application, but only `app-orders` and `app-inventory` are validated:
+
+```json
+{
+  "scopeApplicationId": "app-orders-2.0.0",
+  "applicationDescriptors": [
+    {
+      "id": "app-orders-2.0.0",
+      "name": "app-orders",
+      "version": "2.0.0",
+      "dependencies": [
+        {
+          "name": "app-inventory",
+          "version": ">=2.0.0 <3.0.0",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "id": "app-inventory-2.0.0",
+      "name": "app-inventory",
+      "version": "2.0.0",
+      "dependencies": []
+    },
+    {
+      "id": "another-application-1.0.0",
+      "name": "another-application",
+      "version": "1.0.0",
+      "dependencies": []
+    }
+  ]
+}
+```
+
+The validation scope is:
+
+```text
+app-orders-2.0.0
+└── app-inventory-2.0.0
+
+another-application-1.0.0  (ignored)
+```
+
+Use dependency-scoped mode for independently published application updates, especially when a provider and its
+consumers are being updated together. Applications with no dependencies can be validated and published first. Omit
+the parameter when the entire set of supplied descriptors must be checked as one unit.
+
 
 ## Integration Testing
 

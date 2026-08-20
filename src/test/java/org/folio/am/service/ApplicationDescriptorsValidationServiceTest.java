@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.assertArg;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -59,6 +60,55 @@ class ApplicationDescriptorsValidationServiceTest {
 
     assertThat(actual).isEqualTo(expected);
     verify(dependenciesValidator).validate(anyList());
+  }
+
+  @Test
+  void validateDescriptors_scopedToApplicationWithoutDependencies_validatesOnlyScope() {
+    var scopedApplication = getApplicationDescriptor("app-scoped", "1.0.0");
+    var unrelatedApplication = getApplicationDescriptor("app-unrelated", "1.0.0");
+    unrelatedApplication.setDependencies(List.of(new Dependency().name("app-missing").version("1.0.0")));
+
+    var actual = applicationDescriptorsValidationService.validateDescriptors(
+      List.of(scopedApplication, unrelatedApplication), scopedApplication.getId());
+
+    assertThat(actual).containsExactly(scopedApplication.getId());
+    verify(dependenciesValidator).validate(List.of(scopedApplication));
+    verifyNoInteractions(applicationService);
+  }
+
+  @Test
+  void validateDescriptors_scopedToApplicationWithTransitiveDependencies_validatesFullTreeOnly() {
+    var root = getApplicationDescriptor("app-root", "2.0.0");
+    root.setDependencies(List.of(new Dependency().name("app-provider").version("^2.0.0")));
+
+    var provider = getApplicationDescriptor("app-provider", "2.1.0");
+    provider.setDependencies(List.of(new Dependency().name("app-storage").version("^1.0.0")));
+    var storage = getApplicationDescriptor("app-storage", "1.2.0");
+    var unrelated = getApplicationDescriptor("app-unrelated", "1.0.0");
+    unrelated.setDependencies(List.of(new Dependency().name("app-missing").version("1.0.0")));
+
+    var actual = applicationDescriptorsValidationService.validateDescriptors(
+      List.of(root, provider, storage, unrelated), root.getId());
+
+    assertThat(actual).containsExactly(
+      "app-provider-2.1.0", "app-root-2.0.0", "app-storage-1.2.0");
+    verify(dependenciesValidator).validate(assertArg(descriptors ->
+      assertThat(descriptors).containsExactlyInAnyOrder(root, provider, storage)));
+    verifyNoInteractions(applicationService);
+  }
+
+  @Test
+  void validateDescriptors_unknownScopeApplication_throwsValidationException() {
+    var descriptor = getApplicationDescriptor("app-request", "1.0.0");
+    var scopeApplicationId = "app-unknown-1.0.0";
+
+    assertThatThrownBy(() -> applicationDescriptorsValidationService
+      .validateDescriptors(List.of(descriptor), scopeApplicationId))
+      .isInstanceOf(RequestValidationException.class)
+      .hasMessage("Scope application descriptor must be included in the request")
+      .satisfies(error -> assertThat(((RequestValidationException) error).getErrorParameters())
+        .containsExactly(new Parameter().key("scopeApplicationId").value(scopeApplicationId)));
+    verifyNoInteractions(applicationService);
   }
 
   @Test
