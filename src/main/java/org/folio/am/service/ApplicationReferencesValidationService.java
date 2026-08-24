@@ -79,7 +79,7 @@ public class ApplicationReferencesValidationService {
   private static void collectUnseenDependencies(List<ApplicationDescriptor> source, Set<String> loadedNames,
     ArrayDeque<Dependency> queue) {
     toStream(source)
-      .flatMap(d -> toStream(d.getDependencies()))
+      .flatMap(appDescriptor -> toStream(appDescriptor.getDependencies()))
       .filter(dep -> !Boolean.TRUE.equals(dep.getOptional()))
       .filter(dep -> loadedNames.add(dep.getName()))
       .forEach(queue::add);
