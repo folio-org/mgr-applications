@@ -38,14 +38,14 @@ import org.springframework.test.context.jdbc.Sql;
 })
 class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
 
-  private static final String PLATFORM_APP_NAME    = "app-platform-minimal";
+  private static final String PLATFORM_APP_NAME = "app-platform-minimal";
   private static final String PLATFORM_APP_VERSION = "1.0.0";
-  private static final String PLATFORM_APP_ID      = PLATFORM_APP_NAME + "-" + PLATFORM_APP_VERSION;
-  private static final String PLATFORM_MODULE_ID   = "mod-configuration-1.0.0";
+  private static final String PLATFORM_APP_ID = PLATFORM_APP_NAME + "-" + PLATFORM_APP_VERSION;
+  private static final String PLATFORM_MODULE_ID = "mod-configuration-1.0.0";
 
-  private static final String APP_B_NAME    = "app-b";
+  private static final String APP_B_NAME = "app-b";
   private static final String APP_B_VERSION = "1.0.0";
-  private static final String APP_B_ID      = APP_B_NAME + "-" + APP_B_VERSION;
+  private static final String APP_B_ID = APP_B_NAME + "-" + APP_B_VERSION;
   private static final String APP_B_MODULE_ID = "mod-b-1.0.0";
 
   @Test
