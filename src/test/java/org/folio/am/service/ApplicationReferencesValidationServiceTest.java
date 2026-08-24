@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationReferences;
@@ -75,7 +76,36 @@ class ApplicationReferencesValidationServiceTest {
 
     assertThatNoException().isThrownBy(() -> applicationReferencesValidationService
       .validateReferences(applicationReferences));
-    verify(dependenciesValidator).validate(anyList());
+    verify(dependenciesValidator).validate(anyList(), anyList());
+  }
+
+  @Test
+  void validate_positive_dependencyRegisteredButNotSubmitted() {
+    var platformEntity = createApplication("app-platform-minimal-1.0.0", "app-platform-minimal", "1.0.0");
+    var platformModuleDescriptor = new ModuleDescriptor()
+      .provides(List.of(new InterfaceDescriptor().id("configuration").version("1.0")));
+    platformEntity.setModules(Set.of(createModule(ModuleType.BACKEND, platformModuleDescriptor)));
+    platformEntity.setApplicationDescriptor(new ApplicationDescriptor());
+
+    var appEntity = createApplication("app-b-1.0.0", "app-b", "1.0.0");
+    var appModuleDescriptor = new ModuleDescriptor()
+      .requires(List.of(new InterfaceReference().id("configuration").version("1.0")));
+    appEntity.setModules(Set.of(createModule(ModuleType.BACKEND, appModuleDescriptor)));
+    var appDescriptor = new ApplicationDescriptor()
+      .dependencies(List.of(new Dependency().name("app-platform-minimal").version("^1.0.0")));
+    appEntity.setApplicationDescriptor(appDescriptor);
+
+    var submittedIds = List.of("app-b-1.0.0");
+    var applicationReferences = new ApplicationReferences().applicationIds(new LinkedHashSet<>(submittedIds));
+
+    when(applicationService.findByIdsWithModules(submittedIds)).thenReturn(List.of(appEntity));
+    when(applicationService.findApplicationIdsByNames(List.of("app-platform-minimal")))
+      .thenReturn(Map.of("app-platform-minimal", List.of("app-platform-minimal-1.0.0")));
+    when(applicationService.findByIdsWithModules(List.of("app-platform-minimal-1.0.0")))
+      .thenReturn(List.of(platformEntity));
+
+    assertThatNoException().isThrownBy(() -> applicationReferencesValidationService
+      .validateReferences(applicationReferences));
   }
 
   @Test

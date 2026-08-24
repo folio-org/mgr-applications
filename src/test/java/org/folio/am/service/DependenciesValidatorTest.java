@@ -35,7 +35,7 @@ class DependenciesValidatorTest {
 
     var applicationDescriptors = List.of(applicationDescriptor, applicationDescriptor2);
 
-    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors))
+    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors, List.of()))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Used same applications with different versions")
       .satisfies(error -> {
@@ -60,7 +60,7 @@ class DependenciesValidatorTest {
 
     var applicationDescriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 
-    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors))
+    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors, List.of()))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Application dependency not exist: name = app3");
   }
@@ -81,7 +81,7 @@ class DependenciesValidatorTest {
 
     var applicationDescriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 
-    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors))
+    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors, List.of()))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Application dependency not exist: name = app2, version = ^2.0.1");
   }
@@ -106,7 +106,7 @@ class DependenciesValidatorTest {
 
     var applicationDescriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 
-    assertDoesNotThrow(() -> dependenciesValidator.validateInterfaces(applicationDescriptors));
+    assertDoesNotThrow(() -> dependenciesValidator.validateInterfaces(applicationDescriptors, List.of()));
   }
 
   @Test
@@ -133,7 +133,7 @@ class DependenciesValidatorTest {
 
     var applicationDescriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 
-    assertThatThrownBy(() -> dependenciesValidator.validateInterfaces(applicationDescriptors))
+    assertThatThrownBy(() -> dependenciesValidator.validateInterfaces(applicationDescriptors, List.of()))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Missing interfaces found for the applications")
       .satisfies(error ->
@@ -163,7 +163,8 @@ class DependenciesValidatorTest {
     var applicationDescriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 
     // Should not throw exception because app3 dependency is optional
-    assertThatNoException().isThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors));
+    assertThatNoException()
+      .isThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors, List.of()));
   }
 
   @Test
@@ -186,8 +187,45 @@ class DependenciesValidatorTest {
     var applicationDescriptors = List.of(applicationDescriptor1, applicationDescriptor2);
 
     // Should throw exception because app4 dependency is required but missing
-    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors))
+    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(applicationDescriptors, List.of()))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Application dependency not exist: name = app4");
+  }
+
+  @Test
+  void validateDependencies_positive_dependencyResolvedFromContext() {
+    var target = new ApplicationDescriptor();
+    target.setId("app-b-1.0.0");
+    target.setName("app-b");
+    target.setVersion("1.0.0");
+    target.setDependencies(List.of(new Dependency().name("app-platform-minimal").version("^1.0.0")));
+
+    var contextApp = new ApplicationDescriptor();
+    contextApp.setId("app-platform-minimal-1.0.0");
+    contextApp.setName("app-platform-minimal");
+    contextApp.setVersion("1.0.0");
+
+    assertThatNoException().isThrownBy(
+      () -> dependenciesValidator.validateDependencies(List.of(target), List.of(contextApp)));
+  }
+
+  @Test
+  void validateInterfaces_positive_interfaceProvidedByContextApp() {
+    var target = new ApplicationDescriptor();
+    target.setId("app-b-1.0.0");
+    target.setName("app-b");
+    target.setVersion("1.0.0");
+    target.setModuleDescriptors(List.of(new ModuleDescriptor()
+      .requires(List.of(new InterfaceReference().id("configuration").version("1.0")))));
+
+    var contextApp = new ApplicationDescriptor();
+    contextApp.setId("app-platform-minimal-1.0.0");
+    contextApp.setName("app-platform-minimal");
+    contextApp.setVersion("1.0.0");
+    contextApp.setModuleDescriptors(List.of(new ModuleDescriptor()
+      .provides(List.of(new InterfaceDescriptor().id("configuration").version("1.0")))));
+
+    assertThatNoException().isThrownBy(
+      () -> dependenciesValidator.validateInterfaces(List.of(target), List.of(contextApp)));
   }
 }
