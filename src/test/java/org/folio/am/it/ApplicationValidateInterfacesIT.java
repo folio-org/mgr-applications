@@ -24,6 +24,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @IntegrationTest
 @EnableKafka
@@ -38,10 +39,15 @@ import org.springframework.test.context.jdbc.Sql;
 })
 class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
 
-  private static final String PLATFORM_APP_NAME = "app-platform-minimal";
-  private static final String PLATFORM_APP_VERSION = "1.0.0";
-  private static final String PLATFORM_APP_ID = PLATFORM_APP_NAME + "-" + PLATFORM_APP_VERSION;
-  private static final String PLATFORM_MODULE_ID = "mod-configuration-1.0.0";
+  private static final String APP_MINIMAL_NAME = "app-minimal";
+  private static final String APP_MINIMAL_VERSION = "1.0.0";
+  private static final String APP_MINIMAL_ID = APP_MINIMAL_NAME + "-" + APP_MINIMAL_VERSION;
+  private static final String APP_MINIMAL_MODULE_ID = "mod-minimal-1.0.0";
+
+  private static final String APP_A_NAME = "app-a";
+  private static final String APP_A_VERSION = "1.0.0";
+  private static final String APP_A_ID = APP_A_NAME + "-" + APP_A_VERSION;
+  private static final String APP_A_MODULE_ID = "mod-a-1.0.0";
 
   private static final String APP_B_NAME = "app-b";
   private static final String APP_B_VERSION = "1.0.0";
@@ -50,57 +56,88 @@ class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
 
   @Test
   void validateInterfaces_positive_dependencyAlreadyRegistered_notInSubmittedSet() throws Exception {
-    var platformDescriptor = buildPlatformApp();
-    doPost("/applications", platformDescriptor);
-
-    var appDescriptor = buildAppB();
-    doPost("/applications", appDescriptor);
+    doPost("/applications", buildAppMinimal());
+    doPost("/applications", buildAppA());
+    doPost("/applications", buildAppB());
 
     var request = new ApplicationReferences().applicationIds(new LinkedHashSet<>(List.of(APP_B_ID)));
 
     attemptPost("/applications/validate-interfaces", request)
-      .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isNoContent());
+      .andExpect(MockMvcResultMatchers.status().isNoContent());
   }
 
   @Test
   void validateInterfaces_positive_allAppsSubmitted() throws Exception {
-    doPost("/applications", buildPlatformApp());
+    doPost("/applications", buildAppMinimal());
+    doPost("/applications", buildAppA());
     doPost("/applications", buildAppB());
 
     var request = new ApplicationReferences()
-      .applicationIds(new LinkedHashSet<>(List.of(PLATFORM_APP_ID, APP_B_ID)));
+      .applicationIds(new LinkedHashSet<>(List.of(APP_MINIMAL_ID, APP_A_ID, APP_B_ID)));
 
     attemptPost("/applications/validate-interfaces", request)
-      .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isNoContent());
+      .andExpect(MockMvcResultMatchers.status().isNoContent());
   }
 
   @Test
   void validateInterfaces_negative_dependencyNotRegisteredAnywhere() throws Exception {
-    var appDescriptor = buildAppB();
-    doPost("/applications", appDescriptor);
+    doPost("/applications", buildAppB());
 
     var request = new ApplicationReferences().applicationIds(new LinkedHashSet<>(List.of(APP_B_ID)));
 
     attemptPost("/applications/validate-interfaces", request)
-      .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest())
-      .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
-        "$.errors[0].message", containsString("Application dependency not exist: name = " + PLATFORM_APP_NAME)))
-      .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
+      .andExpect(MockMvcResultMatchers.status().isBadRequest())
+      .andExpect(MockMvcResultMatchers.jsonPath(
+        "$.errors[0].message", containsString("Application dependency not exist: name = " + APP_A_NAME)))
+      .andExpect(MockMvcResultMatchers.jsonPath(
         "$.errors[0].type", is(RequestValidationException.class.getSimpleName())))
-      .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
+      .andExpect(MockMvcResultMatchers.jsonPath(
         "$.total_records", is(1)));
   }
 
-  private static ApplicationDescriptor buildPlatformApp() {
-    return new ApplicationDescriptor()
-      .name(PLATFORM_APP_NAME)
-      .version(PLATFORM_APP_VERSION)
-      .modules(List.of(new Module().name("mod-configuration").version("1.0.0")))
-      .moduleDescriptors(List.of(new ModuleDescriptor()
-        .id(PLATFORM_MODULE_ID)
-        .provides(List.of(new InterfaceDescriptor().id("configuration").version("1.0")))));
+  @Test
+  void validateInterfaces_negative_secondLevelDependencyNotRegistered() throws Exception {
+    // app-minimal (level-2 dep) intentionally NOT registered
+    doPost("/applications", buildAppA());
+    doPost("/applications", buildAppB());
+
+    var request = new ApplicationReferences()
+      .applicationIds(new LinkedHashSet<>(List.of(APP_B_ID)));
+
+    attemptPost("/applications/validate-interfaces", request)
+      .andExpect(MockMvcResultMatchers.status().isBadRequest())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.errors[0].message",
+        containsString("Application dependency not exist: name = " + APP_MINIMAL_NAME)))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.errors[0].type",
+        is(RequestValidationException.class.getSimpleName())))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.total_records", is(1)));
   }
 
+  // base app — provides "minimal-interface 1.0", no dependencies
+  private static ApplicationDescriptor buildAppMinimal() {
+    return new ApplicationDescriptor()
+      .name(APP_MINIMAL_NAME)
+      .version(APP_MINIMAL_VERSION)
+      .modules(List.of(new Module().name("mod-minimal").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id(APP_MINIMAL_MODULE_ID)
+        .provides(List.of(new InterfaceDescriptor().id("minimal-interface").version("1.0")))));
+  }
+
+  // middle app — requires "minimal-interface 1.0", provides "a-interface 1.0", depends on app-minimal
+  private static ApplicationDescriptor buildAppA() {
+    return new ApplicationDescriptor()
+      .name(APP_A_NAME)
+      .version(APP_A_VERSION)
+      .modules(List.of(new Module().name("mod-a").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id(APP_A_MODULE_ID)
+        .provides(List.of(new InterfaceDescriptor().id("a-interface").version("1.0")))
+        .requires(List.of(new InterfaceReference().id("minimal-interface").version("1.0")))))
+      .dependencies(List.of(new Dependency().name(APP_MINIMAL_NAME).version("^1.0.0")));
+  }
+
+  // requires "a-interface 1.0" (level-1) and "minimal-interface 1.0", depends on app-a
   private static ApplicationDescriptor buildAppB() {
     return new ApplicationDescriptor()
       .name(APP_B_NAME)
@@ -108,7 +145,9 @@ class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
       .modules(List.of(new Module().name("mod-b").version("1.0.0")))
       .moduleDescriptors(List.of(new ModuleDescriptor()
         .id(APP_B_MODULE_ID)
-        .requires(List.of(new InterfaceReference().id("configuration").version("1.0")))))
-      .dependencies(List.of(new Dependency().name(PLATFORM_APP_NAME).version("^1.0.0")));
+        .requires(List.of(
+          new InterfaceReference().id("a-interface").version("1.0"),
+          new InterfaceReference().id("minimal-interface").version("1.0")))))
+      .dependencies(List.of(new Dependency().name(APP_A_NAME).version("^1.0.0")));
   }
 }
