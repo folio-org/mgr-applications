@@ -81,15 +81,19 @@ public class ApplicationReferencesValidationService {
     toStream(source)
       .flatMap(appDescriptor -> toStream(appDescriptor.getDependencies()))
       .filter(dep -> !Boolean.TRUE.equals(dep.getOptional()))
-      .filter(dep -> loadedNames.add(dep.getName()))
-      .forEach(queue::add);
+      .forEach(dep -> {
+        if (loadedNames.add(dep.getName())) {
+          queue.add(dep);
+        }
+      });
   }
 
   private static List<String> resolveLatestMatchingIds(List<Dependency> deps, Map<String, List<String>> idsByName) {
     var result = new ArrayList<String>();
     for (var dep : deps) {
       var range = RangesListFactory.create(dep.getVersion(), true);
-      idsByName.getOrDefault(dep.getName(), List.of()).stream()
+      idsByName.getOrDefault(dep.getName(), List.of())
+        .stream()
         .filter(id -> range.isSatisfiedBy(new Semver(getVersion(id))))
         .max(Comparator.comparing(id -> new Semver(getVersion(id))))
         .ifPresent(result::add);

@@ -210,6 +210,25 @@ class DependenciesValidatorTest {
   }
 
   @Test
+  void validateDependencies_negative_contextHasDependencyWithWrongVersion() {
+    var target = new ApplicationDescriptor();
+    target.setId("app-b-1.0.0");
+    target.setName("app-b");
+    target.setVersion("1.0.0");
+    target.setDependencies(List.of(new Dependency().name("app-platform-minimal").version("^2.0.0")));
+
+    var contextApp = new ApplicationDescriptor();
+    contextApp.setId("app-platform-minimal-1.0.0");
+    contextApp.setName("app-platform-minimal");
+    contextApp.setVersion("1.0.0");
+
+    assertThatThrownBy(
+      () -> dependenciesValidator.validateDependencies(List.of(target), List.of(contextApp)))
+      .isInstanceOf(RequestValidationException.class)
+      .hasMessage("Application dependency not exist: name = app-platform-minimal, version = ^2.0.0");
+  }
+
+  @Test
   void validateInterfaces_positive_interfaceProvidedByContextApp() {
     var target = new ApplicationDescriptor();
     target.setId("app-b-1.0.0");

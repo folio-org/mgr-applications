@@ -106,6 +106,7 @@ class ApplicationReferencesValidationServiceTest {
 
     assertThatNoException().isThrownBy(() -> applicationReferencesValidationService
       .validateReferences(applicationReferences));
+    verify(dependenciesValidator).validate(anyList(), anyList());
   }
 
   @Test

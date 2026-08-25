@@ -141,7 +141,7 @@ class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
       .dependencies(List.of(new Dependency().name(APP_MINIMAL_NAME).version("^1.0.0")));
   }
 
-  // requires "a-interface 1.0" (level-1) and "minimal-interface 1.0", depends on app-a
+  // requires "a-interface 1.0" and "minimal-interface 1.0" at module level
   private static ApplicationDescriptor buildAppB() {
     return new ApplicationDescriptor()
       .name(APP_B_NAME)
