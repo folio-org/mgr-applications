@@ -97,7 +97,7 @@ class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
 
   @Test
   void validateInterfaces_negative_secondLevelDependencyNotRegistered() throws Exception {
-    // app-minimal (level-2 dep) intentionally NOT registered
+    // app-minimal (level-2 dep) intentionally NOT registered — its interface won't be provided
     doPost("/applications", buildAppA());
     doPost("/applications", buildAppB());
 
@@ -107,7 +107,11 @@ class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
     attemptPost("/applications/validate-interfaces", request)
       .andExpect(MockMvcResultMatchers.status().isBadRequest())
       .andExpect(MockMvcResultMatchers.jsonPath("$.errors[0].message",
-        containsString("Application dependency not exist: name = " + APP_MINIMAL_NAME)))
+        containsString("Missing interfaces found for the applications")))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.errors[0].parameters[0].key",
+        is(APP_B_ID)))
+      .andExpect(MockMvcResultMatchers.jsonPath("$.errors[0].parameters[0].value",
+        containsString("minimal-interface 1.0")))
       .andExpect(MockMvcResultMatchers.jsonPath("$.errors[0].type",
         is(RequestValidationException.class.getSimpleName())))
       .andExpect(MockMvcResultMatchers.jsonPath("$.total_records", is(1)));
