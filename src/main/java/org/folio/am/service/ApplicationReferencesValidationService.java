@@ -55,6 +55,15 @@ public class ApplicationReferencesValidationService {
     dependenciesValidator.validate(new ArrayList<>(applicationDescriptors), contextDescriptors);
   }
 
+  /**
+   * Loads the transitive dependency chain for the given applications.
+   *
+   * <p>Iteratively resolves non-optional dependencies, selecting the latest version per dependency
+   * that satisfies the declared semver range. Returned descriptors are used as validation context.
+   *
+   * @param targets application descriptors submitted for validation
+   * @return application descriptors forming the transitive dependency chain
+   */
   private List<ApplicationDescriptor> loadDependencyChain(List<ApplicationDescriptor> targets) {
     var loadedNames = new HashSet<>(mapItemsToSet(targets, ApplicationDescriptor::getName));
     var context = new ArrayList<ApplicationDescriptor>();

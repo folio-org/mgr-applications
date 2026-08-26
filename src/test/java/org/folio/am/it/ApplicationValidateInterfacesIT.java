@@ -55,7 +55,7 @@ class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
   private static final String APP_B_MODULE_ID = "mod-b-1.0.0";
 
   @Test
-  void validateInterfaces_positive_dependencyAlreadyRegistered_notInSubmittedSet() throws Exception {
+  void validateInterfaces_positive_dependencyAlreadySaved_notInSubmittedSet() throws Exception {
     doPost("/applications", buildAppMinimal());
     doPost("/applications", buildAppA());
     doPost("/applications", buildAppB());
@@ -67,7 +67,7 @@ class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
   }
 
   @Test
-  void validateInterfaces_positive_allAppsSubmitted() throws Exception {
+  void validateInterfaces_positive_allAppsSaved() throws Exception {
     doPost("/applications", buildAppMinimal());
     doPost("/applications", buildAppA());
     doPost("/applications", buildAppB());
@@ -80,7 +80,7 @@ class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
   }
 
   @Test
-  void validateInterfaces_negative_dependencyNotRegisteredAnywhere() throws Exception {
+  void validateInterfaces_negative_dependencyNotSaved() throws Exception {
     doPost("/applications", buildAppB());
 
     var request = new ApplicationReferences().applicationIds(new LinkedHashSet<>(List.of(APP_B_ID)));
@@ -96,7 +96,7 @@ class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
   }
 
   @Test
-  void validateInterfaces_negative_secondLevelDependencyNotRegistered() throws Exception {
+  void validateInterfaces_negative_secondLevelDependencyNotSaved() throws Exception {
     // app-minimal intentionally NOT registered — its interface won't be provided
     doPost("/applications", buildAppA());
     doPost("/applications", buildAppB());
