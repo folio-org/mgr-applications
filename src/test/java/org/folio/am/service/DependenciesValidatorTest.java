@@ -222,8 +222,9 @@ class DependenciesValidatorTest {
     contextApp.setName("app-platform-minimal");
     contextApp.setVersion("1.0.0");
 
-    assertThatThrownBy(
-      () -> dependenciesValidator.validateDependencies(List.of(target), List.of(contextApp)))
+    var targets = List.of(target);
+    var context = List.of(contextApp);
+    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(targets, context))
       .isInstanceOf(RequestValidationException.class)
       .hasMessage("Application dependency not exist: name = app-platform-minimal, version = ^2.0.0");
   }
