@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.6</version>
+    <version>4.1.1</version>
     <relativePath />
   </parent>
 
@@ -30,12 +30,12 @@
     <lombok.version>1.18.46</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <hypersistence-utils.version>3.15.3</hypersistence-utils.version>
-    <swagger-annotations.version>2.2.50</swagger-annotations.version>
+    <hypersistence-utils.version>3.15.5</hypersistence-utils.version>
+    <swagger-annotations.version>2.2.54</swagger-annotations.version>
     <apache-commons-lang3.version>3.20.0</apache-commons-lang3.version>
-    <apache-commons-collections4.version>4.5.0</apache-commons-collections4.version>
-    <openapi-tools.jackson-databind-nullable.version>0.2.10</openapi-tools.jackson-databind-nullable.version>
-    <cql2pgjson.version>36.0.0</cql2pgjson.version>
+    <apache-commons-collections4.version>4.6.0</apache-commons-collections4.version>
+    <openapi-tools.jackson-databind-nullable.version>0.2.11</openapi-tools.jackson-databind-nullable.version>
+    <cql2pgjson.version>36.0.1</cql2pgjson.version>
     <folio-spring-cql.version>10.0.0</folio-spring-cql.version>
     <applications-poc-tools.version>4.1.0-SNAPSHOT</applications-poc-tools.version>
     <folio-java-checkstyle.version>1.2.0</folio-java-checkstyle.version>
@@ -52,7 +52,7 @@
     <instancio.version>5.6.0</instancio.version>
 
     <!-- Plugins versions -->
-    <maven-checkstyle.version>13.5.0</maven-checkstyle.version>
+    <maven-checkstyle.version>14.0.0</maven-checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
     <openapi-generator.version>7.24.0</openapi-generator.version>
