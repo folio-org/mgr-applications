@@ -248,4 +248,43 @@ class DependenciesValidatorTest {
     assertThatNoException().isThrownBy(
       () -> dependenciesValidator.validateInterfaces(List.of(target), List.of(contextApp)));
   }
+
+  @Test
+  void validateDependencies_negative_prereleaseContextAppVersionDoesNotSatisfyRange() {
+    var appA = new ApplicationDescriptor();
+    appA.setId("app-a-1.0.0");
+    appA.setName("app-a");
+    appA.setVersion("1.0.0");
+    appA.setDependencies(List.of(new Dependency().name("app-platform-minimal").version("^0.0.17")));
+
+    var contextApp = new ApplicationDescriptor();
+    contextApp.setId("app-platform-minimal-0.0.17-SNAPSHOT.2");
+    contextApp.setName("app-platform-minimal");
+    contextApp.setVersion("0.0.17-SNAPSHOT.2");
+
+    var targets = List.of(appA);
+    var context = List.of(contextApp);
+    assertThatThrownBy(() -> dependenciesValidator.validateDependencies(targets, context))
+      .isInstanceOf(RequestValidationException.class)
+      .hasMessage("Application dependency not exist: name = app-platform-minimal, version = ^0.0.17");
+  }
+
+  @Test
+  void validateDependencies_positive_prereleaseContextAppVersionSatisfiesRange() {
+    var appA = new ApplicationDescriptor();
+    appA.setId("app-a-1.0.0");
+    appA.setName("app-a");
+    appA.setVersion("1.0.0");
+    appA.setDependencies(List.of(new Dependency().name("app-platform-minimal").version("^0.0.17-0")));
+
+    var contextApp = new ApplicationDescriptor();
+    contextApp.setId("app-platform-minimal-0.0.17-SNAPSHOT.2");
+    contextApp.setName("app-platform-minimal");
+    contextApp.setVersion("0.0.17-SNAPSHOT.2");
+
+    var targets = List.of(appA);
+    var context = List.of(contextApp);
+    assertThatNoException().isThrownBy(
+      () -> dependenciesValidator.validateDependencies(targets, context));
+  }
 }

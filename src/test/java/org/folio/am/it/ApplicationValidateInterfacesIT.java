@@ -97,7 +97,7 @@ class ApplicationValidateInterfacesIT extends BaseBackendIntegrationTest {
 
   @Test
   void validateInterfaces_negative_secondLevelDependencyNotRegistered() throws Exception {
-    // app-minimal (level-2 dep) intentionally NOT registered — its interface won't be provided
+    // app-minimal intentionally NOT registered — its interface won't be provided
     doPost("/applications", buildAppA());
     doPost("/applications", buildAppB());
 
