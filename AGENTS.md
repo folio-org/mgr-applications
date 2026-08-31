@@ -130,8 +130,8 @@ Integration Layer (External Systems)
 ### Integration Points
 
 **Kong Gateway Integration (via `folio-integration-kong`):**
-- Self-registers the module's service and routes at startup (`KongModuleRegistrar`, `MODULE_URL`, `REGISTER_MODULE_IN_KONG`)
-- Controlled by `KONG_INTEGRATION_ENABLED`
+- Self-registers the module's service and routes at startup (`ApiGatewayModuleRegistrar`, `MODULE_URL`, `APIGW_REGISTER_MODULE`)
+- Controlled by `APIGW_ENABLED`; legacy `KONG_INTEGRATION_ENABLED` / `REGISTER_MODULE_IN_KONG` still work but are deprecated
 
 **Kafka Integration (`org.folio.am.integration.kafka`):**
 - `DiscoveryPublisher` publishes discovery change events to `${ENV}.discovery`
@@ -200,7 +200,7 @@ ApplicationService.create()
 **Folio Application Registry (FAR) Mode:**
 - When `FAR_MODE=true`: Only CRUD operations for application descriptors are enabled
 - Disables Kafka, Keycloak, Okapi, and mgr-tenant-entitlements integrations
-- Kong self-registration is not disabled by FAR mode; set `KONG_INTEGRATION_ENABLED=false` explicitly
+- Kong self-registration is not disabled by FAR mode; set `APIGW_ENABLED=false` explicitly
 - Used for registry-only deployments without service discovery
 
 ## Important Patterns

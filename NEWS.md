@@ -1,5 +1,8 @@
 ## Version `v4.0.3` (IN PROGRESS)
 * Remove Kong gateway route management (discovery-driven service/route synchronization and tenant checks via entitlement events); module self-registration in Kong remains (MGRAPPS-108)
+* Generalize API Gateway configuration to `application.apigw.*` properties and `APIGW_*` environment variables; legacy
+  `application.kong.*` properties and `KONG_*` variables keep working, are reported with a `WARN` at startup and are
+  planned for removal in the `Vetch` release (EUREKA-887)
 
 ---
 
