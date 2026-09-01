@@ -4,6 +4,9 @@
 * Application-scoped sidecar bootstrap: ingress and egress module-bootstrap endpoints (EUREKA-899)
 * Switch Kong integration test container to folioci/folio-kong image (APPPOCTOOL-37)
 * Remove Kong gateway route management (discovery-driven service/route synchronization and tenant checks via entitlement events); module self-registration in Kong remains (MGRAPPS-108)
+* Generalize API Gateway configuration to `application.apigw.*` properties and `APIGW_*` environment variables; legacy
+  `application.kong.*` properties and `KONG_*` variables keep working, are reported with a `WARN` at startup and are
+  planned for removal in the `Vetch` release (EUREKA-887)
 * **Breaking:** Remove "Okapi integration" mode. `OKAPI_INTEGRATION_ENABLED`, `OKAPI_URL` and
   `MOD_AUTHTOKEN_URL` are no longer supported, module/discovery descriptors are no longer pushed to
   an Okapi gateway, and mod-authtoken security mode is no longer reachable. The `okapi.*`

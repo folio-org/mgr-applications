@@ -46,20 +46,20 @@ application:
     enabled: ${FAR_MODE:false}
   security:
     enabled: ${SECURITY_ENABLED:true}
-  kong:
-    enabled: ${KONG_INTEGRATION_ENABLED:true}
-    url: ${KONG_ADMIN_URL:${kong.url:}}
-    module-self-url: ${MODULE_URL:http://mgr-applications:8081}
-    register-module: ${REGISTER_MODULE_IN_KONG:true}
-    connect-timeout: ${KONG_CONNECT_TIMEOUT:}
-    read-timeout: ${KONG_READ_TIMEOUT:}
-    write-timeout: ${KONG_WRITE_TIMEOUT:}
-    retries: ${KONG_RETRIES:}
+  apigw:
+    enabled: ${APIGW_ENABLED:${KONG_INTEGRATION_ENABLED:${application.kong.enabled:true}}}
+    url: ${APIGW_URL:${KONG_ADMIN_URL:${application.kong.url:${kong.url:}}}}
+    module-self-url: ${MODULE_URL:${application.kong.module-self-url:http://mgr-applications:8081}}
+    register-module: ${APIGW_REGISTER_MODULE:${REGISTER_MODULE_IN_KONG:${application.kong.register-module:true}}}
+    connect-timeout: ${APIGW_CONNECT_TIMEOUT:${KONG_CONNECT_TIMEOUT:${application.kong.connect-timeout:}}}
+    read-timeout: ${APIGW_READ_TIMEOUT:${KONG_READ_TIMEOUT:${application.kong.read-timeout:}}}
+    write-timeout: ${APIGW_WRITE_TIMEOUT:${KONG_WRITE_TIMEOUT:${application.kong.write-timeout:}}}
+    retries: ${APIGW_RETRIES:${KONG_RETRIES:${application.kong.retries:}}}
     tls:
-      enabled: ${KONG_TLS_ENABLED:false}
-      trust-store-path: ${KONG_TLS_TRUSTSTORE_PATH:}
-      trust-store-password: ${KONG_TLS_TRUSTSTORE_PASSWORD:}
-      trust-store-type: ${KONG_TLS_TRUSTSTORE_TYPE:}
+      enabled: ${APIGW_TLS_ENABLED:${KONG_TLS_ENABLED:${application.kong.tls.enabled:false}}}
+      trust-store-path: ${APIGW_TLS_TRUSTSTORE_PATH:${KONG_TLS_TRUSTSTORE_PATH:${application.kong.tls.trust-store-path:}}}
+      trust-store-password: ${APIGW_TLS_TRUSTSTORE_PASSWORD:${KONG_TLS_TRUSTSTORE_PASSWORD:${application.kong.tls.trust-store-password:}}}
+      trust-store-type: ${APIGW_TLS_TRUSTSTORE_TYPE:${KONG_TLS_TRUSTSTORE_TYPE:${application.kong.tls.trust-store-type:}}}
   environment: ${ENV:folio}
   kafka:
     producer:

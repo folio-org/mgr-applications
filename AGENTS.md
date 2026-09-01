@@ -26,14 +26,14 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 **Repositories** extend `JpaCqlRepository` for CQL filtering (e.g. `name=="app*"`) via `cql2pgjson`; use `findByQuery()`.
 
 **Integrations**:
-- Kong (via `folio-integration-kong`): self-registers the module's service + routes in Kong at startup (`KongModuleRegistrar`, `MODULE_URL`, `REGISTER_MODULE_IN_KONG`). Toggle `KONG_INTEGRATION_ENABLED`.
+- Kong (via `folio-integration-kong`): self-registers the module's service + routes in Kong at startup (`ApiGatewayModuleRegistrar`, `MODULE_URL`, `APIGW_REGISTER_MODULE`). Toggle `APIGW_ENABLED`. Legacy `KONG_INTEGRATION_ENABLED` / `REGISTER_MODULE_IN_KONG` still work but are deprecated.
 - Kafka (`integration.kafka`): `DiscoveryPublisher` publishes `${ENV}.discovery` events.
 - Keycloak (via `folio-security`): resource-server/client/role/policy import; JWT validation. Toggle `KC_INTEGRATION_ENABLED`.
 - mgr-tenant-entitlements (`integration.mte`): blocks deletion of entitled applications.
 
 **Events** via `ApplicationEventPublisher`: `ApplicationDiscoveryListener` (discovery create/update/delete) drives Kafka side effects. Reliable publishing via transactional outbox (`integration.messaging`).
 
-**FAR mode** (`FAR_MODE=true`): descriptor CRUD only; disables Kafka/Keycloak/mte. Kong self-registration is not disabled by FAR mode — set `KONG_INTEGRATION_ENABLED=false` explicitly.
+**FAR mode** (`FAR_MODE=true`): descriptor CRUD only; disables Kafka/Keycloak/mte. Kong self-registration is not disabled by FAR mode — set `APIGW_ENABLED=false` explicitly.
 
 **Validation** (`VALIDATION_MODE`): NONE / BASIC / ON_CREATE (full dependency checks).
 
