@@ -96,7 +96,8 @@ public class ApplicationController extends BaseController implements Application
   public ResponseEntity<List<String>> validateDescriptorsDependenciesIntegrity(
     ApplicationDescriptorsValidation applicationDescriptorsValidation) {
     var applicationIds = applicationDescriptorsValidationService
-      .validateDescriptors(applicationDescriptorsValidation.getApplicationDescriptors());
+      .validateDescriptors(applicationDescriptorsValidation.getApplicationDescriptors(),
+        applicationDescriptorsValidation.getScopeApplicationId());
     return ResponseEntity.ok(applicationIds);
   }
 

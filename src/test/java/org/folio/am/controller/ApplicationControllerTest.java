@@ -512,7 +512,28 @@ class ApplicationControllerTest {
         .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
       .andExpect(status().isOk());
 
-    verify(applicationDescriptorsValidationService).validateDescriptors(any());
+    verify(applicationDescriptorsValidationService)
+      .validateDescriptors(requestBody.getApplicationDescriptors(), null);
+  }
+
+  @Test
+  void validateDescriptorsDependenciesIntegrity_positive_scoped() throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    var requestBody = new ApplicationDescriptorsValidation()
+      .applicationDescriptors(List.of(applicationDescriptor()))
+      .scopeApplicationId(APPLICATION_ID);
+
+    mockMvc.perform(post("/applications/validate-descriptors")
+        .content(asJsonString(requestBody))
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isOk());
+
+    verify(applicationDescriptorsValidationService)
+      .validateDescriptors(requestBody.getApplicationDescriptors(), APPLICATION_ID);
   }
 
   @Test
