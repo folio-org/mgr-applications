@@ -2,6 +2,9 @@ package org.folio.am.service;
 
 import static java.util.Objects.isNull;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -15,6 +18,7 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -229,6 +233,11 @@ public class ApplicationService {
 
   public List<String> findAllApplicationIdsByName(String applicationName) {
     return mapItems(appRepository.findAllAppArtifactsByName(applicationName), ApplicationProjection::getId);
+  }
+
+  public Map<String, List<String>> findApplicationIdsByNames(List<String> names) {
+    return appRepository.findAllAppArtifactsByNames(names).stream()
+      .collect(groupingBy(ApplicationProjection::getName, mapping(ApplicationProjection::getId, toList())));
   }
 
   private Function<ApplicationEntity, ApplicationDescriptor> descriptorWithModules(

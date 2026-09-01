@@ -34,12 +34,16 @@ import org.springframework.stereotype.Component;
 public class DependenciesValidator {
 
   public void validate(List<ApplicationDescriptor> applicationDescriptors) {
-    validateDependencies(applicationDescriptors);
-    validateInterfaces(applicationDescriptors);
+    validate(applicationDescriptors, List.of());
   }
 
-  void validateDependencies(List<ApplicationDescriptor> applicationDescriptors) {
-    var appNamesWithSeveralVersions = toStream(applicationDescriptors)
+  public void validate(List<ApplicationDescriptor> targets, List<ApplicationDescriptor> context) {
+    validateDependencies(targets, context);
+    validateInterfaces(targets, context);
+  }
+
+  void validateDependencies(List<ApplicationDescriptor> targets, List<ApplicationDescriptor> context) {
+    var appNamesWithSeveralVersions = toStream(targets)
       .collect(groupingBy(ApplicationDescriptor::getName, mapping(ApplicationDescriptor::getVersion, toSet())))
       .entrySet()
       .stream()
@@ -52,17 +56,16 @@ public class DependenciesValidator {
       log.debug(validationMessage + " " + appNamesWithSeveralVersions);
       throw new RequestValidationException(validationMessage, List.of(parameter));
     }
-    var mapApplicationNameToVersions = toStream(applicationDescriptors)
-      .collect(toMap(ApplicationDescriptor::getName, ApplicationDescriptor::getVersion));
-    for (var applicationDescriptor : applicationDescriptors) {
-      var dependencies = applicationDescriptor.getDependencies();
-      validateApplicationDependencies(dependencies, mapApplicationNameToVersions);
-    }
+    var mapApplicationNameToVersions = toStream(union(targets, context))
+      .collect(toMap(ApplicationDescriptor::getName, ApplicationDescriptor::getVersion,
+        (fromTarget, fromContext) -> fromTarget));
+    toStream(targets)
+      .forEach(ad -> validateApplicationDependencies(ad.getDependencies(), mapApplicationNameToVersions));
   }
 
-  void validateInterfaces(List<ApplicationDescriptor> applicationDescriptors) {
-    var providedInterfaces = getProvidedInterfaces(applicationDescriptors);
-    var missedInterfacesPerApplication = toStream(applicationDescriptors)
+  void validateInterfaces(List<ApplicationDescriptor> targets, List<ApplicationDescriptor> context) {
+    var providedInterfaces = getProvidedInterfaces(union(targets, context));
+    var missedInterfacesPerApplication = toStream(targets)
       .collect(toMap(ApplicationDescriptor::getId, applicationDescriptor -> {
         var missedInterfaces = getMissedInterfaces(providedInterfaces, applicationDescriptor);
         return interfaceReferencesAsString(missedInterfaces);
