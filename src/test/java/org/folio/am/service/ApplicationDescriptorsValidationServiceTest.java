@@ -200,6 +200,91 @@ class ApplicationDescriptorsValidationServiceTest {
     );
   }
 
+  @Test
+  void validate_positive_explicitNullPreReleaseBehavesLikeDefaultTrue() {
+    var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
+    var dependency = new Dependency().name("app2").version("^1.2.0-SNAPSHOT").preRelease(null);
+    applicationDescriptor1.setDependencies(List.of(dependency));
+
+    var applicationEntity1 = getApplicationEntity("app2", "1.3.0-SNAPSHOT.1");
+    var applicationDescriptor2 = getApplicationDescriptor("app2", "1.3.0-SNAPSHOT.1");
+
+    when(applicationService.findAllApplicationIdsByName("app2")).thenReturn(List.of(applicationEntity1.getId()));
+    when(applicationService.get(applicationEntity1.getId(), true)).thenReturn(applicationDescriptor2);
+
+    var actual = applicationDescriptorsValidationService.validateDescriptors(List.of(applicationDescriptor1));
+    var expected = List.of("app1-1.0.0", "app2-1.3.0-SNAPSHOT.1");
+
+    assertThat(actual).isEqualTo(expected);
+  }
+
+  @Test
+  void validate_positive_preReleaseFalseExcludesSnapshotAndSelectsStableVersion() {
+    var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
+    var dependency = new Dependency().name("app-requests-ecs").version("^1.1.0")
+      .preRelease(Dependency.PreReleaseEnum.FALSE);
+    applicationDescriptor1.setDependencies(List.of(dependency));
+
+    var stableEntity = getApplicationEntity("app-requests-ecs", "1.1.12");
+    var snapshotEntity = getApplicationEntity("app-requests-ecs", "1.4.0-SNAPSHOT.100200000008383");
+    var stableDescriptor = getApplicationDescriptor("app-requests-ecs", "1.1.12");
+
+    when(applicationService.findAllApplicationIdsByName("app-requests-ecs")).thenReturn(
+      List.of(stableEntity.getId(), snapshotEntity.getId()));
+    when(applicationService.get(stableEntity.getId(), true)).thenReturn(stableDescriptor);
+
+    var actual = applicationDescriptorsValidationService.validateDescriptors(List.of(applicationDescriptor1));
+    var expected = List.of("app-requests-ecs-1.1.12", "app1-1.0.0");
+
+    assertThat(actual).isEqualTo(expected);
+    verify(dependenciesValidator).validate(assertArg(applicationDescriptors ->
+      assertThat(applicationDescriptors).containsExactlyInAnyOrder(applicationDescriptor1, stableDescriptor)));
+  }
+
+  @Test
+  void validate_negative_preReleaseFalseWithNoSatisfyingStableVersion_throwsValidationException() {
+    var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
+    var dependency = new Dependency().name("app2").version("^1.2.0")
+      .preRelease(Dependency.PreReleaseEnum.FALSE);
+    applicationDescriptor1.setDependencies(List.of(dependency));
+
+    var snapshotEntity = getApplicationEntity("app2", "1.3.0-SNAPSHOT.1");
+    when(applicationService.findAllApplicationIdsByName("app2")).thenReturn(List.of(snapshotEntity.getId()));
+
+    var descriptors = List.of(applicationDescriptor1);
+
+    assertThatThrownBy(() -> applicationDescriptorsValidationService.validateDescriptors(descriptors))
+      .isInstanceOf(RequestValidationException.class)
+      .hasMessage("Cannot find application which satisfies the dependency")
+      .satisfies(error -> assertThat(((RequestValidationException) error).getErrorParameters())
+        .containsExactly(
+          new Parameter().key("dependencyName").value("app2"),
+          new Parameter().key("dependencyVersion").value("^1.2.0")));
+  }
+
+  @Test
+  void validate_positive_preReleaseOnlyExcludesStableAndSelectsHighestPreRelease() {
+    var applicationDescriptor1 = getApplicationDescriptor("app1", "1.0.0");
+    var dependency = new Dependency().name("app2").version("^1.2.0")
+      .preRelease(Dependency.PreReleaseEnum.ONLY);
+    applicationDescriptor1.setDependencies(List.of(dependency));
+
+    var stableEntity = getApplicationEntity("app2", "1.4.0");
+    var snapshotEntity = getApplicationEntity("app2", "1.3.0-SNAPSHOT.1");
+    var snapshotDescriptor = getApplicationDescriptor("app2", "1.3.0-SNAPSHOT.1");
+
+    when(applicationService.findAllApplicationIdsByName("app2")).thenReturn(
+      List.of(stableEntity.getId(), snapshotEntity.getId()));
+    when(applicationService.get(snapshotEntity.getId(), true)).thenReturn(snapshotDescriptor);
+
+    var actual = applicationDescriptorsValidationService.validateDescriptors(List.of(applicationDescriptor1));
+    var expected = List.of("app1-1.0.0", "app2-1.3.0-SNAPSHOT.1");
+
+    assertThat(actual).isEqualTo(expected);
+    verify(dependenciesValidator).validate(assertArg(applicationDescriptors ->
+      assertThat(applicationDescriptors).containsExactlyInAnyOrder(applicationDescriptor1, snapshotDescriptor)));
+  }
+
   private ApplicationDescriptor getApplicationDescriptor(String name, String version) {
     var applicationDescriptor = new ApplicationDescriptor();
     applicationDescriptor.setName(name);

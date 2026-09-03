@@ -17,6 +17,12 @@
       "description": "Indicates whether the dependency is optional",
       "type": "boolean",
       "default": false
+    },
+    "preRelease": {
+      "description": "Controls pre-release (e.g. SNAPSHOT) inclusion when resolving this dependency's version range: 'true' includes pre-release alongside stable, picking the overall highest match (default); 'false' resolves stable versions only; 'only' resolves pre-release versions only.",
+      "type": "string",
+      "enum": [ "true", "false", "only" ],
+      "default": "true"
     }
   },
   "additionalProperties": false,

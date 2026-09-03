@@ -18,6 +18,7 @@ import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptorsValidation;
+import org.folio.am.domain.dto.Dependency;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.exception.RequestValidationException;
 import org.folio.am.support.extensions.EnablePostgres;
@@ -260,6 +261,42 @@ class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
           dependencyVersion, appMinimal.getName(), appMinimal.getVersion()))))
       .andExpect(jsonPath("$.errors[0].code", is("validation_error")))
       .andExpect(jsonPath("$.errors[0].type", is(RequestValidationException.class.getSimpleName())));
+  }
+
+  @Test
+  void validateDescriptors_positive_preReleaseFalseSelectsStableOverSnapshot() throws Exception {
+    var stableMinimal = copy(APP_PLATFORM_MINIMAL).id("app-platform-minimal-2.1.0").version("2.1.0");
+    var snapshotMinimal = copy(APP_PLATFORM_MINIMAL)
+      .id("app-platform-minimal-2.2.0-SNAPSHOT.1").version("2.2.0-SNAPSHOT.1");
+    doPost("/applications", stableMinimal);
+    doPost("/applications", snapshotMinimal);
+
+    var dependentApp = copy(APP_EHOLDINGS);
+    var dependency = dependentApp.getDependencies().getFirst();
+    dependency.setVersion("^2.1.0");
+    dependency.setPreRelease(Dependency.PreReleaseEnum.FALSE);
+
+    attemptPost("/applications/validate-descriptors", validationReq(dependentApp))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$", containsInAnyOrder(dependentApp.getId(), stableMinimal.getId())));
+  }
+
+  @Test
+  void validateDescriptors_positive_preReleaseOnlySelectsSnapshotOverStable() throws Exception {
+    var stableMinimal = copy(APP_PLATFORM_MINIMAL).id("app-platform-minimal-2.1.0").version("2.1.0");
+    var snapshotMinimal = copy(APP_PLATFORM_MINIMAL)
+      .id("app-platform-minimal-2.2.0-SNAPSHOT.1").version("2.2.0-SNAPSHOT.1");
+    doPost("/applications", stableMinimal);
+    doPost("/applications", snapshotMinimal);
+
+    var dependentApp = copy(APP_EHOLDINGS);
+    var dependency = dependentApp.getDependencies().getFirst();
+    dependency.setVersion("^2.1.0");
+    dependency.setPreRelease(Dependency.PreReleaseEnum.ONLY);
+
+    attemptPost("/applications/validate-descriptors", validationReq(dependentApp))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$", containsInAnyOrder(dependentApp.getId(), snapshotMinimal.getId())));
   }
 
   private static ApplicationDescriptorsValidation validationReq(ApplicationDescriptor... descriptors) {
