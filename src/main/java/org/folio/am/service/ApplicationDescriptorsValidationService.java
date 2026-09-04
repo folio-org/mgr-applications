@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
+import org.folio.am.domain.dto.Dependency.PreReleaseEnum;
 import org.folio.am.exception.RequestValidationException;
 import org.folio.common.domain.model.error.Parameter;
 import org.semver4j.RangesList;
@@ -156,7 +157,7 @@ public class ApplicationDescriptorsValidationService {
 
     var dependencyVersionRange = semverRangeFrom(dependency);
     var matchingDescriptor = availableDescriptors.stream()
-      .filter(descriptor -> appVersionIsInRange(dependencyVersionRange).test(descriptor.getId()))
+      .filter(descriptor -> appVersionIsInRange(dependency, dependencyVersionRange).test(descriptor.getId()))
       .max(Comparator.comparing((ApplicationDescriptor descriptor) ->
         new Semver(getVersion(descriptor.getId()))));
     if (matchingDescriptor.isEmpty()) {
@@ -197,7 +198,7 @@ public class ApplicationDescriptorsValidationService {
     var dependencyVersionRange = semverRangeFrom(dependency);
 
     return applicationService.findAllApplicationIdsByName(dependency.getName()).stream()
-      .filter(appVersionIsInRange(dependencyVersionRange))
+      .filter(appVersionIsInRange(dependency, dependencyVersionRange))
       .max(bySemver())
       .map(latestAppId -> applicationService.get(latestAppId, true))
       .orElseGet(() -> {
@@ -218,7 +219,7 @@ public class ApplicationDescriptorsValidationService {
   private void validateRangeOnResolvedApp(Dependency dependency, ApplicationDescriptor resolved) {
     var dependencyVersionRange = semverRangeFrom(dependency);
 
-    if (!appVersionIsInRange(dependencyVersionRange).test(resolved.getId())) {
+    if (!appVersionIsInRange(dependency, dependencyVersionRange).test(resolved.getId())) {
       throw new RequestValidationException(
         format("Dependency version range '%s' is not satisfied by already resolved application '%s' with version '%s'."
             + " Check that all dependencies for the '%s' app are compatible",
@@ -262,14 +263,28 @@ public class ApplicationDescriptorsValidationService {
   }
 
   private static RangesList semverRangeFrom(Dependency dependency) {
-    return RangesListFactory.create(dependency.getVersion(), true);
+    return RangesListFactory.create(dependency.getVersion(), preReleaseModeOf(dependency) != PreReleaseEnum.FALSE);
   }
 
   private static Parameter param(String key, String value) {
     return new Parameter().key(key).value(value);
   }
 
-  private static Predicate<String> appVersionIsInRange(RangesList requiredVersionRanges) {
-    return appId -> requiredVersionRanges.isSatisfiedBy(new Semver(getVersion(appId)));
+  private static Predicate<String> appVersionIsInRange(Dependency dependency, RangesList requiredVersionRanges) {
+    return appId -> {
+      var version = new Semver(getVersion(appId));
+      return requiredVersionRanges.isSatisfiedBy(version) && isMatchingPreReleaseMode(dependency, version);
+    };
+  }
+
+  private static PreReleaseEnum preReleaseModeOf(Dependency dependency) {
+    return dependency.getPreRelease() == null ? PreReleaseEnum.TRUE : dependency.getPreRelease();
+  }
+
+  private static boolean isMatchingPreReleaseMode(Dependency dependency, Semver version) {
+    return switch (preReleaseModeOf(dependency)) {
+      case ONLY -> !version.isStable();
+      case TRUE, FALSE -> true;
+    };
   }
 }

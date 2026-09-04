@@ -13,6 +13,7 @@
   subPermissions were dropped from the module descriptor (MGRAPPS-55)
 * POST /applications/validate-interfaces (mgr-applications) is impractical for incremental app registration (MGRAPPS-123)
 * Add dependency-scoped validation for application descriptors using `scopeApplicationId` (MGRAPPS-101)
+* Honor `preRelease` flag on Dependency in `POST validate-descriptors` API (MGRAPPS-103)
 
 ---
 
