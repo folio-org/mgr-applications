@@ -1,4 +1,6 @@
 ## Version `v4.1.0` (IN PROGRESS)
+* Integration with Apache APISIX: gateway self-registration via `folio-integration-apisix`, selected by `APIGW_TYPE`
+  (`kong` default, `apisix`); APISIX Admin API key via `APIGW_API_KEY` (MGRENTITLE-173)
 * Allow interface to be both provided and require / optional in the same module descriptor (MGRAPPS-99)
 * Upgrade dependencies for Kafka 4.2 compatibility in mgr-applications (MGRAPPS-110)
 * Application-scoped sidecar bootstrap: ingress and egress module-bootstrap endpoints (EUREKA-899)

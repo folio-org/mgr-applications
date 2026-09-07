@@ -1,6 +1,6 @@
 # mgr-applications
 
-Spring Boot 4.x Application Manager for FOLIO: manages application/module lifecycle (registration, discovery, deployment, validation). Java 21, PostgreSQL/JPA, Liquibase, Kafka, Kong, Keycloak, OpenAPI codegen, MapStruct, Lombok.
+Spring Boot 4.x Application Manager for FOLIO: manages application/module lifecycle (registration, discovery, deployment, validation). Java 21, PostgreSQL/JPA, Liquibase, Kafka, API Gateway (Kong or APISIX), Keycloak, OpenAPI codegen, MapStruct, Lombok.
 
 ## Build & Test
 
@@ -8,7 +8,7 @@ Spring Boot 4.x Application Manager for FOLIO: manages application/module lifecy
 mvn clean install              # full build
 mvn clean install -DskipTests  # skip tests
 mvn test                       # unit tests (@Tag("unit"), *Test.java)
-mvn verify                     # integration tests (@Tag("integration"), *IT.java; Testcontainers Postgres+Kafka+Kong)
+mvn verify                     # integration tests (@Tag("integration"), *IT.java; Testcontainers Postgres+Kafka+Kong; APISIX ITs use etcd+APISIX)
 mvn test -Dtest=ApplicationServiceTest#shouldCreateApplication  # single test
 mvn checkstyle:check           # runs during build, FOLIO rules
 ```
@@ -26,14 +26,14 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 **Repositories** extend `JpaCqlRepository` for CQL filtering (e.g. `name=="app*"`) via `cql2pgjson`; use `findByQuery()`.
 
 **Integrations**:
-- Kong (via `folio-integration-kong`): self-registers the module's service + routes in Kong at startup (`ApiGatewayModuleRegistrar`, `MODULE_URL`, `APIGW_REGISTER_MODULE`). Toggle `APIGW_ENABLED`. Legacy `KONG_INTEGRATION_ENABLED` / `REGISTER_MODULE_IN_KONG` still work but are deprecated.
+- API Gateway (via `folio-integration-kong` or `folio-integration-apisix`, selected by `APIGW_TYPE`: `kong` default, `apisix` requires `APIGW_API_KEY`): self-registers the module's service + routes at startup (`ApiGatewayModuleRegistrar`, `MODULE_URL`, `APIGW_REGISTER_MODULE`). Toggle `APIGW_ENABLED`. Legacy `KONG_INTEGRATION_ENABLED` / `REGISTER_MODULE_IN_KONG` still work but are deprecated.
 - Kafka (`integration.kafka`): `DiscoveryPublisher` publishes `${ENV}.discovery` events.
 - Keycloak (via `folio-security`): resource-server/client/role/policy import; JWT validation. Toggle `KC_INTEGRATION_ENABLED`.
 - mgr-tenant-entitlements (`integration.mte`): blocks deletion of entitled applications.
 
 **Events** via `ApplicationEventPublisher`: `ApplicationDiscoveryListener` (discovery create/update/delete) drives Kafka side effects. Reliable publishing via transactional outbox (`integration.messaging`).
 
-**FAR mode** (`FAR_MODE=true`): descriptor CRUD only; disables Kafka/Keycloak/mte. Kong self-registration is not disabled by FAR mode — set `APIGW_ENABLED=false` explicitly.
+**FAR mode** (`FAR_MODE=true`): descriptor CRUD only; disables Kafka/Keycloak/mte. Gateway self-registration is not disabled by FAR mode — set `APIGW_ENABLED=false` explicitly.
 
 **Validation** (`VALIDATION_MODE`): NONE / BASIC / ON_CREATE (full dependency checks).
 
@@ -46,7 +46,8 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 - **Conditional beans**: `@ConditionalOnProperty` per integration.
 - **Logging**: Log4j2 (Spring default logging excluded). Secure stores: AWS-SSM/Vault/FSSP.
 - **Unit tests**: never use lenient Mockito; stub only what's needed; verify only unmocked interactions; name `methodName_scenario_expectedBehavior`. Full guide: https://github.com/folio-org/folio-eureka-ai-dev/blob/master/docs/testing/unit-testing.md
+- **Gateway ITs**: `BaseIntegrationTest` starts Kong via `@EnableKongGateway` (`KongRegistrationIT`). APISIX ITs add `@EnableApisixGateway` (`ApisixRegistrationIT`): the Kong container is skipped and etcd + `folioci/folio-apisix:latest` start instead (image is amd64-only — on arm64 rely on emulation or set `TESTCONTAINERS_APISIX_IMAGE`).
 
 ## Key Dependencies
 
-`folio-spring-cql`, `folio-security`, `folio-kafka-producer`, `folio-backend-common`, `folio-integration-kong`, `cql2pgjson`, `semver4j`.
+`folio-spring-cql`, `folio-security`, `folio-kafka-producer`, `folio-backend-common`, `folio-integration-kong`, `folio-integration-apisix`, `cql2pgjson`, `semver4j`.

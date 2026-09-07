@@ -97,6 +97,8 @@ docker run \
 | APIGW_URL                                | -                            |   true   | API Gateway Admin URL used to perform HTTP requests for self-registration, required.                                                                                                                       |
 | kong.url                                 | -                            |  false   | Lowest-precedence system-property fallback for `APIGW_URL`, used by the integration test infrastructure.                                                                                                   |
 | APIGW_ENABLED                            | true                         |  false   | Defines if API Gateway integration is enabled or disabled.<br/>If it set to `false` - it will exclude all gateway-related beans from spring context.                                                       |
+| APIGW_TYPE                               | kong                         |  false   | Active API Gateway implementation: `kong` or `apisix`. Selects which integration library performs self-registration; `APIGW_URL` and `APIGW_TLS_*` apply to the selected gateway.                          |
+| APIGW_API_KEY                            | -                            |  false   | APISIX Admin API key (sent as `X-API-KEY`). Required when `APIGW_TYPE=apisix`; ignored for Kong.                                                                                                           |
 | APIGW_CONNECT_TIMEOUT                    | -                            |  false   | Defines the timeout in milliseconds for establishing a connection from the gateway to upstream service. If the value is not provided then gateway defaults are applied.                                    |
 | APIGW_READ_TIMEOUT                       | -                            |  false   | Defines the timeout in milliseconds between two successive read operations for transmitting a request from the gateway to the upstream service. If the value is not provided then gateway defaults are applied. |
 | APIGW_WRITE_TIMEOUT                      | -                            |  false   | Defines the timeout in milliseconds between two successive write operations for transmitting a request from the gateway to the upstream service. If the value is not provided then gateway defaults are applied. |
@@ -247,18 +249,24 @@ The feature is controlled by two env variables `SECURITY_ENABLED` and `KC_INTEGR
 
 ## API Gateway Integration
 
-API Gateway integration implemented using idempotent approach
-with [Kong Admin API](https://docs.konghq.com/gateway/latest/admin-api/).
+API Gateway integration is implemented using an idempotent approach against the gateway admin API. The active
+gateway is selected by `APIGW_TYPE`:
+
+- `kong` (default) — [Kong Admin API](https://docs.konghq.com/gateway/latest/admin-api/) via `folio-integration-kong`
+- `apisix` — [APISIX Admin API](https://apisix.apache.org/docs/apisix/admin-api/) via `folio-integration-apisix`;
+  requires `APIGW_API_KEY` (sent as `X-API-KEY`), and `APIGW_URL` must point at the Admin API origin
+  (e.g. `http://apisix:9180`)
 
 ### Gateway Self-Registration
 
-On startup, the module registers itself in the Kong Gateway as a service with a list of routes defined in its module
+On startup, the module registers itself in the API Gateway as a service with a list of routes defined in its module
 descriptor (`descriptors/ModuleDescriptor.json`):
 
-- A Kong Service is created (or updated if it already exists) with the name equal to the module id (e.g. `mgr-applications-4.0.0`)
+- A gateway service is created (or updated if it already exists) with the name equal to the module id (e.g. `mgr-applications-4.0.0`)
 - The service URL is taken from the `MODULE_URL` environment variable (the module cannot define the URL for gateway
   registration by itself, because it can be under a Load Balancer, so this value must be provided manually)
-- Routes are created for all routing entries from the module descriptor
+- Routes are created for all routing entries from the module descriptor (Kong routes are tagged with the module id;
+  APISIX routes carry `module` / `interface` labels)
 - Registration is idempotent: on restart, the existing service and routes are updated in place
 - Self-registration is controlled by `APIGW_ENABLED` and `APIGW_REGISTER_MODULE` environment variables
 
@@ -267,6 +275,13 @@ To view the registered service and its routes in Kong, use:
 ```shell
 curl -X GET "$APIGW_URL/services"
 curl -X GET "$APIGW_URL/services/mgr-applications-4.0.0/routes"
+```
+
+In APISIX (module routes are those whose `labels.module` equals the module id):
+
+```shell
+curl -H "X-API-KEY: $APIGW_API_KEY" "$APIGW_URL/apisix/admin/services/mgr-applications-4.0.0"
+curl -H "X-API-KEY: $APIGW_API_KEY" "$APIGW_URL/apisix/admin/routes?page=1&page_size=100"
 ```
 
 ## Kafka Integration
@@ -360,7 +375,8 @@ the parameter when the entire set of supplied descriptors must be checked as one
 
 ## Integration Testing
 
-Integration tests use Testcontainers for PostgreSQL, Kafka and Kong. The following environment variables
+Integration tests use Testcontainers for PostgreSQL, Kafka and Kong; APISIX integration tests
+(`@EnableApisixGateway`) start etcd and Apache APISIX instead of Kong. The following environment variables
 let you redirect containers to a private registry or adjust startup behaviour without changing
 source code.
 
@@ -369,6 +385,9 @@ source code.
 | `TESTCONTAINERS_POSTGRES_IMAGE`          | `postgres:16-alpine`            | PostgreSQL container image           |
 | `TESTCONTAINERS_KONG_IMAGE`              | `folioci/folio-kong:latest`     | Kong Gateway container image         |
 | `TESTCONTAINERS_KONG_READINESS_TIMEOUT`  | `120`                           | Seconds to wait for Kong startup     |
+| `TESTCONTAINERS_APISIX_IMAGE`            | `folioci/folio-apisix:latest`   | APISIX container image (APISIX ITs)  |
+| `TESTCONTAINERS_ETCD_IMAGE`              | `quay.io/coreos/etcd:v3.5.21`   | etcd container image (APISIX ITs)    |
+| `TESTCONTAINERS_APISIX_READINESS_TIMEOUT` | `120`                          | Seconds to wait for APISIX startup   |
 
 ## AI Documentation
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/folio-org/mgr-applications)
