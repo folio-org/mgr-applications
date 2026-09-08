@@ -48,6 +48,8 @@ application:
     enabled: ${SECURITY_ENABLED:true}
   apigw:
     enabled: ${APIGW_ENABLED:${KONG_INTEGRATION_ENABLED:${application.kong.enabled:true}}}
+    type: ${APIGW_TYPE:kong}
+    api-key: ${APIGW_API_KEY:}
     url: ${APIGW_URL:${KONG_ADMIN_URL:${application.kong.url:${kong.url:}}}}
     module-self-url: ${MODULE_URL:${application.kong.module-self-url:http://mgr-applications:8081}}
     register-module: ${APIGW_REGISTER_MODULE:${REGISTER_MODULE_IN_KONG:${application.kong.register-module:true}}}

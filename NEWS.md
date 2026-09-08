@@ -3,6 +3,7 @@
 * Generalize API Gateway configuration to `application.apigw.*` properties and `APIGW_*` environment variables; legacy
   `application.kong.*` properties and `KONG_*` variables keep working, are reported with a `WARN` at startup and are
   planned for removal in the `Vetch` release (EUREKA-887)
+* Add Apache APISIX support for gateway self-registration (MGRENTITLE-173)
 
 ---
 

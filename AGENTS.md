@@ -11,7 +11,7 @@ This file provides guidance to agents when working with code in this repository.
 - PostgreSQL database with JPA/Hibernate
 - Liquibase for database migrations
 - Kafka for event streaming
-- Kong Gateway integration for API routing
+- API Gateway integration (Kong or APISIX) for API routing
 - Keycloak for authentication/authorization
 - OpenAPI code generation for REST APIs
 - MapStruct for object mapping
@@ -52,8 +52,9 @@ mvn test -Dtest=ApplicationServiceTest#shouldCreateApplication
 - Unit tests: Tagged with `@Tag("unit")`, use `mvn test`
 - Integration tests: Tagged with `@Tag("integration")`, use `mvn verify` or `mvn failsafe:integration-test`
 - Integration tests are in files ending with `*IT.java`
+- Gateway ITs use `@EnableKongGateway`; `@EnableApisixGateway` skips Kong and starts etcd + `folioci/folio-apisix:latest` (amd64-only; arm64 uses emulation or `TESTCONTAINERS_APISIX_IMAGE`).
 - Unit tests are in files ending with `*Test.java`
-- Test containers are used for PostgreSQL, Kafka and Kong in integration tests
+- Test containers are used for PostgreSQL, Kafka and Kong in integration tests; APISIX ITs use etcd and APISIX
 
 ### Running the Application
 
@@ -129,7 +130,7 @@ Integration Layer (External Systems)
 
 ### Integration Points
 
-**Kong Gateway Integration (via `folio-integration-kong`):**
+**API Gateway Integration (via `folio-integration-kong` or `folio-integration-apisix`, selected by `APIGW_TYPE`: `kong` default, `apisix` requires `APIGW_API_KEY`):**
 - Self-registers the module's service and routes at startup (`ApiGatewayModuleRegistrar`, `MODULE_URL`, `APIGW_REGISTER_MODULE`)
 - Controlled by `APIGW_ENABLED`; legacy `KONG_INTEGRATION_ENABLED` / `REGISTER_MODULE_IN_KONG` still work but are deprecated
 
@@ -200,7 +201,7 @@ ApplicationService.create()
 **Folio Application Registry (FAR) Mode:**
 - When `FAR_MODE=true`: Only CRUD operations for application descriptors are enabled
 - Disables Kafka, Keycloak, Okapi, and mgr-tenant-entitlements integrations
-- Kong self-registration is not disabled by FAR mode; set `APIGW_ENABLED=false` explicitly
+- Gateway self-registration is not disabled by FAR mode; set `APIGW_ENABLED=false` explicitly
 - Used for registry-only deployments without service discovery
 
 ## Important Patterns
@@ -336,7 +337,7 @@ For complete guidelines, examples, and checklist, refer to the external document
 - `folio-security`: Security and Keycloak integration
 - `folio-kafka-producer`: Kafka integration utilities
 - `folio-backend-common`: Common FOLIO backend models (ModuleDescriptor)
-- `folio-integration-kong`: Kong Gateway integration
+- `folio-integration-kong`, `folio-integration-apisix`: API Gateway integration
 - `cql2pgjson`: CQL to PostgreSQL JSON conversion
 - `semver4j`: Semantic versioning support
 

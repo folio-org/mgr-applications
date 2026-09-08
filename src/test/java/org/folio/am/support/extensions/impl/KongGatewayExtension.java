@@ -6,6 +6,7 @@ import static org.folio.am.support.extensions.impl.PostgresContainerExtension.PO
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.folio.am.support.extensions.EnableApisixGateway;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -29,6 +30,10 @@ public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback
 
   @Override
   public void beforeAll(ExtensionContext extensionContext) {
+    if (isApisixOnly(extensionContext)) {
+      return;
+    }
+
     if (!CONTAINER.isRunning()) {
       runMigrationWithContainer("kong migrations bootstrap");
       runMigrationWithContainer("kong migrations up && kong migrations finish");
@@ -41,8 +46,20 @@ public class KongGatewayExtension implements BeforeAllCallback, AfterAllCallback
 
   @Override
   public void afterAll(ExtensionContext extensionContext) {
+    if (isApisixOnly(extensionContext)) {
+      return;
+    }
+
     System.clearProperty(KONG_URL_PROPERTY);
     System.clearProperty(KONG_GATEWAY_URL_PROPERTY);
+  }
+
+  // APISIX ITs select type=apisix, deactivating every Kong bean — starting the Kong container for them
+  // only couples APISIX tests to Kong image availability.
+  private static boolean isApisixOnly(ExtensionContext extensionContext) {
+    return extensionContext.getTestClass()
+      .map(testClass -> testClass.isAnnotationPresent(EnableApisixGateway.class))
+      .orElse(false);
   }
 
   private static String getUrlForExposedPort(int port) {
