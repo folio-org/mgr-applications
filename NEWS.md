@@ -1,4 +1,4 @@
-## Version `v4.0.2` (IN PROGRESS)
+## Version `v4.0.2` (11.09.2026)
 * Application-scoped sidecar bootstrap: ingress and egress module-bootstrap endpoints (EUREKA-899)
 
 ---
