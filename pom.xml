@@ -30,7 +30,7 @@
     <lombok.version>1.18.48</lombok.version>
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.6.3</mapstruct.version>
-    <hypersistence-utils.version>3.15.5</hypersistence-utils.version>
+    <hypersistence-utils.version>3.16.0</hypersistence-utils.version>
     <swagger-annotations.version>2.2.55</swagger-annotations.version>
     <apache-commons-lang3.version>3.20.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.6.0</apache-commons-collections4.version>
@@ -46,7 +46,7 @@
     <kafka.version>4.2.0</kafka.version>
 
     <!-- Test dependencies versions -->
-    <mockito.version>5.23.0</mockito.version>
+    <mockito.version>5.24.0</mockito.version>
     <testcontainer.version>2.0.5</testcontainer.version>
     <awaitility.version>4.3.0</awaitility.version>
     <instancio.version>6.0.0</instancio.version>
