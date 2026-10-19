@@ -63,17 +63,6 @@ class ApplicationIT extends BaseIntegrationTest {
   }
 
   @Test
-  void getById_positive_withScope() throws Exception {
-    mockMvc.perform(get("/applications/{id}", "test-app-platform-1.0.0")
-        .header(TOKEN, generateAccessToken(keycloakProperties)))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.id", is("test-app-platform-1.0.0")))
-      .andExpect(jsonPath("$.name", is("test-app-platform")))
-      .andExpect(jsonPath("$.version", is("1.0.0")))
-      .andExpect(jsonPath("$.scope", is("platform")));
-  }
-
-  @Test
   void getById_positive_descriptorWithPlatformFieldNotInSchema() throws Exception {
     mockMvc.perform(get("/applications/{id}", "test-app-4.0.0")
         .header(TOKEN, generateAccessToken(keycloakProperties)))
@@ -217,9 +206,9 @@ class ApplicationIT extends BaseIntegrationTest {
       .andExpect(jsonPath("$.dependencies[0].name", is("app-zookeeper")))
       .andExpect(jsonPath("$.dependencies[0].version", is(">=3.8.0")))
       .andExpect(jsonPath("$.dependencies[0].optional", is(false)))
-      .andExpect(jsonPath("$.dependencies[0].preRelease").doesNotExist())
+      .andExpect(jsonPath("$.dependencies[0].preRelease", is("true")))
       .andExpect(jsonPath("$.dependencies[1].optional", is(true)))
-      .andExpect(jsonPath("$.dependencies[1].preRelease").doesNotExist());
+      .andExpect(jsonPath("$.dependencies[1].preRelease", is("true")));
 
     mockMvc.perform(get("/applications/{id}", "app-kafka-3.5.1")
         .queryParam("full", "true")

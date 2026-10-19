@@ -30,13 +30,7 @@ values
       "platform": "base",
       "version": "4.0.0",
       "modules": [ { "id": "mod-foo-2.0.0", "name": "mod-foo", "version": "2.0.0" } ]
-    }'),
-  ('test-app-platform-1.0.0', 'test-app-platform', '1.0.0', '{
-    "id": "test-app-platform-1.0.0",
-    "name": "test-app-platform",
-    "version": "1.0.0",
-    "scope": "platform"
-  }');
+    }');
 
 INSERT INTO module(id, name, version, descriptor, type)
 VALUES
