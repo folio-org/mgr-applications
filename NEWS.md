@@ -1,3 +1,8 @@
+## Version `v4.0.3` (20.10.2026)
+* Trillium CSP#1 - Upgrade to SpringBoot 4.1 (MGRAPPS-128)
+
+---
+
 ## Version `v4.0.2` (11.09.2026)
 * Application-scoped sidecar bootstrap: ingress and egress module-bootstrap endpoints (EUREKA-899)
 
