@@ -299,6 +299,20 @@ class ApplicationValidateInFarModeIT  extends BaseBackendIntegrationTest {
       .andExpect(jsonPath("$", containsInAnyOrder(dependentApp.getId(), snapshotMinimal.getId())));
   }
 
+  @Test
+  void validateDescriptors_positive_dependencyResolvedToStoredVirtualApplication() throws Exception {
+    var virtualApp = new ApplicationDescriptor().id("app-kafka-3.5.1").name("app-kafka").version("3.5.1")
+      .scope(ApplicationDescriptor.ScopeEnum.PLATFORM);
+    doPost("/applications", virtualApp);
+
+    var dependentApp = new ApplicationDescriptor().id("app-dependent-1.0.0").name("app-dependent").version("1.0.0")
+      .dependencies(List.of(new Dependency().name("app-kafka").version(">=3.5.1")));
+
+    attemptPost("/applications/validate-descriptors", validationReq(dependentApp))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$", containsInAnyOrder(dependentApp.getId(), virtualApp.getId())));
+  }
+
   private static ApplicationDescriptorsValidation validationReq(ApplicationDescriptor... descriptors) {
     return new ApplicationDescriptorsValidation(List.of(descriptors));
   }

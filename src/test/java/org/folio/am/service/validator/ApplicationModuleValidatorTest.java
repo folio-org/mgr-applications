@@ -56,6 +56,16 @@ class ApplicationModuleValidatorTest {
   }
 
   @Test
+  void create_positive_noModules() {
+    when(applicationDescriptor.getModules()).thenReturn(emptyList());
+    var validationContext = ValidationContext.builder().applicationDescriptor(applicationDescriptor).build();
+
+    validator.validate(validationContext);
+
+    verify(applicationDescriptor).getModules();
+  }
+
+  @Test
   void create_positive_moduleBelongsToSameApplicationName() {
     var module1 = new Module().name(SERVICE_NAME).version(SERVICE_VERSION);
     var module2 = new Module().name("test").version(SERVICE_VERSION);

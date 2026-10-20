@@ -168,6 +168,15 @@ class DependenciesValidatorTest {
   }
 
   @Test
+  void validateDependencies_positive_nullDependencies() {
+    var virtualApplication = new ApplicationDescriptor().id("app-kafka-3.5.1").name("app-kafka").version("3.5.1");
+    virtualApplication.setDependencies(null);
+
+    assertThatNoException()
+      .isThrownBy(() -> dependenciesValidator.validateDependencies(List.of(virtualApplication), List.of()));
+  }
+
+  @Test
   void validateDependencies_negative_withMixedDependencies() {
     var applicationDescriptor1 = new ApplicationDescriptor();
     applicationDescriptor1.setId("app1-1.0.0");

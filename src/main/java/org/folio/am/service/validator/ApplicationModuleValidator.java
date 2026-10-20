@@ -31,6 +31,10 @@ public class ApplicationModuleValidator implements ApplicationValidator {
   public void validate(ValidationContext context) {
     var descriptor = context.getApplicationDescriptor();
     var moduleIds = mapItems(descriptor.getModules(), Module::getArtifactId);
+    if (moduleIds.isEmpty()) {
+      return;
+    }
+
     var applications = service.findApplicationsByModuleIds(moduleIds);
 
     var notValidApplications = applications.stream()
