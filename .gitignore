@@ -42,3 +42,4 @@ build/
 .codemie/
 CLAUDE.md
 /.codegraph/
+/.tasks/
