@@ -1,8 +1,13 @@
-## Version `v4.0.3` (IN PROGRESS)
+## Version `v4.0.4` (in progress)
 * Remove Kong gateway route management (discovery-driven service/route synchronization and tenant checks via entitlement events); module self-registration in Kong remains (MGRAPPS-108)
 * Generalize API Gateway configuration to `application.apigw.*` properties and `APIGW_*` environment variables; legacy
   `application.kong.*` properties and `KONG_*` variables keep working, are reported with a `WARN` at startup and are
   planned for removal in the `Vetch` release (EUREKA-887)
+
+---
+
+## Version `v4.0.3` (20.10.2026)
+* Trillium CSP#1 - Upgrade to SpringBoot 4.1 (MGRAPPS-128)
 
 ---
 
