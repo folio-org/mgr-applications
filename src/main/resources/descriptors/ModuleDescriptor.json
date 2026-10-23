@@ -144,6 +144,11 @@
     }
   ],
   "requires": [],
+  "producesEvents": [
+    {
+      "event": "discovery"
+    }
+  ],
   "permissionSets": [
     {
       "description": "Register a new application",
