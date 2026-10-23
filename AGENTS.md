@@ -27,7 +27,9 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 
 **Integrations**:
 - API Gateway (via `folio-integration-kong` or `folio-integration-apisix`, selected by `APIGW_TYPE`: `kong` default, `apisix` requires `APIGW_API_KEY`): self-registers the module's service + routes at startup (`ApiGatewayModuleRegistrar`, `MODULE_URL`, `APIGW_REGISTER_MODULE`). Toggle `APIGW_ENABLED`. Legacy `KONG_INTEGRATION_ENABLED` / `REGISTER_MODULE_IN_KONG` still work but are deprecated.
-- Kafka (`integration.kafka`): `DiscoveryPublisher` publishes `${ENV}.discovery` events.
+- Kafka (`integration.kafka`): `DiscoveryPublisher` publishes `${ENV}.discovery` events. The module descriptor
+  declares this as `producesEvents: [{event: discovery}]` and no `consumesEvents` (guarded by
+  `ModuleDescriptorTest`, MGRAPPS-130).
 - Keycloak (via `folio-security`): resource-server/client/role/policy import; JWT validation. Toggle `KC_INTEGRATION_ENABLED`.
 - mgr-tenant-entitlements (`integration.mte`): blocks deletion of entitled applications.
 
