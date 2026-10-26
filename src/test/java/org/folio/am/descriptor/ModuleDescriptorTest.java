@@ -3,6 +3,7 @@ package org.folio.am.descriptor;
 import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.am.integration.kafka.DiscoveryPublisher.DISCOVERY_DESTINATION;
+import static org.folio.am.integration.kafka.DiscoveryPublisher.PRODUCED_EVENT_DISCOVERY;
 import static org.folio.test.TestUtils.OBJECT_MAPPER;
 import static org.folio.test.TestUtils.readString;
 
@@ -81,28 +82,24 @@ class ModuleDescriptorTest {
       assertThat(name).isNotBlank());
   }
 
-  /**
-   * mgr-applications publishes the discovery event via {@code DiscoveryPublisher}. The descriptor must declare it
-   * under {@code producesEvents} under the same name, so that event dependency checking can validate it once the
-   * descriptor is bundled into {@code app-mgr-services} (MGRAPPS-130).
-   */
   @Test
   void moduleDescriptor_positive_discoveryEventDeclared() {
     var producedEvents = descriptor.getProducesEvents().stream()
       .map(ProducesEvent::getEvent)
       .toList();
 
-    assertThat(producedEvents).containsExactly(DISCOVERY_DESTINATION);
+    assertThat(producedEvents).containsExactly(PRODUCED_EVENT_DISCOVERY);
   }
 
-  /**
-   * mgr-applications no longer consumes the entitlement event: Kong route management and its entitlement listener
-   * were removed in MGRAPPS-108. It consumes no Kafka events, so the descriptor declares no {@code consumesEvents}
-   * (MGRAPPS-130).
-   *
-   * <p>Asserted on the raw JSON tree rather than on {@link ModuleDescriptor}, because an absent key is
-   * indistinguishable from an empty list once deserialized into the model.</p>
-   */
+  @Test
+  void moduleDescriptor_positive_discoveryEventIdentifierFollowsNamingConvention() {
+    assertThat(PRODUCED_EVENT_DISCOVERY)
+      .as("event identifier should be <module>.<resource>.<event-type>.vN, not the bare topic/channel name")
+      .matches("[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*){2,}\\.v\\d+")
+      .startsWith(descriptor.getName() + ".")
+      .isNotEqualTo(DISCOVERY_DESTINATION);
+  }
+
   @Test
   void moduleDescriptor_negative_noConsumedEventsDeclared() {
     assertThat(descriptorJson.has("consumesEvents"))
@@ -111,18 +108,9 @@ class ModuleDescriptorTest {
       .isFalse();
   }
 
-  /**
-   * The declared event name must match the Kafka topic the service actually publishes to, i.e. the {@code name} of
-   * one of the topics configured under {@code application.kafka.producer.topics} (the environment prefix is added
-   * at runtime by {@code KafkaUtils.getEnvTopicName}, so comparing the unprefixed names is sufficient).
-   */
   @Test
-  void moduleDescriptor_positive_declaredEventMatchesConfiguredTopic() {
-    var declaredEvents = descriptor.getProducesEvents().stream()
-      .map(ProducesEvent::getEvent)
-      .collect(toSet());
-
-    assertThat(configuredTopicNames()).isEqualTo(declaredEvents);
+  void moduleDescriptor_positive_discoveryTopicStillConfigured() {
+    assertThat(configuredTopicNames()).contains(DISCOVERY_DESTINATION);
   }
 
   private static List<RoutingEntry> handlers() {
@@ -137,7 +125,7 @@ class ModuleDescriptorTest {
     var resource = new ClassPathResource("application.yml");
     var propertySource = (EnumerablePropertySource<?>) new YamlPropertySourceLoader()
       .load("application", resource)
-      .get(0);
+      .getFirst();
 
     return Arrays.stream(propertySource.getPropertyNames())
       .filter(name -> name.startsWith("application.kafka.producer.topics[") && name.endsWith("].name"))

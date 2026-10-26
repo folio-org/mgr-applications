@@ -146,7 +146,7 @@
   "requires": [],
   "producesEvents": [
     {
-      "event": "discovery"
+      "event": "mgr-applications.module.discovery.v1"
     }
   ],
   "permissionSets": [

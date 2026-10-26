@@ -298,9 +298,13 @@ topic naming convention: `{ENV}.discovery`
 }
 ```
 #### Module descriptor declaration
-* The module descriptor declares the discovery event under `producesEvents` as `discovery`, matching the topic
-  above, so that other modules' dependency on it can be validated once the descriptor is bundled into
-  `app-mgr-services` (MGRAPPS-130).
+* The module descriptor declares the discovery event under `producesEvents` as the event identifier
+  `mgr-applications.module.discovery.v1`. This identifier is not the Kafka topic name,
+  it must stay independent of the topic/channel address, so that renaming or sharing a topic
+  does not break a declared dependency on the event contract.
+  The identifier follows that feedback's `<module>.<resource>.<event-type>.<version>` shape (e.g. its
+  `inventory.instance.created.v1` example): module-qualified, dotted, and major-versioned. `DiscoveryPublisher`
+  does not distinguish create/update/delete on the wire, so a single event type covers all three.
 * mgr-applications no longer consumes the entitlement event (the Kong route management and its entitlement
   listener were removed in MGRAPPS-108), so the descriptor declares no `consumesEvents`.
 
