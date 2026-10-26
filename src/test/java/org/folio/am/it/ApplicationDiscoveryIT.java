@@ -139,6 +139,79 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
 
   @Test
   @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
+  void create_positive_batchRequestUpsert() throws Exception {
+    var firstRequest = TestValues.moduleDiscoveries(
+      TestValues.moduleDiscovery(MODULE_BAR_NAME, MODULE_BAR_VERSION, MODULE_BAR_URL),
+      TestValues.moduleDiscovery(MODULE_FOO_NAME, MODULE_FOO_VERSION, MODULE_FOO_URL));
+
+    mockMvc.perform(post("/modules/discovery")
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(firstRequest)))
+      .andExpect(status().isCreated())
+      .andExpect(content().json(asJsonString(firstRequest), STRICT));
+
+    assertDiscoveryEvents(MODULE_BAR_ID, MODULE_FOO_ID);
+
+    var newFooUrl = "http://test-module-foo-updated:8080";
+    var secondRequest = TestValues.moduleDiscoveries(
+      TestValues.moduleDiscovery(MODULE_BAR_NAME, MODULE_BAR_VERSION, MODULE_BAR_URL),
+      TestValues.moduleDiscovery(MODULE_FOO_NAME, MODULE_FOO_VERSION, newFooUrl));
+
+    mockMvc.perform(post("/modules/discovery")
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(secondRequest)))
+      .andExpect(status().isCreated())
+      .andExpect(content().json(asJsonString(secondRequest), STRICT));
+
+    mockMvc.perform(get("/applications/{id}/discovery", APPLICATION_ID)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(secondRequest), STRICT));
+
+    // only foo is changed: create events for bar and foo, then one update event for foo; the unchanged bar gets none
+    assertDiscoveryEvents(MODULE_BAR_ID, MODULE_FOO_ID, MODULE_FOO_ID);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
+  void create_positive_batchRequestRepeated() throws Exception {
+    var moduleDiscoveries = TestValues.moduleDiscoveries(
+      TestValues.moduleDiscovery(MODULE_BAR_NAME, MODULE_BAR_VERSION, MODULE_BAR_URL),
+      TestValues.moduleDiscovery(MODULE_FOO_NAME, MODULE_FOO_VERSION, MODULE_FOO_URL));
+
+    mockMvc.perform(post("/modules/discovery")
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(moduleDiscoveries)))
+      .andExpect(status().isCreated())
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
+
+    mockMvc.perform(post("/modules/discovery")
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(moduleDiscoveries)))
+      .andExpect(status().isCreated())
+      .andExpect(content().json(asJsonString(moduleDiscoveries), STRICT));
+
+    KafkaEventAssertions.assertDiscoveryEvents(MODULE_BAR_ID, MODULE_FOO_ID);
+
+    // the repeated request publishes nothing: the only events are the first request's, then the one created afterwards
+    var bazId = "test-module-baz-1.0.0";
+    var bazDiscovery = TestValues.moduleDiscovery("test-module-baz", "1.0.0", "http://test-module-baz:8080");
+    mockMvc.perform(post("/modules/{id}/discovery", bazId)
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(bazDiscovery)))
+      .andExpect(status().isCreated());
+
+    KafkaEventAssertions.assertDiscoveryEvents(MODULE_BAR_ID, MODULE_FOO_ID, bazId);
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
   void create_positive_batchRequestModuleNotFound() throws Exception {
     var moduleDiscoveries = TestValues.moduleDiscoveries(
       TestValues.moduleDiscovery("mod-unknown", "1.2.3", "http://test:80801"));
