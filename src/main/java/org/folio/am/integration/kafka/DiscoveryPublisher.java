@@ -14,6 +14,8 @@ public class DiscoveryPublisher implements ApplicationDiscoveryListener {
 
   public static final String DISCOVERY_DESTINATION = "discovery";
 
+  public static final String PRODUCED_EVENT_DISCOVERY = "mgr-applications.module.discovery.v1";
+
   private final MessagePublisher<DiscoveryEvent> messagePublisher;
 
   @Override

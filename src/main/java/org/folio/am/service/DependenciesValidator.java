@@ -83,7 +83,7 @@ public class DependenciesValidator {
 
   private void validateApplicationDependencies(List<Dependency> dependencies,
     Map<String, String> mapApplicationNameToVersions) {
-    for (var dependency : dependencies) {
+    for (var dependency : toStream(dependencies).toList()) {
       if (Boolean.TRUE.equals(dependency.getOptional())) {
         log.debug("Skipping validation for optional dependency: name = {}", dependency.getName());
         continue;

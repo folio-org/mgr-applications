@@ -58,7 +58,8 @@ class ApplicationIT extends BaseIntegrationTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.id", is(APPLICATION_ID)))
       .andExpect(jsonPath("$.name", is("test-app")))
-      .andExpect(jsonPath("$.version", is("1.0.0")));
+      .andExpect(jsonPath("$.version", is("1.0.0")))
+      .andExpect(jsonPath("$.scope").doesNotExist());
   }
 
   @Test
@@ -166,6 +167,91 @@ class ApplicationIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON))
       .andExpectAll(argumentNotValidErr("Invalid semantic version or range(s): \"xxx\"",
         "dependencies[0].version", "xxx"));
+  }
+
+  @Test
+  void create_positive_virtualApplication() throws Exception {
+    var virtualApplication = """
+      {
+        "name": "app-kafka",
+        "version": "3.5.1",
+        "description": "Kafka virtual application",
+        "scope": "platform",
+        "dependencies": [
+          {"name": "app-zookeeper", "version": ">=3.8.0"},
+          {"name": "app-storage", "version": ">=1.0.0", "optional": true}
+        ]
+      }
+      """;
+
+    mockMvc.perform(post("/applications")
+        .content(virtualApplication)
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.id", is("app-kafka-3.5.1")))
+      .andExpect(jsonPath("$.scope", is("platform")));
+
+    mockMvc.perform(get("/applications/{id}", "app-kafka-3.5.1")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.id", is("app-kafka-3.5.1")))
+      .andExpect(jsonPath("$.name", is("app-kafka")))
+      .andExpect(jsonPath("$.version", is("3.5.1")))
+      .andExpect(jsonPath("$.description", is("Kafka virtual application")))
+      .andExpect(jsonPath("$.scope", is("platform")))
+      .andExpect(jsonPath("$.modules.length()", is(0)))
+      .andExpect(jsonPath("$.uiModules.length()", is(0)))
+      .andExpect(jsonPath("$.dependencies.length()", is(2)))
+      .andExpect(jsonPath("$.dependencies[0].name", is("app-zookeeper")))
+      .andExpect(jsonPath("$.dependencies[0].version", is(">=3.8.0")))
+      .andExpect(jsonPath("$.dependencies[0].optional", is(false)))
+      .andExpect(jsonPath("$.dependencies[0].preRelease", is("true")))
+      .andExpect(jsonPath("$.dependencies[1].optional", is(true)))
+      .andExpect(jsonPath("$.dependencies[1].preRelease", is("true")));
+
+    mockMvc.perform(get("/applications/{id}", "app-kafka-3.5.1")
+        .queryParam("full", "true")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.moduleDescriptors.length()", is(0)))
+      .andExpect(jsonPath("$.uiModuleDescriptors.length()", is(0)));
+
+    mockMvc.perform(get("/applications")
+        .queryParam("query", "name==app-kafka")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(1)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].id", is("app-kafka-3.5.1")));
+
+    mockMvc.perform(get("/applications")
+        .queryParam("appName", "app-kafka")
+        .header(TOKEN, generateAccessToken(keycloakProperties)))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.totalRecords", is(1)))
+      .andExpect(jsonPath("$.applicationDescriptors[0].id", is("app-kafka-3.5.1")));
+  }
+
+  @Test
+  void create_negative_virtualApplicationInvalidScope() throws Exception {
+    var virtualApplication = "{\"name\": \"app-kafka\", \"version\": \"3.5.1\", \"scope\": \"global\"}";
+
+    mockMvc.perform(post("/applications")
+        .content(virtualApplication)
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void validate_positive_virtualApplication() throws Exception {
+    var virtualApplication = "{\"name\": \"app-kafka\", \"version\": \"3.5.1\", \"scope\": \"platform\"}";
+
+    mockMvc.perform(post("/applications/validate")
+        .content(virtualApplication)
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isNoContent());
   }
 
   @Test
