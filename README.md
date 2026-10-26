@@ -289,14 +289,24 @@ curl -H "X-API-KEY: $APIGW_API_KEY" "$APIGW_URL/apisix/admin/routes?page=1&page_
 * The application publishes lightweight kafka events when discovery information is registered/updated/removed.
 * The topic is being created on application startup.
 #### Naming convention
-topic naming convention:`<prefix>_discovery`
-* Prefix is passed in as environment variable (for FSE it's usually the cluster identifier, e.g. "evrk")
+topic naming convention: `{ENV}.discovery`
+* `{ENV}` is the value of the `ENV` environment variable (for FSE it's usually the cluster identifier, e.g. "evrk")
 #### Event structure
 ```json
 {
   "moduleId": "mod-foo-1.2.3"
 }
 ```
+#### Module descriptor declaration
+* The module descriptor declares the discovery event under `producesEvents` as the event identifier
+  `mgr-applications.module.discovery.v1`. This identifier is not the Kafka topic name,
+  it must stay independent of the topic/channel address, so that renaming or sharing a topic
+  does not break a declared dependency on the event contract.
+  The identifier follows that feedback's `<module>.<resource>.<event-type>.<version>` shape (e.g. its
+  `inventory.instance.created.v1` example): module-qualified, dotted, and major-versioned. `DiscoveryPublisher`
+  does not distinguish create/update/delete on the wire, so a single event type covers all three.
+* mgr-applications no longer consumes the entitlement event (the Kong route management and its entitlement
+  listener were removed in MGRAPPS-108), so the descriptor declares no `consumesEvents`.
 
 ## Manager Tenant Entitlements Integration
 
