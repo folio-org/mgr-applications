@@ -230,6 +230,50 @@ class ApplicationDiscoveryIT extends BaseIntegrationTest {
   }
 
   @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
+  void create_negative_batchRequestWithValidAndUnknownModule() throws Exception {
+    var moduleDiscoveries = TestValues.moduleDiscoveries(
+      TestValues.moduleDiscovery(MODULE_BAR_NAME, MODULE_BAR_VERSION, MODULE_BAR_URL),
+      TestValues.moduleDiscovery("mod-unknown", "1.2.3", "http://test:80801"));
+
+    mockMvc.perform(post("/modules/discovery")
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(moduleDiscoveries)))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.errors[0].message", is("Modules are not found for ids: [mod-unknown-1.2.3]")));
+
+    // the valid module of the failed request is not created
+    mockMvc.perform(get("/modules/{id}/discovery", MODULE_BAR_ID)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNotFound());
+
+    KafkaEventAssertions.assertNoDiscoveryEvents();
+  }
+
+  @Test
+  @Sql(scripts = "classpath:/sql/module-discoveries-it.sql")
+  void create_negative_batchRequestWithValidAndInvalidIdModule() throws Exception {
+    var moduleDiscoveries = TestValues.moduleDiscoveries(
+      TestValues.moduleDiscovery(MODULE_BAR_NAME, MODULE_BAR_VERSION, MODULE_BAR_URL),
+      TestValues.moduleDiscovery(MODULE_FOO_NAME, MODULE_FOO_VERSION, MODULE_FOO_URL).id("invalid-id"));
+
+    mockMvc.perform(post("/modules/discovery")
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .content(asJsonString(moduleDiscoveries)))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.errors[0].message", is("Discovery id must match name-version pattern")));
+
+    // the valid module of the failed request is not created
+    mockMvc.perform(get("/modules/{id}/discovery", MODULE_BAR_ID)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isNotFound());
+
+    KafkaEventAssertions.assertNoDiscoveryEvents();
+  }
+
+  @Test
   @Sql(scripts = "classpath:/sql/module-discoveries.sql")
   void update_positive() throws Exception {
     var newModuleDiscoveryUrl = "http://test-module-foo-updated:8080";
