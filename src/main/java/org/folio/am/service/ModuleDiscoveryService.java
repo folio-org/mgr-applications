@@ -1,7 +1,6 @@
 package org.folio.am.service;
 
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -105,13 +104,13 @@ public class ModuleDiscoveryService {
    * @param token - x-okapi-token value
    * @return {@link ModuleDiscoveries} with the resulting discovery information of all requested modules
    */
-  public ModuleDiscoveries create(ModuleDiscoveries moduleDiscoveries, String token) {
+  public ModuleDiscoveries upsert(ModuleDiscoveries moduleDiscoveries, String token) {
     var locationsByModuleId = moduleDiscoveries.getDiscovery().stream()
       .collect(toMap(Artifact::getArtifactId, ModuleDiscovery::getLocation));
 
     var resultingDiscoveries = getValidatedModuleEntities(moduleDiscoveries).stream()
       .map(entity -> upsertDiscoveryUrlForModule(entity, locationsByModuleId.get(entity.getId()), token))
-      .collect(toList());
+      .toList();
 
     return new ModuleDiscoveries()
       .discovery(resultingDiscoveries)

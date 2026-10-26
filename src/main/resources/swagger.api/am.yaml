@@ -326,7 +326,7 @@ paths:
         - A module that already has discovery with the same location is left unchanged.
         - A module that already has discovery with a different location is updated to the supplied location.
 
-        The request is atomic: it fails, and nothing is changed, if any module is unknown or any descriptor is invalid.
+        The request is atomic: if any module is unknown or any discovery is invalid, the request fails and no discovery is created or updated.
       tags:
         - module-discovery
       parameters:

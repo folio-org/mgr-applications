@@ -35,7 +35,7 @@ public class ModuleDiscoveryController extends BaseController implements ModuleD
 
   @Override
   public ResponseEntity<ModuleDiscoveries> createModuleDiscoveries(String token, ModuleDiscoveries discoveries) {
-    var moduleDiscoveries = moduleDiscoveryService.create(discoveries, token);
+    var moduleDiscoveries = moduleDiscoveryService.upsert(discoveries, token);
     return ResponseEntity.status(CREATED).body(moduleDiscoveries);
   }
 

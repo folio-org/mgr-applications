@@ -191,7 +191,7 @@ class ModuleDiscoveryServiceTest {
 
       var moduleDiscovery = TestValues.moduleDiscovery().id(null);
       var moduleDiscoveries = new ModuleDiscoveries().discovery(List.of(moduleDiscovery));
-      var result = service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN);
+      var result = service.upsert(moduleDiscoveries, OKAPI_AUTH_TOKEN);
 
       assertThat(result).isEqualTo(TestValues.moduleDiscoveries(TestValues.moduleDiscovery()));
     }
@@ -201,7 +201,7 @@ class ModuleDiscoveryServiceTest {
       var moduleDiscovery = TestValues.moduleDiscovery().id("invalid id");
       var moduleDiscoveries = TestValues.moduleDiscoveries(moduleDiscovery);
 
-      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN))
+      assertThatThrownBy(() -> service.upsert(moduleDiscoveries, OKAPI_AUTH_TOKEN))
         .isInstanceOf(RequestValidationException.class)
         .hasMessage("Discovery id must match name-version pattern")
         .satisfies(exception ->
@@ -215,7 +215,7 @@ class ModuleDiscoveryServiceTest {
       var moduleDiscoveries = TestValues.moduleDiscoveries(moduleDiscovery);
       when(repository.findAllById(List.of(MODULE_ID))).thenReturn(emptyList());
 
-      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN))
+      assertThatThrownBy(() -> service.upsert(moduleDiscoveries, OKAPI_AUTH_TOKEN))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Modules are not found for ids: %s", List.of(MODULE_ID));
     }
@@ -229,7 +229,7 @@ class ModuleDiscoveryServiceTest {
       when(mapper.convert(moduleEntity)).thenReturn(expectedModuleDiscovery);
 
       var moduleDiscoveries = TestValues.moduleDiscoveries(TestValues.moduleDiscovery());
-      var result = service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN);
+      var result = service.upsert(moduleDiscoveries, OKAPI_AUTH_TOKEN);
 
       assertThat(result).isEqualTo(TestValues.moduleDiscoveries(TestValues.moduleDiscovery()));
       assertThat(moduleEntity.getDiscoveryUrl()).isEqualTo(MODULE_URL);
@@ -247,7 +247,7 @@ class ModuleDiscoveryServiceTest {
         OKAPI_AUTH_TOKEN);
 
       var moduleDiscoveries = TestValues.moduleDiscoveries(TestValues.moduleDiscovery());
-      var result = service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN);
+      var result = service.upsert(moduleDiscoveries, OKAPI_AUTH_TOKEN);
 
       assertThat(result).isEqualTo(TestValues.moduleDiscoveries(TestValues.moduleDiscovery()));
       assertThat(moduleEntity.getDiscoveryUrl()).isEqualTo(MODULE_URL);
