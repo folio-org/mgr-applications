@@ -4,7 +4,7 @@
   "description": "Request for egress module bootstrap. Required-module resolution is restricted to providers within the supplied application scope.",
   "properties": {
     "applicationIds": {
-      "description": "Application IDs that define the egress resolution scope.",
+      "description": "Application IDs that define the egress resolution scope. Items must not be blank.",
       "type": "array",
       "items": { "type": "string" },
       "minItems": 1

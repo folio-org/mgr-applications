@@ -1,7 +1,9 @@
 package org.folio.am.repository;
 
+import java.util.Collection;
 import java.util.List;
 import org.folio.am.domain.entity.ModuleBootstrapView;
+import org.folio.am.domain.model.EgressProviderRow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,9 +15,11 @@ public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrap
   /**
    * Queries the module and all its dependencies by the given id.
    *
-   * <p>No {@code DISTINCT} is used: the {@code v_module_bootstrap} grain is one row per (module, application) —
-   * guaranteed by the {@code application_module} composite primary key — and the nested {@code IN} subqueries are
-   * semi-joins that cannot fan out rows, so duplicates are not possible.</p>
+   * <p>The {@code v_module_bootstrap} grain is one row per (module, application) — guaranteed by the
+   * {@code application_module} composite primary key — and the nested {@code IN} subqueries are semi-joins that
+   * cannot fan out rows, so no {@code DISTINCT} is needed. The entity id is the module id though, so Hibernate
+   * returns one shared instance per module, populated from the first row it reads. Ordering by application id makes
+   * that the row with the lowest application id, so {@code applicationId} in the response is stable.</p>
    *
    * @param moduleId the module identifier
    * @return List of module views
@@ -23,25 +27,44 @@ public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrap
   @Query(value = "SELECT view FROM ModuleBootstrapView view WHERE (view.id = :moduleId OR view.id IN "
     + "(SELECT p.moduleId FROM InterfaceReferenceEntity p WHERE p.type = 'PROVIDES' AND "
     + "p.id IN (SELECT r.id FROM InterfaceReferenceEntity r WHERE r.moduleId = :moduleId AND "
-    + "(r.type = 'REQUIRES' OR r.type = 'OPTIONAL')))) and (view.location is not null OR view.id = :moduleId)")
+    + "(r.type = 'REQUIRES' OR r.type = 'OPTIONAL')))) and (view.location is not null OR view.id = :moduleId) "
+    + "ORDER BY view.applicationId")
   List<ModuleBootstrapView> findAllRequiredByModuleId(@Param("moduleId") String moduleId);
 
   /**
-   * Same as {@link #findAllRequiredByModuleId(String)} but restricted to the given application scope: only the
-   * module and provider rows whose application is in {@code applicationIds} are returned. When the module itself is
-   * not in scope no self row is returned.
+   * Checks that the module is a BACKEND module of at least one application in the given scope.
    *
-   * @param moduleId the module identifier
+   * @param id the module identifier
    * @param applicationIds the application scope
-   * @return List of in-scope module views
+   * @return {@code true} if the module belongs to at least one of the applications
    */
-  @Query(value = "SELECT view FROM ModuleBootstrapView view WHERE view.applicationId IN :applicationIds "
-    + "AND (view.id = :moduleId OR view.id IN "
-    + "(SELECT p.moduleId FROM InterfaceReferenceEntity p WHERE p.type = 'PROVIDES' AND "
-    + "p.id IN (SELECT r.id FROM InterfaceReferenceEntity r WHERE r.moduleId = :moduleId AND "
-    + "(r.type = 'REQUIRES' OR r.type = 'OPTIONAL')))) and (view.location is not null OR view.id = :moduleId)")
-  List<ModuleBootstrapView> findAllRequiredByModuleIdAndApplicationIdsIn(
-    @Param("moduleId") String moduleId, @Param("applicationIds") List<String> applicationIds);
+  boolean existsByIdAndApplicationIdIn(String id, Collection<String> applicationIds);
+
+  /**
+   * Returns the in-scope providers of the interfaces that the given module requires or optionally requires.
+   *
+   * <p>There is one row per (provider, in-scope application, required interface). The query selects scalar values,
+   * not {@link ModuleBootstrapView} entities, so rows of the same module in different applications are not merged by
+   * the persistence context. The module itself and providers without a discovery URL are excluded.</p>
+   *
+   * @param moduleId the requesting module id
+   * @param applicationIds the application scope
+   * @return provider rows, see {@link EgressProviderRow}
+   */
+  @Query("""
+    SELECT new org.folio.am.domain.model.EgressProviderRow(
+             v.id, v.applicationId, v.location, v.systemUserRequired, p.providedInterface)
+      FROM ModuleBootstrapView v
+      JOIN InterfaceReferenceEntity p ON p.moduleId = v.id AND p.type = 'PROVIDES'
+     WHERE v.applicationId IN :applicationIds
+       AND v.id <> :moduleId
+       AND v.location IS NOT NULL
+       AND p.providedInterface IS NOT NULL
+       AND p.id IN (SELECT r.id FROM InterfaceReferenceEntity r
+                     WHERE r.moduleId = :moduleId AND (r.type = 'REQUIRES' OR r.type = 'OPTIONAL'))
+    """)
+  List<EgressProviderRow> findEgressProviders(@Param("moduleId") String moduleId,
+    @Param("applicationIds") Collection<String> applicationIds);
 
   /**
    * Returns the bootstrap view row(s) for a single module id. A list is returned (not Optional) because the same

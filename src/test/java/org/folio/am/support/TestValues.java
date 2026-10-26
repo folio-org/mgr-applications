@@ -50,6 +50,7 @@ import org.folio.am.domain.entity.ModuleBootstrapView;
 import org.folio.am.domain.entity.ModuleDiscoveryEntity;
 import org.folio.am.domain.entity.ModuleEntity;
 import org.folio.am.domain.entity.ModuleType;
+import org.folio.am.domain.model.EgressProviderRow;
 import org.folio.am.domain.model.ValidationContext;
 import org.folio.am.service.validator.ValidationMode;
 import org.folio.common.domain.model.AnyDescriptor;
@@ -191,6 +192,11 @@ public class TestValues {
     view.setApplicationId(APPLICATION_ID);
     view.setDescriptor(new ModuleDescriptor().provides(interfaceDescriptors));
     return view;
+  }
+
+  public static EgressProviderRow egressProviderRow(String moduleId, String applicationId, String interfaceId) {
+    return new EgressProviderRow(moduleId, applicationId, moduleLocation(moduleId), false,
+      interfaceDescriptor(interfaceId));
   }
 
   public static InterfaceDescriptor interfaceDescriptor(String interfaceId) {

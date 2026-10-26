@@ -16,6 +16,7 @@
 * POST /applications/validate-interfaces (mgr-applications) is impractical for incremental app registration (MGRAPPS-123)
 * Add dependency-scoped validation for application descriptors using `scopeApplicationId` (MGRAPPS-101)
 * Honor `preRelease` flag on Dependency in `POST validate-descriptors` API (MGRAPPS-103)
+* Optimize egress module bootstrap: read provider routing data without loading module descriptors and return deterministic results (MGRAPPS-127)
 
 ---
 

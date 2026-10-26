@@ -68,24 +68,25 @@ public class MappingMethods {
   }
 
   private void populateInterfaceReferences(ModuleEntity entity, ModuleDescriptor md) {
-    var provides = toInterfaceReferences(md.getProvides());
-    var requires = md.getRequires();
-    var optional = md.getOptional();
-
     var interfaces = new HashSet<InterfaceReferenceEntity>();
-    interfaces.addAll(toInterfaceReferenceEntities(provides, PROVIDES));
-    interfaces.addAll(toInterfaceReferenceEntities(requires, REQUIRES));
-    interfaces.addAll(toInterfaceReferenceEntities(optional, OPTIONAL));
+    interfaces.addAll(mapItems(md.getProvides(), MappingMethods::toProvidedInterfaceEntity));
+    interfaces.addAll(toInterfaceReferenceEntities(md.getRequires(), REQUIRES));
+    interfaces.addAll(toInterfaceReferenceEntities(md.getOptional(), OPTIONAL));
 
     entity.setInterfaces(interfaces);
   }
 
-  private List<InterfaceReference> toInterfaceReferences(List<InterfaceDescriptor> descriptors) {
-    return mapItems(descriptors, this::toInterfaceReference);
-  }
-
-  private InterfaceReference toInterfaceReference(InterfaceDescriptor descriptor) {
-    return new InterfaceReference().id(descriptor.getId()).version(descriptor.getVersion());
+  /**
+   * Creates a PROVIDES reference that also keeps a copy of the provided interface, so egress bootstrap can read
+   * routing data without loading the module descriptor.
+   */
+  private static InterfaceReferenceEntity toProvidedInterfaceEntity(InterfaceDescriptor descriptor) {
+    var entity = new InterfaceReferenceEntity();
+    entity.setId(descriptor.getId());
+    entity.setVersion(descriptor.getVersion());
+    entity.setType(PROVIDES);
+    entity.setProvidedInterface(descriptor);
+    return entity;
   }
 
   private List<InterfaceReferenceEntity> toInterfaceReferenceEntities(Collection<InterfaceReference> refs,

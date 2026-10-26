@@ -21,11 +21,13 @@ import org.folio.am.domain.dto.EgressBootstrapRequest;
 import org.folio.am.domain.dto.Module;
 import org.folio.am.domain.dto.ModuleBootstrap;
 import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
+import org.folio.am.domain.dto.ModuleBootstrapEndpoint;
 import org.folio.am.domain.dto.ModuleBootstrapInterface;
 import org.folio.am.support.base.BaseIntegrationTest;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
+import org.folio.common.domain.model.RoutingEntry;
 import org.folio.security.integration.keycloak.configuration.properties.KeycloakProperties;
 import org.folio.test.extensions.EnableKeycloakDataImport;
 import org.folio.test.extensions.EnableKeycloakSecurity;
@@ -36,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.ResultActions;
 
 @IntegrationTest
 @EnableKeycloakSecurity
@@ -233,6 +236,192 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
         .contentType(APPLICATION_JSON)
         .content(asJsonString(new EgressBootstrapRequest().applicationIds(List.of("other-app-1.0.0")))))
       .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void egressBootstrap_positive_providerInTwoApplicationVersions_lowestApplicationId() throws Exception {
+    // an unchanged module is part of every version of its application
+    postProviderApplication("provider-app", "2.0.0", "mod-provider", "1.0.0", dashboard());
+    postProviderApplication("provider-app", "1.0.0", "mod-provider", "1.0.0", dashboard());
+    postDiscovery("mod-provider", "1.0.0", "http://mod-provider:8081");
+    postConsumerApplication(List.of(new InterfaceReference().id("dashboard").version("2.0")), List.of());
+
+    var expected = new EgressBootstrap().requiredModules(List.of(
+      provider("mod-provider-1.0.0", "provider-app-1.0.0", "http://mod-provider:8081", dashboardBootstrap())));
+
+    postEgressBootstrap("consumer-1.0.0", "test-app-1.0.0", "provider-app-2.0.0", "provider-app-1.0.0")
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(expected), STRICT));
+  }
+
+  @Test
+  void egressBootstrap_positive_descriptorRewrittenByLaterApplicationVersion_returnsNewHandlers() throws Exception {
+    postProviderApplication("provider-app", "1.0.0", "mod-provider", "1.0.0", dashboard());
+    postProviderApplication("provider-app", "2.0.0", "mod-provider", "1.0.0",
+      dashboard().addHandlersItem(new RoutingEntry().addMethodsItem("GET").pathPattern("/dashboard")));
+    postDiscovery("mod-provider", "1.0.0", "http://mod-provider:8081");
+    postConsumerApplication(List.of(new InterfaceReference().id("dashboard").version("2.0")), List.of());
+
+    var expected = new EgressBootstrap().requiredModules(List.of(
+      provider("mod-provider-1.0.0", "provider-app-1.0.0", "http://mod-provider:8081",
+        dashboardBootstrap().addEndpointsItem(new ModuleBootstrapEndpoint().addMethodsItem("GET")
+          .pathPattern("/dashboard")))));
+
+    postEgressBootstrap("consumer-1.0.0", "test-app-1.0.0", "provider-app-1.0.0", "provider-app-2.0.0")
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(expected), STRICT));
+  }
+
+  @Test
+  void egressBootstrap_positive_multipleInterfaceProvidedByDifferentModules_allReturned() throws Exception {
+    postProviderApplication("provider-a-app", "1.0.0", "mod-provider-a", "1.0.0", dashboard());
+    postProviderApplication("provider-b-app", "1.0.0", "mod-provider-b", "3.0.0", dashboard());
+    postDiscovery("mod-provider-a", "1.0.0", "http://mod-provider-a:8081");
+    postDiscovery("mod-provider-b", "3.0.0", "http://mod-provider-b:8081");
+    postConsumerApplication(List.of(new InterfaceReference().id("dashboard").version("2.0")), List.of());
+
+    var expected = new EgressBootstrap().requiredModules(List.of(
+      provider("mod-provider-a-1.0.0", "provider-a-app-1.0.0", "http://mod-provider-a:8081", dashboardBootstrap()),
+      provider("mod-provider-b-3.0.0", "provider-b-app-1.0.0", "http://mod-provider-b:8081", dashboardBootstrap())));
+
+    postEgressBootstrap("consumer-1.0.0", "test-app-1.0.0", "provider-b-app-1.0.0", "provider-a-app-1.0.0")
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(expected), STRICT));
+  }
+
+  @Test
+  void egressBootstrap_positive_twoProviderVersions_highestVersion() throws Exception {
+    postProviderApplication("provider-app", "1.0.0", "mod-provider", "1.0.0", dashboard());
+    postProviderApplication("provider-app", "2.0.0", "mod-provider", "2.0.0", dashboard());
+    postDiscovery("mod-provider", "1.0.0", "http://mod-provider-1:8081");
+    postDiscovery("mod-provider", "2.0.0", "http://mod-provider-2:8081");
+    postConsumerApplication(List.of(new InterfaceReference().id("dashboard").version("2.0")), List.of());
+
+    var expected = new EgressBootstrap().requiredModules(List.of(
+      provider("mod-provider-2.0.0", "provider-app-2.0.0", "http://mod-provider-2:8081", dashboardBootstrap())));
+
+    postEgressBootstrap("consumer-1.0.0", "test-app-1.0.0", "provider-app-1.0.0", "provider-app-2.0.0")
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(expected), STRICT));
+  }
+
+  @Test
+  void egressBootstrap_positive_onlyRequiredInterfacesReturned() throws Exception {
+    postProviderApplication("provider-app", "1.0.0", "mod-provider", "1.0.0",
+      dashboard(), new InterfaceDescriptor().id("unrelated").version("1.0").interfaceType("multiple"));
+    postDiscovery("mod-provider", "1.0.0", "http://mod-provider:8081");
+    postConsumerApplication(List.of(new InterfaceReference().id("dashboard").version("2.0")), List.of());
+
+    var expected = new EgressBootstrap().requiredModules(List.of(
+      provider("mod-provider-1.0.0", "provider-app-1.0.0", "http://mod-provider:8081", dashboardBootstrap())));
+
+    postEgressBootstrap("consumer-1.0.0", "test-app-1.0.0", "provider-app-1.0.0")
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(expected), STRICT));
+  }
+
+  @Test
+  void egressBootstrap_positive_interfacesSortedById() throws Exception {
+    postProviderApplication("provider-app", "1.0.0", "mod-provider", "1.0.0",
+      new InterfaceDescriptor().id("b-api").version("1.0").interfaceType("multiple"),
+      new InterfaceDescriptor().id("a-api").version("1.0").interfaceType("multiple"));
+    postDiscovery("mod-provider", "1.0.0", "http://mod-provider:8081");
+    postConsumerApplication(List.of(
+      new InterfaceReference().id("b-api").version("1.0"), new InterfaceReference().id("a-api").version("1.0")),
+      List.of());
+
+    var expected = new EgressBootstrap().requiredModules(List.of(
+      provider("mod-provider-1.0.0", "provider-app-1.0.0", "http://mod-provider:8081",
+        new ModuleBootstrapInterface().id("a-api").version("1.0").interfaceType("multiple"),
+        new ModuleBootstrapInterface().id("b-api").version("1.0").interfaceType("multiple"))));
+
+    postEgressBootstrap("consumer-1.0.0", "test-app-1.0.0", "provider-app-1.0.0")
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(expected), STRICT));
+  }
+
+  @Test
+  void egressBootstrap_positive_providerWithoutDiscoveryExcluded() throws Exception {
+    postProviderApplication("provider-app", "1.0.0", "mod-provider", "1.0.0", dashboard());
+    postConsumerApplication(List.of(new InterfaceReference().id("dashboard").version("2.0")), List.of());
+
+    postEgressBootstrap("consumer-1.0.0", "test-app-1.0.0", "provider-app-1.0.0")
+      .andExpect(status().isOk())
+      .andExpect(content().json(asJsonString(new EgressBootstrap().requiredModules(List.of())), STRICT));
+  }
+
+  @Test
+  void egressBootstrap_negative_blankApplicationId() throws Exception {
+    postConsumerApplication(List.of(), List.of());
+
+    postEgressBootstrap("consumer-1.0.0", "test-app-1.0.0", " ")
+      .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void egressBootstrap_negative_uiModule() throws Exception {
+    var uiApp = new ApplicationDescriptor()
+      .name("ui-app").version("1.0.0")
+      .uiModules(List.of(new Module().name("ui-module").version("1.0.0")))
+      .uiModuleDescriptors(List.of(new ModuleDescriptor().id("ui-module-1.0.0")));
+    postApplication(uiApp);
+
+    postEgressBootstrap("ui-module-1.0.0", "ui-app-1.0.0")
+      .andExpect(status().isNotFound());
+  }
+
+  private static InterfaceDescriptor dashboard() {
+    return new InterfaceDescriptor().id("dashboard").version("2.0").interfaceType("multiple");
+  }
+
+  private static ModuleBootstrapInterface dashboardBootstrap() {
+    return new ModuleBootstrapInterface().id("dashboard").version("2.0").interfaceType("multiple");
+  }
+
+  private static ModuleBootstrapDiscovery provider(String moduleId, String applicationId, String location,
+    ModuleBootstrapInterface... interfaces) {
+    return new ModuleBootstrapDiscovery()
+      .moduleId(moduleId)
+      .applicationId(applicationId)
+      .location(location)
+      .systemUserRequired(false)
+      .interfaces(List.of(interfaces));
+  }
+
+  private void postProviderApplication(String appName, String appVersion, String moduleName, String moduleVersion,
+    InterfaceDescriptor... provides) throws Exception {
+    postApplication(new ApplicationDescriptor()
+      .name(appName).version(appVersion)
+      .modules(List.of(new Module().name(moduleName).version(moduleVersion)))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id(moduleName + "-" + moduleVersion)
+        .provides(List.of(provides)))));
+  }
+
+  private void postConsumerApplication(List<InterfaceReference> requires, List<InterfaceReference> optional)
+    throws Exception {
+    postApplication(new ApplicationDescriptor()
+      .name("test-app").version("1.0.0")
+      .modules(List.of(new Module().name("consumer").version("1.0.0")))
+      .moduleDescriptors(List.of(new ModuleDescriptor()
+        .id("consumer-1.0.0")
+        .requires(requires)
+        .optional(optional))));
+  }
+
+  private void postDiscovery(String moduleName, String moduleVersion, String location) throws Exception {
+    mockMvc.perform(post("/modules/{id}/discovery", moduleName + "-" + moduleVersion)
+        .header(TOKEN, generateAccessToken(keycloakProperties))
+        .contentType(APPLICATION_JSON)
+        .content(asJsonString(moduleDiscovery(moduleName, moduleVersion, location))))
+      .andExpect(status().isCreated());
+  }
+
+  private ResultActions postEgressBootstrap(String moduleId, String... applicationIds) throws Exception {
+    return mockMvc.perform(post("/modules/{id}/bootstrap", moduleId)
+      .header(TOKEN, generateAccessToken(keycloakProperties))
+      .contentType(APPLICATION_JSON)
+      .content(asJsonString(new EgressBootstrapRequest().applicationIds(List.of(applicationIds)))));
   }
 
   private void postApplication(ApplicationDescriptor applicationDescriptor) throws Exception {
