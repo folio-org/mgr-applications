@@ -44,7 +44,7 @@ public class ModuleBootstrapService {
    * is preferred. It is a total order, so the choice does not depend on the order in which candidates are visited.
    */
   private static final Comparator<ModuleBootstrapDiscovery> BY_PREFERENCE = Comparator
-    .comparing(ModuleBootstrapService::versionOf, Comparator.nullsFirst(Comparator.<Semver>naturalOrder()))
+    .comparing(ModuleBootstrapService::versionOf, Comparator.nullsFirst(Comparator.naturalOrder()))
     .thenComparing(BY_MODULE_ID.reversed());
 
   private final ModuleBootstrapRepository repository;
@@ -242,6 +242,7 @@ public class ModuleBootstrapService {
   }
 
   private static Semver versionOf(ModuleBootstrapDiscovery discovery) {
+    assert discovery.getModuleId() != null;
     return Semver.parse(getNameAndVersion(discovery.getModuleId()).getRight());
   }
 
