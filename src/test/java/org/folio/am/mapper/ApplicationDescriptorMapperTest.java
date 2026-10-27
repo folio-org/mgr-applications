@@ -12,10 +12,12 @@ import java.util.List;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.domain.dto.Module;
+import org.folio.am.domain.entity.InterfaceReferenceEntity;
 import org.folio.am.support.TestValues;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
 import org.folio.common.domain.model.ModuleDescriptor;
+import org.folio.common.domain.model.RoutingEntry;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -93,5 +95,31 @@ class ApplicationDescriptorMapperTest {
         TestValues.interfaceReferenceEntity(moduleId, providedInterface, providedInterfaceVersion, PROVIDES),
         TestValues.interfaceReferenceEntity(moduleId, requiredInterface, requiredInterfaceVersion, REQUIRES),
         TestValues.interfaceReferenceEntity(moduleId, optionalInterface, optionalInterfaceVersion, OPTIONAL));
+  }
+
+  @Test
+  void convert_module_to_moduleEntity_providesReferenceKeepsProvidedInterface() {
+    var moduleId = "test-1.0.0";
+    var providedInterface = new InterfaceDescriptor().id("interface").version("1.2").interfaceType("multiple")
+      .addHandlersItem(new RoutingEntry().addMethodsItem("GET").pathPattern("/interface/{id}"));
+
+    var appDescriptor = new ApplicationDescriptor()
+      .addModulesItem(new Module().id(moduleId).name("test"))
+      .addModuleDescriptorsItem(new ModuleDescriptor().id(moduleId)
+        .addProvidesItem(providedInterface)
+        .addRequiresItem(new InterfaceReference().id("req-interface").version("1.0"))
+        .addOptionalItem(new InterfaceReference().id("opt-interface").version("3.4")));
+
+    var moduleEntity = takeOne(mapper.convert(appDescriptor).getModules());
+
+    assertThat(moduleEntity.getInterfaces())
+      .filteredOn(reference -> reference.getType() == PROVIDES)
+      .singleElement()
+      .extracting(InterfaceReferenceEntity::getProvidedInterface)
+      .isEqualTo(providedInterface);
+    assertThat(moduleEntity.getInterfaces())
+      .filteredOn(reference -> reference.getType() != PROVIDES)
+      .hasSize(2)
+      .allSatisfy(reference -> assertThat(reference.getProvidedInterface()).isNull());
   }
 }

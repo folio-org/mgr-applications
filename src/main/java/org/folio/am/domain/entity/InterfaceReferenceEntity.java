@@ -1,5 +1,6 @@
 package org.folio.am.domain.entity;
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,7 +14,9 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.folio.common.domain.model.InterfaceDescriptor;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
 
 @Entity
@@ -38,6 +41,16 @@ public class InterfaceReferenceEntity {
   @JdbcTypeCode(SqlTypes.NAMED_ENUM)
   @Column(columnDefinition = "interface_ref_type", updatable = false)
   private ReferenceType type;
+
+  /**
+   * Copy of the provided interface, set only for {@link ReferenceType#PROVIDES} rows. Egress bootstrap reads routing
+   * data from here, so it never has to load the full module descriptor.
+   */
+  @Type(JsonBinaryType.class)
+  @Column(name = "provided_interface", columnDefinition = "jsonb")
+  @EqualsAndHashCode.Exclude
+  @ToString.Exclude
+  private InterfaceDescriptor providedInterface;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "module_id", updatable = false, insertable = false)

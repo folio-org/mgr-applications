@@ -191,7 +191,7 @@ class ModuleDiscoveryServiceTest {
 
       var moduleDiscovery = TestValues.moduleDiscovery().id(null);
       var moduleDiscoveries = new ModuleDiscoveries().discovery(List.of(moduleDiscovery));
-      var result = service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN);
+      var result = service.upsert(moduleDiscoveries, OKAPI_AUTH_TOKEN);
 
       assertThat(result).isEqualTo(TestValues.moduleDiscoveries(TestValues.moduleDiscovery()));
     }
@@ -201,7 +201,7 @@ class ModuleDiscoveryServiceTest {
       var moduleDiscovery = TestValues.moduleDiscovery().id("invalid id");
       var moduleDiscoveries = TestValues.moduleDiscoveries(moduleDiscovery);
 
-      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN))
+      assertThatThrownBy(() -> service.upsert(moduleDiscoveries, OKAPI_AUTH_TOKEN))
         .isInstanceOf(RequestValidationException.class)
         .hasMessage("Discovery id must match name-version pattern")
         .satisfies(exception ->
@@ -215,21 +215,42 @@ class ModuleDiscoveryServiceTest {
       var moduleDiscoveries = TestValues.moduleDiscoveries(moduleDiscovery);
       when(repository.findAllById(List.of(MODULE_ID))).thenReturn(emptyList());
 
-      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN))
+      assertThatThrownBy(() -> service.upsert(moduleDiscoveries, OKAPI_AUTH_TOKEN))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Modules are not found for ids: %s", List.of(MODULE_ID));
     }
 
     @Test
-    void positive_batchRequestAndModuleDiscoveryUrlIsPresent() {
-      var moduleDiscovery = TestValues.moduleDiscovery();
-      var moduleDiscoveries = TestValues.moduleDiscoveries(moduleDiscovery);
+    void positive_batchRequestAndModuleHasDiscoveryWithSameLocation() {
       var moduleEntity = TestValues.moduleEntity(MODULE_URL);
-      when(repository.findAllById(List.of(MODULE_ID))).thenReturn(List.of(moduleEntity));
+      var expectedModuleDiscovery = TestValues.moduleDiscovery();
 
-      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN))
-        .isInstanceOf(EntityExistsException.class)
-        .hasMessage("Module Discovery already exists for ids: %s", List.of(MODULE_ID));
+      when(repository.findAllById(List.of(MODULE_ID))).thenReturn(List.of(moduleEntity));
+      when(mapper.convert(moduleEntity)).thenReturn(expectedModuleDiscovery);
+
+      var moduleDiscoveries = TestValues.moduleDiscoveries(TestValues.moduleDiscovery());
+      var result = service.upsert(moduleDiscoveries, OKAPI_AUTH_TOKEN);
+
+      assertThat(result).isEqualTo(TestValues.moduleDiscoveries(TestValues.moduleDiscovery()));
+      assertThat(moduleEntity.getDiscoveryUrl()).isEqualTo(MODULE_URL);
+    }
+
+    @Test
+    void positive_batchRequestAndModuleHasDiscoveryWithAnotherLocation() {
+      var moduleEntity = TestValues.moduleEntity("http://old-location:8080");
+      var expectedModuleDiscovery = TestValues.moduleDiscovery();
+
+      when(repository.findAllById(List.of(MODULE_ID))).thenReturn(List.of(moduleEntity));
+      when(repository.saveAndFlush(moduleEntity)).thenReturn(moduleEntity);
+      when(mapper.convert(moduleEntity)).thenReturn(expectedModuleDiscovery);
+      doNothing().when(eventPublisher).publishDiscoveryUpdate(expectedModuleDiscovery, ModuleType.BACKEND,
+        OKAPI_AUTH_TOKEN);
+
+      var moduleDiscoveries = TestValues.moduleDiscoveries(TestValues.moduleDiscovery());
+      var result = service.upsert(moduleDiscoveries, OKAPI_AUTH_TOKEN);
+
+      assertThat(result).isEqualTo(TestValues.moduleDiscoveries(TestValues.moduleDiscovery()));
+      assertThat(moduleEntity.getDiscoveryUrl()).isEqualTo(MODULE_URL);
     }
 
     @Test

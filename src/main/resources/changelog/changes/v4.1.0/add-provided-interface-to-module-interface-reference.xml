@@ -1,0 +1,22 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+  <changeSet id="add-provided-interface-to-module-interface-reference" author="dmtkachenko">
+    <comment>
+      provided_interface: the interface definition (id, version, interfaceType, handlers) that the module
+      provides, copied from module.descriptor.provides for PROVIDES rows, so egress bootstrap can read routing
+      data without loading the module descriptor. NULL for REQUIRES and OPTIONAL rows.
+    </comment>
+    <addColumn tableName="module_interface_reference">
+      <column name="provided_interface" type="jsonb"/>
+    </addColumn>
+  </changeSet>
+
+  <changeSet id="populate-module-interface-reference-provided-interface" author="dmtkachenko">
+    <sqlFile path="populate-module-interface-reference-provided-interface.sql" relativeToChangelogFile="true"
+             splitStatements="false"/>
+  </changeSet>
+</databaseChangeLog>
