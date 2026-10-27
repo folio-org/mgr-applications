@@ -18,8 +18,9 @@ public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrap
    * <p>The {@code v_module_bootstrap} grain is one row per (module, application) — guaranteed by the
    * {@code application_module} composite primary key — and the nested {@code IN} subqueries are semi-joins that
    * cannot fan out rows, so no {@code DISTINCT} is needed. The entity id is the module id though, so Hibernate
-   * returns one shared instance per module, populated from the first row it reads. Ordering by application id makes
-   * that the row with the lowest application id, so {@code applicationId} in the response is stable.</p>
+   * returns one shared instance per module, populated from the first row it reads. Ordering by application id in
+   * descending order makes that the row with the highest application id (compared as a string, unlike the egress
+   * query, which compares versions), so {@code applicationId} in the response is stable.</p>
    *
    * @param moduleId the module identifier
    * @return List of module views
@@ -28,7 +29,7 @@ public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrap
     + "(SELECT p.moduleId FROM InterfaceReferenceEntity p WHERE p.type = 'PROVIDES' AND "
     + "p.id IN (SELECT r.id FROM InterfaceReferenceEntity r WHERE r.moduleId = :moduleId AND "
     + "(r.type = 'REQUIRES' OR r.type = 'OPTIONAL')))) and (view.location is not null OR view.id = :moduleId) "
-    + "ORDER BY view.applicationId")
+    + "ORDER BY view.applicationId DESC")
   List<ModuleBootstrapView> findAllRequiredByModuleId(@Param("moduleId") String moduleId);
 
   /**

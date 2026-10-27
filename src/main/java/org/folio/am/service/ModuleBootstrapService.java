@@ -27,6 +27,7 @@ import org.folio.am.mapper.ModuleBootstrapMapper;
 import org.folio.am.repository.ModuleBootstrapRepository;
 import org.folio.common.domain.model.InterfaceDescriptor;
 import org.folio.common.domain.model.InterfaceReference;
+import org.folio.common.utils.SemverUtils;
 import org.semver4j.Semver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,17 @@ public class ModuleBootstrapService {
   private static final Comparator<ModuleBootstrapDiscovery> BY_PREFERENCE = Comparator
     .comparing(ModuleBootstrapService::versionOf, Comparator.nullsFirst(Comparator.naturalOrder()))
     .thenComparing(BY_MODULE_ID.reversed());
+
+  /**
+   * Orders application ids ({@code name-semver}) by application name and then by semantic version, so that
+   * {@code app-1.2.0} is lower than {@code app-1.10.0} and {@code app-1.0.0-SNAPSHOT.5} is lower than
+   * {@code app-1.0.0}. Plain string order would get both wrong. An id that is not {@code name-semver} is ordered by its
+   * string value before valid ids of the same name, so this is still a total order.
+   */
+  private static final Comparator<String> BY_APPLICATION_VERSION = Comparator
+    .comparing(ModuleBootstrapService::applicationNameOf)
+    .thenComparing(ModuleBootstrapService::applicationVersionOf, Comparator.nullsFirst(Comparator.naturalOrder()))
+    .thenComparing(naturalOrder());
 
   private final ModuleBootstrapRepository repository;
   private final ModuleBootstrapMapper mapper;
@@ -95,35 +107,35 @@ public class ModuleBootstrapService {
    *   it provides). Only providers with a discovery URL are returned, never the module itself, and the interface
    *   comes from the stored copy in {@code module_interface_reference.provided_interface}, so module descriptors
    *   are not read.</li>
-   *   <li>Fold the rows into one discovery per provider module: the lowest scope application id, and its interfaces
-   *   without duplicates, sorted by interface id.</li>
+   *   <li>Fold the rows into one discovery per provider module: the highest scope application (by name, then by
+   *   semantic version), and its interfaces without duplicates, sorted by interface id.</li>
    *   <li>Keep one provider per module name (highest version) and sort the result by module id, see
    *   {@link #selectProviders(List)}.</li>
    * </ol>
    *
-   * <p>Example: {@code consumer-1.0.0} requires interface {@code orders}. The scope is {@code [app-b-1.0.0,
-   * app-a-1.0.0, app-b-1.0.0]}, which is normalized to {@code [app-a-1.0.0, app-b-1.0.0]}. Data:</p>
+   * <p>Example: {@code consumer-1.0.0} requires interface {@code orders}. The scope is {@code [app-2.0.0,
+   * app-1.0.0, app-2.0.0]}, which is normalized to {@code [app-1.0.0, app-2.0.0]}. Data:</p>
    * <pre>
-   * mod-orders-1.0.0   in app-a and app-b   provides orders, orders-admin   discovery set
-   * mod-orders-1.1.0   in app-b             provides orders                 discovery set
-   * mod-users-2.0.0    in app-a             provides users                  discovery set (not required)
-   * mod-audit-1.0.0    in app-c (no scope)  provides orders                 discovery set
-   * mod-fees-1.0.0     in app-a             provides orders                 no discovery
+   * mod-orders-1.0.0   in app-1.0.0 and app-2.0.0   provides orders, orders-admin   discovery set
+   * mod-orders-1.1.0   in app-2.0.0                 provides orders                 discovery set
+   * mod-users-2.0.0    in app-1.0.0                 provides users                  discovery set (not required)
+   * mod-audit-1.0.0    in app-3.0.0 (not in scope)  provides orders                 discovery set
+   * mod-fees-1.0.0     in app-1.0.0                 provides orders                 no discovery
    * </pre>
    *
    * <p>Step 3 returns these rows ({@code orders-admin}, {@code mod-users}, {@code mod-audit} and {@code mod-fees}
    * are filtered out by the query):</p>
    * <pre>
-   * (mod-orders-1.0.0, app-a-1.0.0, orders)
-   * (mod-orders-1.0.0, app-b-1.0.0, orders)
-   * (mod-orders-1.1.0, app-b-1.0.0, orders)
+   * (mod-orders-1.0.0, app-1.0.0, orders)
+   * (mod-orders-1.0.0, app-2.0.0, orders)
+   * (mod-orders-1.1.0, app-2.0.0, orders)
    * </pre>
    *
-   * <p>Step 4 gives {@code mod-orders-1.0.0} (application {@code app-a-1.0.0}, interfaces {@code [orders]}) and
-   * {@code mod-orders-1.1.0} (application {@code app-b-1.0.0}, interfaces {@code [orders]}). Step 5 sees two versions
-   * of {@code mod-orders} and keeps {@code mod-orders-1.1.0}, so the response is:</p>
+   * <p>Step 4 gives {@code mod-orders-1.0.0} (application {@code app-2.0.0}, the higher of its two, interfaces
+   * {@code [orders]}) and {@code mod-orders-1.1.0} (application {@code app-2.0.0}, interfaces {@code [orders]}).
+   * Step 5 sees two versions of {@code mod-orders} and keeps {@code mod-orders-1.1.0}, so the response is:</p>
    * <pre>
-   * requiredModules: [ mod-orders-1.1.0 (application app-b-1.0.0, location, interfaces [orders]) ]
+   * requiredModules: [ mod-orders-1.1.0 (application app-2.0.0, location, interfaces [orders]) ]
    * </pre>
    *
    * @param moduleId - the requesting module id
@@ -145,8 +157,8 @@ public class ModuleBootstrapService {
    * Folds provider rows into one discovery per module. A row is one (provider, application, interface), so a module
    * and its interfaces repeat once for every in-scope application that contains the provider.
    *
-   * <p>Example: rows {@code (mod-a-1.0.0, app-2, x)}, {@code (mod-a-1.0.0, app-1, x)} and
-   * {@code (mod-a-1.0.0, app-1, y)} become one discovery of {@code mod-a-1.0.0}, see
+   * <p>Example: rows {@code (mod-a-1.0.0, app-1.10.0, x)}, {@code (mod-a-1.0.0, app-1.2.0, x)} and
+   * {@code (mod-a-1.0.0, app-1.2.0, y)} become one discovery of {@code mod-a-1.0.0}, see
    * {@link #toProviderDiscovery(List)}.</p>
    */
   private List<ModuleBootstrapDiscovery> toProviderDiscoveries(List<EgressProviderRow> rows) {
@@ -155,16 +167,20 @@ public class ModuleBootstrapService {
   }
 
   /**
-   * Builds the discovery of one provider: the lowest in-scope application id, and its required interfaces without
-   * duplicates, sorted by interface id.
+   * Builds the discovery of one provider: the highest in-scope application (by name, then by semantic version, see
+   * {@link #BY_APPLICATION_VERSION}), and its required interfaces without duplicates, sorted by interface id.
    *
-   * <p>Example: rows {@code (mod-a-1.0.0, app-2, x)}, {@code (mod-a-1.0.0, app-1, x)} and
-   * {@code (mod-a-1.0.0, app-1, y)} give application {@code app-1} and interfaces {@code [x, y]}: the application id
-   * is the smallest of {@code app-2} and {@code app-1}, and {@code x} appears once although two rows carry it.</p>
+   * <p>Example: rows {@code (mod-a-1.0.0, app-1.10.0, x)}, {@code (mod-a-1.0.0, app-1.2.0, x)} and
+   * {@code (mod-a-1.0.0, app-1.2.0, y)} give application {@code app-1.10.0} and interfaces {@code [x, y]}: version
+   * 1.10.0 is higher than 1.2.0 (as strings it would be the other way round), and {@code x} appears once although two
+   * rows carry it.</p>
    */
   private ModuleBootstrapDiscovery toProviderDiscovery(List<EgressProviderRow> moduleRows) {
     var row = moduleRows.getFirst();
-    var applicationId = moduleRows.stream().map(EgressProviderRow::applicationId).min(naturalOrder()).orElseThrow();
+    var applicationId = moduleRows.stream()
+      .map(EgressProviderRow::applicationId)
+      .max(BY_APPLICATION_VERSION)
+      .orElseThrow();
 
     var interfacesById = new TreeMap<String, InterfaceDescriptor>();
     moduleRows.forEach(r -> interfacesById.putIfAbsent(r.providedInterface().getId(), r.providedInterface()));
@@ -241,6 +257,23 @@ public class ModuleBootstrapService {
     return BY_PREFERENCE.compare(candidate, current) > 0 ? candidate : current;
   }
 
+  private static String applicationNameOf(String applicationId) {
+    try {
+      return SemverUtils.getName(applicationId);
+    } catch (IllegalArgumentException e) {
+      return applicationId;
+    }
+  }
+
+  private static Semver applicationVersionOf(String applicationId) {
+    try {
+      return Semver.parse(SemverUtils.getVersion(applicationId));
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
+  }
+
+  @SuppressWarnings("javabugs:S2259")
   private static Semver versionOf(ModuleBootstrapDiscovery discovery) {
     assert discovery.getModuleId() != null;
     return Semver.parse(getNameAndVersion(discovery.getModuleId()).getRight());

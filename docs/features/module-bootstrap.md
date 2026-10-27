@@ -23,7 +23,7 @@ the module descriptor.
 
 - **Egress request** (`egressBootstrapRequest`): `{ "applicationIds": ["app-a-1.0.0", ...] }` (required, at least one id, no blank items).
 - **Ingress response**: `moduleBootstrap` with `module` populated and `requiredModules: []`.
-- **Egress response** (`egressBootstrap`): `{ "requiredModules": [...] }` — providers resolved within the supplied applications only; the self module is not returned. Each provider has `moduleId`, `applicationId` (the lowest supplied application that contains it), `location`, `systemUserRequired` and the `interfaces` it provides that the module requires.
+- **Egress response** (`egressBootstrap`): `{ "requiredModules": [...] }` — providers resolved within the supplied applications only; the self module is not returned. Each provider has `moduleId`, `applicationId` (the highest supplied application that contains it), `location`, `systemUserRequired` and the `interfaces` it provides that the module requires.
 
 ## Business rules
 
@@ -33,7 +33,7 @@ the module descriptor.
 - Providers are filtered to the interfaces the module actually requires/optionally requires. A provider appears once, even if it provides several of them.
 - One provider is kept per module name: the highest semantic version; for equal versions (build metadata is ignored) the lowest module id (same selection as `GET /modules/{id}`).
 - Different modules that provide the same interface, which is the normal case for interfaces of type `multiple`, are all returned. Only versions of the same module name compete.
-- A provider that belongs to several in-scope applications is reported with the lowest application id.
+- A provider that belongs to several in-scope applications is reported with the highest of them, compared by application name and then by semantic version (so `app-1.10.0` is higher than `app-1.2.0`). `GET /modules/{id}` has no scope and takes the highest application id in database string order.
 - The response is deterministic: `requiredModules` are sorted by `moduleId`, and the interfaces of an egress provider are sorted by interface id.
 - There is no tenant context; the application scope is the only filter.
 

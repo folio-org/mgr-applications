@@ -75,16 +75,16 @@ class ModuleBootstrapRepositoryIT extends BaseRepositoryTest {
   }
 
   @Test
-  void findAllRequiredByModuleId_returnsLowestApplicationIdForSharedModule() {
+  void findAllRequiredByModuleId_returnsHighestApplicationIdForSharedModule() {
     addModuleToApplication(MODULE_BAR_ID, APP_1_0_0_ID);
 
     var result = repository.findAllRequiredByModuleId(MODULE_FOO_ID);
 
     // the module is returned once per owning application, but all entries share one instance populated from the
-    // first row, which is the one with the lowest application id
+    // first row, which is the one with the highest application id
     assertThat(result).filteredOn(view -> view.getId().equals(MODULE_BAR_ID))
       .hasSize(2)
-      .allSatisfy(view -> assertThat(view.getApplicationId()).isEqualTo(APP_1_0_0_ID));
+      .allSatisfy(view -> assertThat(view.getApplicationId()).isEqualTo(APP_2_0_0_ID));
   }
 
   @Test

@@ -239,17 +239,17 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
   }
 
   @Test
-  void egressBootstrap_positive_providerInTwoApplicationVersions_lowestApplicationId() throws Exception {
-    // an unchanged module is part of every version of its application
+  void egressBootstrap_positive_providerInTwoApplicationVersions_highestApplicationVersion() throws Exception {
+    // an unchanged module is part of every version of its application; 10.0.0 is higher than 2.0.0 only by version
     postProviderApplication("provider-app", "2.0.0", "mod-provider", "1.0.0", dashboard());
-    postProviderApplication("provider-app", "1.0.0", "mod-provider", "1.0.0", dashboard());
+    postProviderApplication("provider-app", "10.0.0", "mod-provider", "1.0.0", dashboard());
     postDiscovery("mod-provider", "1.0.0", "http://mod-provider:8081");
     postConsumerApplication(List.of(new InterfaceReference().id("dashboard").version("2.0")), List.of());
 
     var expected = new EgressBootstrap().requiredModules(List.of(
-      provider("mod-provider-1.0.0", "provider-app-1.0.0", "http://mod-provider:8081", dashboardBootstrap())));
+      provider("mod-provider-1.0.0", "provider-app-10.0.0", "http://mod-provider:8081", dashboardBootstrap())));
 
-    postEgressBootstrap("consumer-1.0.0", "test-app-1.0.0", "provider-app-2.0.0", "provider-app-1.0.0")
+    postEgressBootstrap("consumer-1.0.0", "test-app-1.0.0", "provider-app-2.0.0", "provider-app-10.0.0")
       .andExpect(status().isOk())
       .andExpect(content().json(asJsonString(expected), STRICT));
   }
@@ -263,7 +263,7 @@ class ModuleBootstrapIT extends BaseIntegrationTest {
     postConsumerApplication(List.of(new InterfaceReference().id("dashboard").version("2.0")), List.of());
 
     var expected = new EgressBootstrap().requiredModules(List.of(
-      provider("mod-provider-1.0.0", "provider-app-1.0.0", "http://mod-provider:8081",
+      provider("mod-provider-1.0.0", "provider-app-2.0.0", "http://mod-provider:8081",
         dashboardBootstrap().addEndpointsItem(new ModuleBootstrapEndpoint().addMethodsItem("GET")
           .pathPattern("/dashboard")))));
 

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 import org.folio.am.domain.dto.ModuleBootstrapDiscovery;
 import org.folio.am.domain.dto.ModuleBootstrapInterface;
 import org.folio.am.exception.RequestValidationException;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
@@ -220,20 +222,28 @@ class ModuleBootstrapServiceTest {
     assertThat(actual.getRequiredModules()).isEmpty();
   }
 
-  @Test
-  void getEgressBootstrap_positive_providerInTwoApplications_lowestApplicationId() {
-    var scope = List.of("app-a-1.0.0", "app-b-1.0.0");
+  @ParameterizedTest
+  @CsvSource({
+    "app-1.10.0, app-1.2.0, app-1.10.0",
+    "app-10.0.0, app-2.0.0, app-10.0.0",
+    "app-1.0.0, app-1.0.0-SNAPSHOT.5, app-1.0.0",
+    "app-1.0.0-SNAPSHOT.10, app-1.0.0-SNAPSHOT.9, app-1.0.0-SNAPSHOT.10",
+    "app-b-1.0.0, app-a-2.0.0, app-b-1.0.0"
+  })
+  void getEgressBootstrap_positive_providerInTwoApplications_highestApplicationVersion(String first, String second,
+    String expectedApplicationId) {
+    var scope = Stream.of(first, second).sorted().toList();
     mockModuleInScope(MODULE_FOO_ID, scope);
     when(repository.findEgressProviders(MODULE_FOO_ID, scope)).thenReturn(List.of(
-      egressProviderRow(MODULE_BAR_ID, "app-b-1.0.0", MODULE_BAR_INTERFACE_ID),
-      egressProviderRow(MODULE_BAR_ID, "app-a-1.0.0", MODULE_BAR_INTERFACE_ID)));
+      egressProviderRow(MODULE_BAR_ID, first, MODULE_BAR_INTERFACE_ID),
+      egressProviderRow(MODULE_BAR_ID, second, MODULE_BAR_INTERFACE_ID)));
 
-    var actual = service.getEgressBootstrap(MODULE_FOO_ID, scope);
+    var actual = service.getEgressBootstrap(MODULE_FOO_ID, List.of(first, second));
 
     assertThat(actual.getRequiredModules())
       .singleElement()
       .extracting(ModuleBootstrapDiscovery::getApplicationId)
-      .isEqualTo("app-a-1.0.0");
+      .isEqualTo(expectedApplicationId);
   }
 
   @Test
