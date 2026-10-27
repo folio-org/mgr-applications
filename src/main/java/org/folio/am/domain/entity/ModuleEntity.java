@@ -20,12 +20,21 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.folio.common.domain.model.ModuleDescriptor;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
 
+/**
+ * Module entity.
+ *
+ * <p>{@code @DynamicUpdate}: discovery create/update/delete only changes {@code discovery_url}. Without it Hibernate
+ * rewrites every column, including the large {@code descriptor} JSONB. That costs I/O and can overwrite a descriptor
+ * that a concurrent application registration has just written.</p>
+ */
 @Data
 @Entity
+@DynamicUpdate
 @Table(name = "module")
 @EqualsAndHashCode(callSuper = true)
 public class ModuleEntity extends ArtifactEntity {
