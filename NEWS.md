@@ -20,6 +20,7 @@
 * Declare the discovery event (`mgr-applications.module.discovery.v1`) in `producesEvents` in the module
   descriptor and validate the descriptor for `app-mgr-services` bundling; mgr-applications consumes no Kafka
   events, so `consumesEvents` is not declared (MGRAPPS-130)
+* Add `DeployConfig.json` to mgr-applications (ADR-0013 Configuration Management) (MGRAPPS-120)
 
 ---
 
