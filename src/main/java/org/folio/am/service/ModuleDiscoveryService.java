@@ -1,7 +1,6 @@
 package org.folio.am.service;
 
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -96,23 +95,26 @@ public class ModuleDiscoveryService {
   }
 
   /**
-   * Creates a module discovery information records for the {@link ModuleDiscoveries} batch request.
+   * Creates or updates module discovery information records for the {@link ModuleDiscoveries} batch request.
+   *
+   * <p>Discovery is created for modules that have none, updated for modules whose location differs and left
+   * untouched (no event is published) for modules that already have the same location.</p>
    *
    * @param moduleDiscoveries - {@link ModuleDiscoveries} information batch request
    * @param token - x-okapi-token value
-   * @return created {@link ModuleDiscovery} information
+   * @return {@link ModuleDiscoveries} with the resulting discovery information of all requested modules
    */
-  public ModuleDiscoveries create(ModuleDiscoveries moduleDiscoveries, String token) {
-    var moduleDiscoveryMap = moduleDiscoveries.getDiscovery().stream()
+  public ModuleDiscoveries upsert(ModuleDiscoveries moduleDiscoveries, String token) {
+    var locationsByModuleId = moduleDiscoveries.getDiscovery().stream()
       .collect(toMap(Artifact::getArtifactId, ModuleDiscovery::getLocation));
 
-    var createdModuleEntities = getValidatedModuleEntities(moduleDiscoveries).stream()
-      .map(entity -> addDiscoveryUrlForModule(entity, moduleDiscoveryMap.get(entity.getId()), token))
-      .collect(toList());
+    var resultingDiscoveries = getValidatedModuleEntities(moduleDiscoveries).stream()
+      .map(entity -> upsertDiscoveryUrlForModule(entity, locationsByModuleId.get(entity.getId()), token))
+      .toList();
 
     return new ModuleDiscoveries()
-      .discovery(createdModuleEntities)
-      .totalRecords((long) createdModuleEntities.size());
+      .discovery(resultingDiscoveries)
+      .totalRecords((long) resultingDiscoveries.size());
   }
 
   /**
@@ -126,16 +128,7 @@ public class ModuleDiscoveryService {
     validateModuleDiscovery(moduleId, moduleDiscovery);
     populateModuleDiscoveryId(moduleDiscovery);
 
-    var location = moduleDiscovery.getLocation();
-    log.info("Updating module discovery: moduleId = {}, discovery = {}", moduleId, location);
-    var moduleEntity = findModule(moduleId);
-    moduleEntity.setDiscoveryUrl(moduleDiscovery.getLocation());
-    var updatedEntity = repository.saveAndFlush(moduleEntity);
-
-    var newModuleDiscovery = mapper.convert(updatedEntity);
-    eventPublisher.publishDiscoveryUpdate(newModuleDiscovery, moduleEntity.getType(), token);
-
-    log.info("Module discovery updated: moduleId = {}", moduleId);
+    changeDiscoveryUrlForModule(findModule(moduleId), moduleDiscovery.getLocation(), token);
   }
 
   /**
@@ -180,13 +173,35 @@ public class ModuleDiscoveryService {
       throw new EntityNotFoundException("Modules are not found for ids: " + notFoundModuleIds);
     }
 
-    var moduleIdsWithDiscoveryUrl = filterAndMap(moduleEntities, notNullDiscovery(), ArtifactEntity::getId);
-    if (isNotEmpty(moduleIdsWithDiscoveryUrl)) {
-      throw new EntityExistsException("Module Discovery already exists for ids: " + moduleIdsWithDiscoveryUrl);
-    }
-
     var moduleEntityMap = moduleEntities.stream().collect(toMap(ArtifactEntity::getId, identity()));
     return mapItems(moduleIds, moduleEntityMap::get);
+  }
+
+  private ModuleDiscovery upsertDiscoveryUrlForModule(ModuleEntity entity, String location, String token) {
+    var currentLocation = entity.getDiscoveryUrl();
+    if (currentLocation == null) {
+      return addDiscoveryUrlForModule(entity, location, token);
+    }
+
+    if (Objects.equals(currentLocation, location)) {
+      log.info("Module discovery is unchanged: moduleId = {}, discovery = {}", entity.getId(), location);
+      return mapper.convert(entity);
+    }
+
+    return changeDiscoveryUrlForModule(entity, location, token);
+  }
+
+  private ModuleDiscovery changeDiscoveryUrlForModule(ModuleEntity entity, String location, String token) {
+    var moduleId = entity.getId();
+    log.info("Updating module discovery: moduleId = {}, discovery = {}", moduleId, location);
+    entity.setDiscoveryUrl(location);
+    var savedModule = repository.saveAndFlush(entity);
+    var moduleDiscovery = mapper.convert(savedModule);
+
+    eventPublisher.publishDiscoveryUpdate(moduleDiscovery, entity.getType(), token);
+    log.info("Module discovery updated: moduleId = {}", moduleId);
+
+    return moduleDiscovery;
   }
 
   private ModuleDiscovery addDiscoveryUrlForModule(ModuleEntity entity, String location, String token) {
@@ -227,9 +242,5 @@ public class ModuleDiscoveryService {
 
   private static Predicate<ModuleDiscovery> notEqualIdAndArtifactId() {
     return md -> isNotBlank(md.getId()) && !StringUtils.equals(md.getArtifactId(), md.getId());
-  }
-
-  private static Predicate<ModuleEntity> notNullDiscovery() {
-    return moduleEntity -> moduleEntity.getDiscoveryUrl() != null;
   }
 }

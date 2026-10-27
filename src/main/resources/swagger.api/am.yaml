@@ -319,7 +319,14 @@ paths:
           $ref: '#/components/responses/internal-server-error'
     post:
       operationId: createModuleDiscoveries
-      description: Creates module discovery information in a batch
+      description: |
+        Creates or updates module discovery information in a batch (upsert).
+
+        - A module without discovery gets the supplied discovery.
+        - A module that already has discovery with the same location is left unchanged.
+        - A module that already has discovery with a different location is updated to the supplied location.
+
+        The request is atomic: if any module is unknown or any discovery is invalid, the request fails and no discovery is created or updated.
       tags:
         - module-discovery
       parameters:

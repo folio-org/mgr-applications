@@ -30,7 +30,7 @@ public final class KafkaEventAssertions {
     await().untilAsserted(() -> {
       var consumerRecords = getEvents(topic, DiscoveryEvent.class);
       var entitlementEvents = mapItems(consumerRecords, ConsumerRecord::value);
-      assertThat(entitlementEvents).containsSequence(expectedEvents);
+      assertThat(entitlementEvents).containsExactlyElementsOf(expectedEvents);
     });
   }
 
