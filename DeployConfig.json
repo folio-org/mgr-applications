@@ -1,0 +1,320 @@
+{
+  "_disclaimer": "Default values are calibrated against a reference bugfest environment. See ADR-0013 (Module configuration management) for the governance model behind this file. Resource values and JVM limits must be adjusted to the target host capacity.",
+  "description": "mgr-applications configuration template",
+  "moduleDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for the mgr-applications container"
+      },
+      {
+        "name": "memory",
+        "value": "1024",
+        "description": "Memory hard limit for the mgr-applications container in MiB"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "896",
+        "description": "Memory reservation (soft limit) for the mgr-applications container in MiB"
+      }
+    ],
+    "java": [
+      {
+        "name": "xmx",
+        "value": "512m",
+        "description": "Maximum Java heap size"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "256m",
+        "description": "Maximum Java metaspace size"
+      },
+      {
+        "name": "MetaspaceSize",
+        "value": "88m",
+        "description": "Initial Java metaspace size"
+      }
+    ],
+    "deployment": {
+      "isHaSupported": true,
+      "replicasRecommendedCount": 2,
+      "description": "mgr-applications keeps no local state: application and module data live in PostgreSQL, and Liquibase migrations are guarded by the database changelog lock. Multiple replicas can run behind a load balancer; two are recommended for availability."
+    },
+    "EnvVars": [
+      {
+        "name": "DB_HOST",
+        "value": null,
+        "description": "PostgreSQL database host",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_PORT",
+        "value": "5432",
+        "description": "PostgreSQL database port",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_USERNAME",
+        "value": null,
+        "description": "PostgreSQL database username (sourced from secret store)",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_PASSWORD",
+        "value": null,
+        "description": "PostgreSQL database password (sourced from secret store)",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_DATABASE",
+        "value": null,
+        "description": "PostgreSQL database name holding the mgr-applications schema",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_HOST",
+        "value": null,
+        "description": "Kafka broker host. Used to publish module discovery events",
+        "type": "KAFKA",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_PORT",
+        "value": "9092",
+        "description": "Kafka broker port",
+        "type": "KAFKA",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_SECURITY_PROTOCOL",
+        "value": "PLAINTEXT",
+        "description": "Security protocol used to communicate with Kafka brokers (PLAINTEXT or SSL)",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_DISCOVERY_TOPIC_PARTITIONS",
+        "value": "1",
+        "description": "Number of partitions of the discovery topic, created at startup if it does not exist",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_DISCOVERY_TOPIC_REPLICATION_FACTOR",
+        "value": null,
+        "description": "Replication factor of the discovery topic. When unset, the broker default is used",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "ENV",
+        "value": null,
+        "description": "Logical deployment name, used as the Kafka topic prefix; must match the value used by the other modules sharing the Kafka cluster. Falls back to 'folio' when unset",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "SERVER_PORT",
+        "value": "8081",
+        "description": "HTTP port the module listens on",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "MAX_HTTP_REQUEST_HEADER_SIZE",
+        "value": "200KB",
+        "description": "Maximum size of the HTTP request header; raised above the server default to accommodate large JWTs",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "ROUTER_PATH_PREFIX",
+        "value": "mgr-applications",
+        "description": "Prefix added to every endpoint path exposed by the module (/applications becomes {prefix}/applications). The default matches the reference environment, where the load-balancer group has the form {host}/{moduleId}; clear it when the module is reached without a path prefix",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTS",
+        "value": null,
+        "description": "Additional JVM options for the mgr-applications process (heap sizing, GC, agent flags, etc.)",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "SECURITY_ENABLED",
+        "value": "true",
+        "description": "Enables request authentication and authorization. With KC_INTEGRATION_ENABLED=true, Keycloak acts as the security provider",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "FAR_MODE",
+        "value": "false",
+        "description": "Enables Folio Application Registry (FAR) mode. When true, the Kafka discovery publisher and the mgr-tenant-entitlements client are disabled, application cleanup is unavailable and deletion skips the entitlement check. API gateway integration must be turned off separately with APIGW_ENABLED=false",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "VALIDATION_MODE",
+        "value": "basic",
+        "description": "Default validation mode for application descriptor checks when no mode is passed in the request: none, basic or onCreate",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "TE_URL",
+        "value": "http://mgr-tenant-entitlements:8081",
+        "description": "Base URL of mgr-tenant-entitlements. Queried for the tenants that have an application entitled, before an application descriptor is deleted or cleaned up. Not used in FAR mode",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "APIGW_ENABLED",
+        "value": "true",
+        "description": "Enables API gateway integration. When false, all gateway-related beans are excluded and the module does not self-register",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "APIGW_TYPE",
+        "value": "kong",
+        "description": "API gateway implementation used for self-registration: kong or apisix",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "APIGW_URL",
+        "value": null,
+        "description": "Admin URL of the API gateway. For apisix, the Admin API origin without the /apisix/admin path",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "APIGW_API_KEY",
+        "value": null,
+        "description": "APISIX Admin API key sent as X-API-KEY. Required when APIGW_TYPE=apisix, ignored for kong",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "APIGW_REGISTER_MODULE",
+        "value": "true",
+        "description": "Defines whether the module self-registers its routes in the API gateway at startup",
+        "type": "FUNCTIONAL",
+        "essential": false
+      },
+      {
+        "name": "MODULE_URL",
+        "value": "http://mgr-applications:8081",
+        "description": "URL at which the API gateway reaches this module; used as the upstream when the module self-registers",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "SECRET_STORE_TYPE",
+        "value": "AWS_SSM",
+        "description": "Secure store backend holding the Keycloak admin client secret. Supported values: EPHEMERAL, AWS_SSM, VAULT, FSSP. The default matches the reference environment",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "SECURE_STORE_ENV",
+        "value": null,
+        "description": "First segment of the secure store key, for example prod or test. Defaults to the value of ENV, with fallback to 'folio'",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_AWS_SSM_REGION",
+        "value": null,
+        "description": "AWS region of the SSM client. Applies when SECRET_STORE_TYPE=AWS_SSM; when unset the AWS default region provider chain is used",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_AWS_SSM_USE_IAM",
+        "value": "true",
+        "description": "Use the IAM role of the running task for SSM authorization instead of explicit credentials. Applies when SECRET_STORE_TYPE=AWS_SSM",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "KC_INTEGRATION_ENABLED",
+        "value": "true",
+        "description": "Enables Keycloak integration: Keycloak-based security and registration of the module in Keycloak. When false, all Keycloak-related beans are excluded",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_URL",
+        "value": "http://keycloak:8080",
+        "description": "Base URL of Keycloak, used for administration and token requests",
+        "type": "KC",
+        "essential": true
+      },
+      {
+        "name": "KC_JWKS_BASE_URL",
+        "value": null,
+        "description": "Override base URL for JWKS retrieval. When empty, the issuer URL from the token iss claim is used. Set it to reach Keycloak through an internal address instead of the public one",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_IMPORT_ENABLED",
+        "value": "true",
+        "description": "At startup, creates or updates the module's own records in Keycloak (resource server, client, resources, permissions, roles, policies) from its internal module descriptor",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_ADMIN_CLIENT_ID",
+        "value": "folio-backend-admin-client",
+        "description": "Keycloak admin client used for administration. Its secret is read from the secure store, not from an environment variable",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_ADMIN_GRANT_TYPE",
+        "value": "client_credentials",
+        "description": "OAuth2 grant type used to obtain the Keycloak admin token",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_CLIENT_ID",
+        "value": "mgr-applications",
+        "description": "Client ID under which the module registers itself in Keycloak when KC_IMPORT_ENABLED=true",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_AUTH_TOKEN_VALIDATE_URI",
+        "value": "false",
+        "description": "When true, validates that the Keycloak URL matches the issuer of the incoming JWT",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_JWKS_REFRESH_INTERVAL",
+        "value": "60",
+        "description": "Interval in minutes between scheduled JWKS cache refreshes for the JWT parser",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_FORCED_JWKS_REFRESH_INTERVAL",
+        "value": "60",
+        "description": "Interval in minutes for forced JWKS refreshes of the JWT parser; applies to signing key rotation",
+        "type": "KC",
+        "essential": false
+      }
+    ]
+  }
+}
