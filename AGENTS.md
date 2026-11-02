@@ -17,11 +17,7 @@ Run locally: `java -jar target/mgr-applications-*.jar`. Full env vars in `README
 
 ## Architecture
 
-Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Repositories/Entities → Integration.
-
 **Domain** (`org.folio.am`): `ApplicationEntity` (JSONB `ApplicationDescriptor`) ⇄ `ModuleEntity` (JSONB `ModuleDescriptor`, BACKEND/UI) is many-to-many via `application_module`. `ModuleDiscoveryEntity` = modules with non-null `discovery_url` (`@SQLRestriction`). `InterfaceReferenceEntity` tracks provided/required interfaces.
-
-**Key services**: `ApplicationService` (CRUD, versioning, validation orchestration), `DependenciesValidator`, `ModuleDiscoveryService`, `ModuleBootstrapService`.
 
 **Repositories** extend `JpaCqlRepository` (folio-spring-cql) for CQL filtering (e.g. `name=="app*"`); use `findByCql()`.
 
@@ -50,7 +46,3 @@ Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Re
 - **Logging**: Log4j2 (Spring default logging excluded). Secure stores: AWS-SSM/Vault/FSSP.
 - **Unit tests**: never use lenient Mockito; stub only what's needed; verify only unmocked interactions; name `methodName_scenario_expectedBehavior`. Full guide: https://github.com/folio-org/folio-eureka-ai-dev/blob/master/docs/testing/unit-testing.md
 - **Gateway ITs**: `BaseIntegrationTest` starts Kong via `@EnableKongGateway` (`KongRegistrationIT`). APISIX ITs add `@EnableApisixGateway` (`ApisixRegistrationIT`): the Kong container is skipped and etcd + `folioci/folio-apisix:latest` start instead (image is amd64-only — on arm64 rely on emulation or set `TESTCONTAINERS_APISIX_IMAGE`).
-
-## Key Dependencies
-
-`folio-spring-cql`, `folio-security`, `folio-kafka-producer`, `folio-backend-common`, `folio-integration-kong`, `folio-integration-apisix`, `cql2pgjson`, `semver4j`.
