@@ -8,7 +8,7 @@ Application Manager for FOLIO: manages application/module lifecycle (registratio
 mvn clean install              # full build
 mvn clean install -DskipTests  # skip tests
 mvn test                       # unit tests (@Tag("unit"), *Test.java)
-mvn verify                     # integration tests (@Tag("integration"), *IT.java; Testcontainers Postgres+Kafka+Kong; APISIX ITs use etcd+APISIX)
+mvn verify                     # unit and integration tests (@Tag("integration"), *IT.java; Testcontainers Postgres+Kafka+Kong; APISIX ITs use etcd+APISIX)
 mvn test -Dtest=ApplicationServiceTest#create_positive  # single test
 mvn checkstyle:check           # runs during build, FOLIO rules
 ```
@@ -16,6 +16,16 @@ mvn checkstyle:check           # runs during build, FOLIO rules
 Run locally: `java -jar target/mgr-applications-*.jar`. Full env vars in `README.md`.
 
 ## Architecture
+
+Layers: Controllers (implement OpenAPI-generated interfaces) → Services → Repositories/Entities → Integration.
+
+**Domain** (`org.folio.am`): `ApplicationEntity` (JSONB `ApplicationDescriptor`) ⇄ `ModuleEntity` (JSONB `ModuleDescriptor`, BACKEND/UI) is many-to-many via `application_module`. `ModuleDiscoveryEntity` = modules with non-null `discovery_url` (`@SQLRestriction`). `InterfaceReferenceEntity` tracks provided/required interfaces.
+
+**Key services**: `ApplicationService` (CRUD, versioning, validation orchestration), `DependenciesValidator`, `ModuleDiscoveryService`, `ModuleBootstrapService`.
+
+**Repositories** extend `JpaCqlRepository` (folio-spring-cql) for CQL filtering (e.g. `name=="app*"`); use `findByCql()`.
+
+**Events**: discovery create/update/delete notify `ApplicationDiscoveryListener` implementations (`DiscoveryPublisher`), which drive Kafka side effects. Reliable publishing via transactional outbox (`integration.messaging`).
 
 **Integrations**:
 - API Gateway (via `folio-integration-kong` or `folio-integration-apisix`, selected by `APIGW_TYPE`: `kong` default, `apisix` requires `APIGW_API_KEY`): self-registers the module's service + routes at startup (`ApiGatewayModuleRegistrar`, `MODULE_URL`, `APIGW_REGISTER_MODULE`). Toggle `APIGW_ENABLED`. Legacy `KONG_INTEGRATION_ENABLED` / `REGISTER_MODULE_IN_KONG` still work but are deprecated.
@@ -40,3 +50,7 @@ Run locally: `java -jar target/mgr-applications-*.jar`. Full env vars in `README
 - **Logging**: Log4j2 (Spring default logging excluded). Secure stores: AWS-SSM/Vault/FSSP.
 - **Unit tests**: never use lenient Mockito; stub only what's needed; verify only unmocked interactions; name `methodName_scenario_expectedBehavior`. Full guide: https://github.com/folio-org/folio-eureka-ai-dev/blob/master/docs/testing/unit-testing.md
 - **Gateway ITs**: `BaseIntegrationTest` starts Kong via `@EnableKongGateway` (`KongRegistrationIT`). APISIX ITs add `@EnableApisixGateway` (`ApisixRegistrationIT`): the Kong container is skipped and etcd + `folioci/folio-apisix:latest` start instead (image is amd64-only — on arm64 rely on emulation or set `TESTCONTAINERS_APISIX_IMAGE`).
+
+## Key Dependencies
+
+`folio-spring-cql`, `folio-security`, `folio-kafka-producer`, `folio-backend-common`, `folio-integration-kong`, `folio-integration-apisix`, `cql2pgjson`, `semver4j`.
