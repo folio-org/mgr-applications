@@ -31,10 +31,10 @@
     <cqlparser.version>1.13</cqlparser.version>
     <mapstruct.version>1.6.3</mapstruct.version>
     <hypersistence-utils.version>3.16.0</hypersistence-utils.version>
-    <swagger-annotations.version>2.2.55</swagger-annotations.version>
+    <swagger-annotations.version>3.0.0</swagger-annotations.version>
     <apache-commons-lang3.version>3.20.0</apache-commons-lang3.version>
     <apache-commons-collections4.version>4.6.0</apache-commons-collections4.version>
-    <openapi-tools.jackson-databind-nullable.version>0.2.12</openapi-tools.jackson-databind-nullable.version>
+    <openapi-tools.jackson-databind-nullable.version>0.2.13</openapi-tools.jackson-databind-nullable.version>
     <cql2pgjson.version>36.0.1</cql2pgjson.version>
     <folio-spring-cql.version>10.0.0</folio-spring-cql.version>
     <applications-poc-tools.version>4.1.0-SNAPSHOT</applications-poc-tools.version>
