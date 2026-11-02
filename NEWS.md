@@ -1,3 +1,8 @@
+## Version `v4.0.4` (02.11.2026)
+* Add `DeployConfig.json` to mgr-applications (ADR-0013 Configuration Management) (MGRAPPS-120)
+
+---
+
 ## Version `v4.0.4` (23.10.2026)
 * Remove Kong gateway route management (discovery-driven service/route synchronization and tenant checks via entitlement events); module self-registration in Kong remains (MGRAPPS-108)
 * Generalize API Gateway configuration to `application.apigw.*` properties and `APIGW_*` environment variables; legacy
