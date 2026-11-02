@@ -260,7 +260,7 @@ gateway is selected by `APIGW_TYPE`:
 ### Gateway Self-Registration
 
 On startup, the module registers itself in the API Gateway as a service with a list of routes defined in its module
-descriptor (`descriptors/ModuleDescriptor.json`):
+descriptor (`descriptors/ModuleDescriptor-template.json`):
 
 - A gateway service is created (or updated if it already exists) with the name equal to the module id (e.g. `mgr-applications-4.0.0`)
 - The service URL is taken from the `MODULE_URL` environment variable (the module cannot define the URL for gateway

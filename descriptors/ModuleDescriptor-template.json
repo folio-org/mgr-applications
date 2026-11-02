@@ -1,5 +1,5 @@
 {
-  "id": "mgr-applications-4.0.0",
+  "id": "@artifactId@-@version@",
   "name": "Manager Applications",
   "provides": [
     {

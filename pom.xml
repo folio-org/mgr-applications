@@ -24,6 +24,8 @@
   </licenses>
 
   <properties>
+    <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
+    <folio-module-descriptor-validator.version>1.0.2-SNAPSHOT</folio-module-descriptor-validator.version>
     <java.version>21</java.version>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
@@ -506,6 +508,62 @@
       </plugin>
 
       <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>filter-descriptor-inputs</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/descriptors</directory>
+                  <includes>
+                    <include>ModuleDescriptor-template.json</include>
+                  </includes>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
+        <version>${copy-rename-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <!-- The filtered module descriptor is copied to two places:
+                 1. target/ModuleDescriptor.json - published to the module registry by CI (folio-org/.github maven.yml)
+                 2. target/classes/descriptors/ModuleDescriptor.json - packaged into the jar and loaded at runtime
+                    (gateway registration, Keycloak import) -->
+            <id>copy-descriptor-outputs</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <fileSets>
+                <fileSet>
+                  <sourceFile>${project.build.directory}/ModuleDescriptor-template.json</sourceFile>
+                  <destinationFile>${project.build.directory}/ModuleDescriptor.json</destinationFile>
+                </fileSet>
+                <fileSet>
+                  <sourceFile>${project.build.directory}/ModuleDescriptor-template.json</sourceFile>
+                  <destinationFile>${project.build.outputDirectory}/descriptors/ModuleDescriptor.json</destinationFile>
+                </fileSet>
+              </fileSets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <version>${build-helper-maven-plugin.version}</version>
@@ -577,6 +635,22 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <groupId>org.folio</groupId>
+        <artifactId>folio-module-descriptor-validator</artifactId>
+        <version>${folio-module-descriptor-validator.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>validate</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <!-- report only: the existing permission names do not pass yet; set to true once they are fixed -->
+          <failOnInvalidDescriptor>false</failOnInvalidDescriptor>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

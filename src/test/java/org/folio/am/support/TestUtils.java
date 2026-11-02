@@ -31,9 +31,20 @@ import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.security.integration.keycloak.configuration.properties.KeycloakProperties;
+import org.springframework.core.io.ClassPathResource;
 
 @UtilityClass
 public class TestUtils {
+
+  /**
+   * Returns the module id from the (build-time filtered) module descriptor on the classpath.
+   */
+  @SneakyThrows
+  public static String moduleDescriptorId() {
+    try (var in = new ClassPathResource("descriptors/ModuleDescriptor.json").getInputStream()) {
+      return OBJECT_MAPPER.readTree(in).get("id").asText();
+    }
+  }
 
   public static HttpClient httpClientWithDummySslContext() {
     return HttpClient.newBuilder().sslContext(dummySslContext()).build();
