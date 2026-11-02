@@ -322,8 +322,7 @@ In this mode, we only need a subset of the component's functionality.
 While CRUD operations for application descriptors works as-is,
 the integrations with Kafka and mgr-tenant-entitlements are disabled.
 Keycloak integration and gateway self-registration are **not** disabled by FAR mode — set `KC_INTEGRATION_ENABLED=false` and `APIGW_ENABLED=false` explicitly if they must be off.
-To enable this mode set `FAR_MODE` env variable to `true`. `KC_INTEGRATION_ENABLED` and `APIGW_ENABLED` default
-to `true`, so set them to `false` explicitly.
+To enable this mode set `FAR_MODE` env variable to `true`.
 
 ## Application descriptor dependency validation
 
