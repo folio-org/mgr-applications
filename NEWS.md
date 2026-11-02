@@ -1,4 +1,4 @@
-## Version `v4.0.4` (02.11.2026)
+## Version `v4.0.5` (02.11.2026)
 * Add `DeployConfig.json` to mgr-applications (ADR-0013 Configuration Management) (MGRAPPS-120)
 
 ---
