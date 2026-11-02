@@ -1,6 +1,6 @@
 # mgr-applications
 
-Application Manager for FOLIO: manages application/module lifecycle (registration, discovery, deployment, validation).
+Application Manager for FOLIO: manages application/module lifecycle (registration, discovery, deployment, validation). Java, Spring Boot, PostgreSQL/JPA, Liquibase, Kafka, API Gateway (Kong or APISIX), Keycloak, OpenAPI codegen, MapStruct, Lombok.
 
 ## Build & Test
 
