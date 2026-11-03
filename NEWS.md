@@ -23,6 +23,7 @@
 * `POST /modules/discovery` is now a batch upsert: existing discoveries are updated or left unchanged instead of failing with 409 (MGRAPPS-122)
 * Optimize egress module bootstrap: read provider routing data without loading module descriptors and return deterministic results (MGRAPPS-127)
 * Add `DeployConfig.json` to mgr-applications (ADR-0013 Configuration Management) (MGRAPPS-120)
+* Publish module descriptor to Module Descriptor Registry (MGRAPPS-137)
 
 ---
 
