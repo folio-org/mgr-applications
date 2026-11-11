@@ -1,6 +1,6 @@
 package org.folio.am.controller.converter;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.Arrays;
 import org.folio.am.domain.dto.ValidationMode;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,10 @@ public final class ValidationModeConverters {
 
     @Override
     public ValidationMode convert(String source) {
-      return ValidationMode.fromValue(StringUtils.lowerCase(source));
+      return Arrays.stream(ValidationMode.values())
+        .filter(mode -> mode.getValue().equalsIgnoreCase(source))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unexpected value '" + source + "'"));
     }
   }
 
