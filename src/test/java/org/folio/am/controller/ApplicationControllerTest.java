@@ -55,6 +55,9 @@ import org.folio.test.extensions.EnableKeycloakSecurity;
 import org.folio.test.types.UnitTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -480,6 +483,67 @@ class ApplicationControllerTest {
       .andExpect(status().isNoContent());
 
     verify(applicationValidatorService).validate(validationContext(), ValidationMode.BASIC);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "basic,    BASIC",
+    "BASIC,    BASIC",
+    "onCreate, ON_CREATE",
+    "oncreate, ON_CREATE",
+    "ONCREATE, ON_CREATE"
+  })
+  void validateApplicationDescriptor_positive_modeIsCaseInsensitive(String mode, ValidationMode expectedMode)
+    throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    mockMvc.perform(post("/applications/validate")
+        .content(asJsonString(applicationDescriptor()))
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .queryParam("mode", mode))
+      .andExpect(status().isNoContent());
+
+    verify(applicationValidatorService).validate(validationContext(), expectedMode);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"default", "DEFAULT", "Default"})
+  void validateApplicationDescriptor_positive_defaultModeUsesConfiguredDefault(String mode) throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    mockMvc.perform(post("/applications/validate")
+        .content(asJsonString(applicationDescriptor()))
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .queryParam("mode", mode))
+      .andExpect(status().isNoContent());
+
+    verify(applicationValidatorService).validate(validationContext());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"unknown", "none", "on_create", "on create"})
+  void validateApplicationDescriptor_negative_unknownMode(String mode) throws Exception {
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    mockMvc.perform(post("/applications/validate")
+        .content(asJsonString(applicationDescriptor()))
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN)
+        .queryParam("mode", mode))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.total_records", is(1)))
+      .andExpect(jsonPath("$.errors[0].type", is("MethodArgumentTypeMismatchException")))
+      .andExpect(jsonPath("$.errors[0].code", is("validation_error")));
+
+    verifyNoInteractions(applicationValidatorService);
   }
 
   @Test
