@@ -15,9 +15,9 @@
       "type": "string"
     },
     "scope": {
-      "description": "Application scope: 'regular' applications are entitled per tenant, 'platform' applications are deployment-wide (e.g. virtual applications). Omitted when not provided",
+      "description": "Application scope: 'tenant' applications are entitled per tenant, 'platform' applications are deployment-wide (e.g. virtual applications). Omitted when not provided",
       "type": "string",
-      "enum": [ "regular", "platform" ]
+      "enum": [ "tenant", "platform" ]
     },
     "metadata" : {
       "$ref" : "common/metadata.json",
