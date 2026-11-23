@@ -24,6 +24,7 @@
 * Optimize egress module bootstrap: read provider routing data without loading module descriptors and return deterministic results (MGRAPPS-127)
 * Add `DeployConfig.json` to mgr-applications (ADR-0013 Configuration Management) (MGRAPPS-120)
 * Publish module descriptor to Module Descriptor Registry (MGRAPPS-137)
+* Remove references to usage regular keyword using tenant keyword for applications scope (EUREKA-938)
 
 ---
 
